@@ -426,6 +426,69 @@ namespace VoiceroidUtil
             return Tuple.Create(ExoOperationResult.Success, (string)null);
         }
 
+        private static async Task<Tuple<ExoOperationResult, string>> DoOperateExo(
+            string filePath,
+            VoiceroidId voiceroidId,
+            string text1,
+            string text2,
+            AppConfig appConfig,
+            ExoConfig exoConfig,
+            IAviUtlFileDropService aviUtlFileDropService)
+        {
+            if (appConfig.IsExoFileMaking)
+            {
+                var exoFilePath = Path.ChangeExtension(filePath, @".exo");
+
+                // 共通設定更新
+                ExoCommonConfig common = null;
+                var gcmzResult = GcmzDrops.FileDrop.Result.Success;
+                if (
+                    appConfig.IsSavedExoFileToAviUtl &&
+                    appConfig.IsExoFileParamReplacedByAviUtl)
+                {
+                    common = exoConfig.Common.Clone();
+                    gcmzResult = UpdateExoCommonConfigByAviUtl(ref common);
+                }
+
+                // ファイル保存
+                var exo =
+                    await DoOperateExoSave(
+                        exoFilePath,
+                        filePath,
+                        text1,
+                        text2,
+                        common ?? exoConfig.Common,
+                        exoConfig.CharaStyles[voiceroidId]);
+                if (exo == null)
+                {
+                    return
+                        Tuple.Create(
+                            ExoOperationResult.SaveFail,
+                            @".exo ファイルを保存できませんでした。");
+                }
+
+                // ファイルドロップ
+                if (appConfig.IsSavedExoFileToAviUtl)
+                {
+                    // UpdateExoCommonConfigByAviUtl で失敗しているなら実施しない
+                    var failMessage =
+                        (gcmzResult != GcmzDrops.FileDrop.Result.Success) ?
+                            MakeFailMessageFromExoDropResult(gcmzResult, true) :
+                            await DoOperateExoDrop(
+                                exoFilePath,
+                                exo.Length,
+                                appConfig.AviUtlDropLayers[voiceroidId].Layer,
+                                aviUtlFileDropService);
+                    if (failMessage != null)
+                    {
+                        return Tuple.Create(ExoOperationResult.DropFail, failMessage);
+                    }
+                }
+            }
+
+            return Tuple.Create(ExoOperationResult.Success, (string)null);
+        }
+
         /// <summary>
         /// 設定を基にAviUtl拡張編集ファイルの保存処理を行う。
         /// </summary>
@@ -481,12 +544,12 @@ namespace VoiceroidUtil
                     new LayerItem
                     {
                         BeginFrame = 1,
-                        EndFrame = exo.Length,
+                        EndFrame = 10,
                         LayerId = 1,
                         GroupId = common.IsGrouping ? 1 : 0,
                         IsClipping = charaStyle.IsTextClipping
                     };
-
+                
                 var c = charaStyle.Text.Clone();
                 ExoTextStyleTemplate.ClearUnused(c);
                 c.Text = text;
@@ -495,6 +558,129 @@ namespace VoiceroidUtil
 
                 exo.LayerItems.Add(item);
             }
+            
+
+            // 音声レイヤー追加
+            {
+                var item =
+                    new LayerItem
+                    {
+                        BeginFrame = 1,
+                        EndFrame = frameCount,
+                        LayerId = 2,
+                        GroupId = common.IsGrouping ? 1 : 0,
+                        IsAudio = true,
+                    };
+
+                item.Components.Add(
+                    new AudioFileComponent
+                    {
+                        PlaySpeed = charaStyle.PlaySpeed.Clone(),
+                        FilePath = waveFilePath,
+                    });
+                item.Components.Add(charaStyle.Play.Clone());
+
+                exo.LayerItems.Add(item);
+            }
+
+            // ファイル書き出し
+            try
+            {
+                await ExoFileReaderWriter.WriteAsync(exoFilePath, exo);
+            }
+            catch (Exception ex)
+            {
+                ThreadTrace.WriteException(ex);
+                return null;
+            }
+
+            return exo;
+        }
+
+        private static async Task<ExEditObject> DoOperateExoSave(
+            string exoFilePath,
+            string waveFilePath,
+            string text1,
+            string text2,
+            ExoCommonConfig common,
+            ExoCharaStyle charaStyle)
+        {
+            // フレーム数算出
+            int frameCount = 0;
+            try
+            {
+                var waveTime =
+                    await Task.Run(() => (new WaveFileInfo(waveFilePath)).TotalTime);
+                var f =
+                    (waveTime.Ticks * common.Fps) /
+                    (charaStyle.PlaySpeed.Begin * (TimeSpan.TicksPerSecond / 100));
+                frameCount = (int)decimal.Floor(f); // 拡張編集の仕様に合わせて切り捨て
+            }
+            catch (Exception ex)
+            {
+                ThreadTrace.WriteException(ex);
+                return null;
+            }
+
+            var exo =
+                new ExEditObject
+                {
+                    Width = common.Width,
+                    Height = common.Height,
+                    Length = frameCount + common.ExtraFrames,
+                    AudioSampleRate = common.AudioSampleRate,
+                    AudioChannelCount = common.AudioChannelCount,
+                };
+
+            // decimal の小数部桁数を取得
+            var scale = (decimal.GetBits(common.Fps)[3] & 0xFF0000) >> 16;
+
+            exo.FpsScale = (int)Math.Pow(10, scale);
+            exo.FpsBase = decimal.Floor(common.Fps * exo.FpsScale);
+
+            // テキストレイヤー追加
+            {
+                var item =
+                    new LayerItem
+                    {
+                        BeginFrame = 1,
+                        EndFrame = 10,
+                        LayerId = 1,
+                        GroupId = common.IsGrouping ? 1 : 0,
+                        IsClipping = charaStyle.IsTextClipping
+                    };
+
+                var c = charaStyle.Text.Clone();
+                ExoTextStyleTemplate.ClearUnused(c);
+                c.Text = text1;
+                item.Components.Add(c);
+                item.Components.Add(charaStyle.Render.Clone());
+
+                exo.LayerItems.Add(item);
+            }
+
+            // テキストレイヤー追加
+
+            {
+                var item =
+                    new LayerItem
+                    {
+                        BeginFrame = 100,
+                        EndFrame = 110,
+                        LayerId = 1,
+                        GroupId = common.IsGrouping ? 1 : 0,
+                        IsClipping = charaStyle.IsTextClipping
+                    };
+
+                var c = charaStyle.Text.Clone();
+                ExoTextStyleTemplate.ClearUnused(c);
+                c.Text = text2;
+                item.Components.Add(c);
+                item.Components.Add(charaStyle.Render.Clone());
+
+                exo.LayerItems.Add(item);
+            }
+
 
             // 音声レイヤー追加
             {
@@ -855,6 +1041,93 @@ namespace VoiceroidUtil
             =>
             this.ParameterMaker();
 
+        // Toruto's Function
+        private static int getTextDividePoint(string text)
+        {
+            const int OneLineMaxLength = 18;
+            if (text.Length <= OneLineMaxLength)
+            {
+                return -1;
+            }
+            int wordsCount = 0;
+            int[] dividePointCandidates = { };
+
+            foreach (var node in MeCab.MeCabTagger.Create().ParseToNodes(text))
+            {
+                if (node.CharType > 0)
+                {
+                    wordsCount += node.Surface.Length;
+
+                    var features = node.Feature.Split(',');
+                    /*
+                    var displayFeatures = string.Join(", ", features);
+                    //fileText += $"{node.Surface}：{features[0]}, {features[1]}, {features[2]}\n";
+                    fileText += $"\n{node.Surface}：{displayFeatures}";
+                    */
+                    if (features[0] == "名詞"
+                        || features[0] == "動詞"
+                        || features[0] == "形容詞"
+                        || features[0] == "形容動詞"
+                        || features[0] == "副詞"
+                        || features[0] == "連体詞"
+                        || features[0] == "接続詞"
+                        || features[0] == "感動詞"
+                        ) continue;
+
+                    if (features[0] == "助動詞"
+                        && (node.Surface == "たり"
+                            || node.Surface == "て"
+                            || node.Surface == "し"
+                        )) continue;
+
+                    if (features[1] == "格助詞"
+                        && (node.Surface == "に"
+                            || node.Surface == "へ"
+                            || node.Surface == "より"
+                            || node.Surface == "で"
+                            || node.Surface == "と"
+                            || node.Surface == "や"
+                            || node.Surface == "から"
+                        )) continue;
+
+                    if (features[1] == "副助詞") continue;
+                    if (features[1] == "終助詞") continue;
+                    if (features[1] == "連体化") continue;
+
+                    dividePointCandidates = dividePointCandidates.Concat(new int[] { wordsCount }).ToArray();
+                }
+            }
+
+            // 中央付近の改行候補を選択
+            int id = dividePointCandidates.Length - 1;
+
+            for (int i = 1; i < dividePointCandidates.Length; i++)
+            {
+                int m0 = Math.Abs(dividePointCandidates[i - 1] - text.Length / 2);
+                int m1 = Math.Abs(dividePointCandidates[i] - text.Length / 2);
+                if (m0 < m1)
+                {
+                    id = i - 1;
+                    break;
+                }
+            }
+            return dividePointCandidates[id];
+        }
+
+        private static string InsertLineFeed(string text)
+        {
+            int lfPoint = getTextDividePoint(text);
+            return $"{text.Substring(0, lfPoint)}\n{text.Substring(lfPoint)}";
+        }
+
+        private static (string, string) DivideText(string text)
+        {
+            // テキストをルールにのっとって分割し
+            // leftHarf, rightHarf
+            int dividePoint = getTextDividePoint(text);
+            return (text.Substring(0, dividePoint), text.Substring(dividePoint)) ;
+        }
+
         /// <summary>
         /// コマンド処理を行う。
         /// </summary>
@@ -1012,7 +1285,7 @@ namespace VoiceroidUtil
             var requiredFilePath = filePath;
             filePath = result.FilePath;
 
-            // 本体側の自動命名時はファイルパスが空文字列            
+            // 本体側の自動命名時はファイルパスが空文字列
             if (string.IsNullOrEmpty(filePath))
             {
                 return
@@ -1044,11 +1317,45 @@ namespace VoiceroidUtil
                         @"ファイル分割時は音声ファイル保存のみ行います。");
             }
 
-            // テキストファイル保存
-            if (appConfig.IsTextFileForceMaking)
+            const int OneLineMaxLength = 18;
+            bool isDivideChecked = true;
+            if (fileText.Length < OneLineMaxLength || !isDivideChecked) 
             {
-                var txtPath = Path.ChangeExtension(filePath, @".txt");
-                if (!(await WriteTextFile(txtPath, fileText, appConfig.IsTextFileUtf8)))
+                if (fileText.Length >= OneLineMaxLength)
+                {
+                    fileText = InsertLineFeed(fileText);
+                }
+                // テキストファイル保存
+                if (appConfig.IsTextFileForceMaking)
+                {
+                    var txtPath = Path.ChangeExtension(filePath, @".txt");
+                    if (!(await WriteTextFile(txtPath, fileText, appConfig.IsTextFileUtf8)))
+                    {
+                        return
+                            MakeResult(
+                                parameter,
+                                AppStatusType.Success,
+                                statusText,
+                                AppStatusType.Fail,
+                                @"テキストファイルを保存できませんでした。");
+                    }
+                }
+
+                // 以降の処理の対象となるVOICEROID識別ID
+                // 複数キャラクターを保持するならキャラクター名からキャラ選別
+                var voiceroidId =
+                    (process.HasMultiCharacters ? FindKeywordContainedVoiceroidId(charaName) : null) ??
+                    process.Id;
+
+                // .exo ファイル関連処理
+                var exoResult = await DoOperateExo(
+                        filePath,
+                        voiceroidId,
+                        fileText,
+                        appConfig,
+                        exoConfig,
+                        this.AviUtlFileDropService);
+                if (exoResult.Item1 == ExoOperationResult.SaveFail)
                 {
                     return
                         MakeResult(
@@ -1056,54 +1363,107 @@ namespace VoiceroidUtil
                             AppStatusType.Success,
                             statusText,
                             AppStatusType.Fail,
-                            @"テキストファイルを保存できませんでした。");
+                            exoResult.Item2);
                 }
-            }
+                var exoWarnText =
+                    (exoResult.Item1 == ExoOperationResult.Success) ? null : exoResult.Item2;
 
-            // 以降の処理の対象となるVOICEROID識別ID
-            // 複数キャラクターを保持するならキャラクター名からキャラ選別
-            var voiceroidId =
-                (process.HasMultiCharacters ? FindKeywordContainedVoiceroidId(charaName) : null) ??
-                process.Id;
+                // ゆっくりMovieMaker3処理
+                var ymmWarnText =
+                    await DoOperateYmm(filePath, voiceroidId, charaName, appConfig);
 
-            // .exo ファイル関連処理
-            var exoResult =
-                await DoOperateExo(
-                    filePath,
-                    voiceroidId,
-                    fileText,
-                    appConfig,
-                    exoConfig,
-                    this.AviUtlFileDropService);
-            if (exoResult.Item1 == ExoOperationResult.SaveFail)
-            {
+                var warnText = exoWarnText ?? ymmWarnText;
                 return
                     MakeResult(
                         parameter,
                         AppStatusType.Success,
                         statusText,
-                        AppStatusType.Fail,
-                        exoResult.Item2);
+                        (warnText == null) ? AppStatusType.None : AppStatusType.Warning,
+                        warnText ?? @"保存先フォルダーを開く",
+                        (warnText == null) ?
+                            new ProcessStartCommand(@"explorer.exe", $@"/select,""{filePath}""") :
+                            null,
+                        (warnText == null) ? Path.GetDirectoryName(filePath) : null);
             }
-            var exoWarnText =
-                (exoResult.Item1 == ExoOperationResult.Success) ? null : exoResult.Item2;
+            else
+            {
+                // テキストファイル保存
+                var (leftHarf, rightHarf) = isDivideChecked ? DivideText(fileText) : (null, null);
+                if (appConfig.IsTextFileForceMaking)
+                {
 
-            // ゆっくりMovieMaker3処理
-            var ymmWarnText =
-                await DoOperateYmm(filePath, voiceroidId, charaName, appConfig);
+                    var noExtFilePath = $"{Path.GetDirectoryName(filePath)}\\{Path.GetFileNameWithoutExtension(filePath)}";
+                    
+                    if (!(await WriteTextFile($"{noExtFilePath}_L.txt", leftHarf, appConfig.IsTextFileUtf8)))
+                    {
+                        return
+                            MakeResult(
+                                parameter,
+                                AppStatusType.Success,
+                                statusText,
+                                AppStatusType.Fail,
+                                @"テキストファイルを保存できませんでした。");
+                    }
 
-            var warnText = exoWarnText ?? ymmWarnText;
-            return
-                MakeResult(
-                    parameter,
-                    AppStatusType.Success,
-                    statusText,
-                    (warnText == null) ? AppStatusType.None : AppStatusType.Warning,
-                    warnText ?? @"保存先フォルダーを開く",
-                    (warnText == null) ?
-                        new ProcessStartCommand(@"explorer.exe", $@"/select,""{filePath}""") :
-                        null,
-                    (warnText == null) ? Path.GetDirectoryName(filePath) : null);
+                    if (!(await WriteTextFile($"{noExtFilePath}_R.txt", rightHarf, appConfig.IsTextFileUtf8)))
+                    {
+                        return
+                            MakeResult(
+                                parameter,
+                                AppStatusType.Success,
+                                statusText,
+                                AppStatusType.Fail,
+                                @"テキストファイルを保存できませんでした。");
+                    }
+                }
+                // 以降の処理の対象となるVOICEROID識別ID
+                // 複数キャラクターを保持するならキャラクター名からキャラ選別
+                var voiceroidId =
+                    (process.HasMultiCharacters ? FindKeywordContainedVoiceroidId(charaName) : null) ??
+                    process.Id;
+
+                // .exo ファイル関連処理
+                var exoResult = await DoOperateExo(
+                        filePath,
+                        voiceroidId,
+                        leftHarf,
+                        rightHarf,
+                        appConfig,
+                        exoConfig,
+                        this.AviUtlFileDropService);
+                if (exoResult.Item1 == ExoOperationResult.SaveFail)
+                {
+                    return
+                        MakeResult(
+                            parameter,
+                            AppStatusType.Success,
+                            statusText,
+                            AppStatusType.Fail,
+                            exoResult.Item2);
+                }
+                var exoWarnText =
+                    (exoResult.Item1 == ExoOperationResult.Success) ? null : exoResult.Item2;
+
+                // ゆっくりMovieMaker3処理
+                var ymmWarnText =
+                    await DoOperateYmm(filePath, voiceroidId, charaName, appConfig);
+
+                var warnText = exoWarnText ?? ymmWarnText;
+                return
+                    MakeResult(
+                        parameter,
+                        AppStatusType.Success,
+                        statusText,
+                        (warnText == null) ? AppStatusType.None : AppStatusType.Warning,
+                        warnText ?? @"保存先フォルダーを開く",
+                        (warnText == null) ?
+                            new ProcessStartCommand(@"explorer.exe", $@"/select,""{filePath}""") :
+                            null,
+                        (warnText == null) ? Path.GetDirectoryName(filePath) : null);
+            }
+            
+
+            
         }
 
         #endregion
