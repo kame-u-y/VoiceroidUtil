@@ -190,6 +190,60 @@
                             Content="※チェックを外す方が高速ですが、一部環境では保存失敗します。"
                             FontSize="11"
                             Margin="20,0,0,0" />
+                        <CheckBox
+                            Content="TRT's拡張：テキストの改行・分割処理を行う"
+                            IsChecked="{Binding Config.Value.IsTextSpliting}"
+                            Margin="0,4,0,0" />
+                        <DockPanel>
+                            <Label
+                                Content="テキスト処理方法："
+                                Margin="20,4,0,0"
+                                />
+                            <RadioButton 
+                                Content="改行"
+                                IsChecked="{Binding 
+                                    Path=Config.Value.SplitModeValue,
+                                    Mode=TwoWay,
+                                    Converter={StaticResource boolToEnumConverter},
+                                    ConverterParameter=LineFeed,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Margin="0,4,0,0"/>
+                            <RadioButton 
+                                Content="ファイル分割"
+                                IsChecked="{Binding 
+                                    Path=Config.Value.SplitModeValue,
+                                    Mode=TwoWay,
+                                    Converter={StaticResource boolToEnumConverter},
+                                    ConverterParameter=SplitFile,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Margin="10,4,0,0"/>
+                        </DockPanel>
+                        
+                        <DockPanel>
+                            <Label
+                                Content="処理を適用する文字数："
+                                Margin="20,4,0,0"/>
+                            <tk:IntegerUpDown 
+                                HorizontalAlignment="Left"
+                                Value="{Binding 
+                                    Config.Value.MaxLineLength,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="10,4,0,0"/>
+                            <Label
+                                Content="以上"
+                                Margin="5,4,0,0"/>
+                        </DockPanel>
+
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
@@ -326,7 +380,7 @@
                                 <StackPanel Orientation="Vertical" Margin="12,2,0,0">
                                     <v:AviUtlDropLayersControl
                                         DataContext="{Binding
-                                            Path=VisibleAviUtlDropLayers.Value}" />
+                                            Path=VisibleAviUtlDropLayers.Value}" Loaded="AviUtlDropLayersControl_Loaded" />
                                     <Expander
                                         Header="VOICEROID2/ガイノイドTalk/A.I.VOICEについて"
                                         IsExpanded="False"

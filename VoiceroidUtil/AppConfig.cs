@@ -187,6 +187,47 @@ namespace VoiceroidUtil
         private bool uiAutomationEnabledOnSave = true;
 
         /// <summary>
+        /// TRT's拡張：字幕テキストに対して改行or分割処理を適用するか否かを取得または設定する。
+        /// </summary>
+        [DataMember]
+        public bool IsTextSpliting
+        {
+            get => this.textSpliting;
+            set => this.SetProperty(ref this.textSpliting, value);
+        }
+        private bool textSpliting = false;
+
+
+        /// <summary>
+        /// TRT's拡張：字幕テキストの処理方法（改行or分割）を取得または設定する。
+        /// </summary>
+        public enum SplitMode
+        {
+            SplitFile,
+            LineFeed,
+        }
+
+        [DataMember]
+        public SplitMode SplitModeValue
+        {
+            get => this.splitModeValue;
+            set => this.SetProperty(ref this.splitModeValue, value);
+        }
+        private SplitMode splitModeValue;
+
+        /// <summary>
+        /// TRT's拡張：字幕テキストに対する改行or分割処理の
+        /// 適用する文字数の閾値を取得または設定する。
+        /// </summary>
+        [DataMember]
+        public int MaxLineLength
+        {
+            get => this.maxLineLength;
+            set => this.SetProperty(ref this.maxLineLength, value);
+        }
+        private int maxLineLength = 1;
+
+        /// <summary>
         /// 保存したファイルのパスを『ゆっくりMovieMaker3』に設定するか否かを
         /// 取得または設定する。
         /// </summary>
