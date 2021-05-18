@@ -190,6 +190,7 @@
                             Content="※チェックを外す方が高速ですが、一部環境では保存失敗します。"
                             FontSize="11"
                             Margin="20,0,0,0" />
+
                         <CheckBox
                             Content="TRT's拡張：テキストの改行・分割処理を行う"
                             IsChecked="{Binding Config.Value.IsTextSpliting}"
@@ -223,8 +224,10 @@
                                     Path=Config.Value.IsTextSpliting,
                                     Mode=OneWay}"
                                 Margin="10,4,0,0"/>
+                            
+
                         </DockPanel>
-                        
+
                         <DockPanel>
                             <Label
                                 Content="処理を適用する文字数："
@@ -380,7 +383,7 @@
                                 <StackPanel Orientation="Vertical" Margin="12,2,0,0">
                                     <v:AviUtlDropLayersControl
                                         DataContext="{Binding
-                                            Path=VisibleAviUtlDropLayers.Value}" Loaded="AviUtlDropLayersControl_Loaded" />
+                                            Path=VisibleAviUtlDropLayers.Value}" />
                                     <Expander
                                         Header="VOICEROID2/ガイノイドTalk/A.I.VOICEについて"
                                         IsExpanded="False"

@@ -544,12 +544,12 @@ namespace VoiceroidUtil
                     new LayerItem
                     {
                         BeginFrame = 1,
-                        EndFrame = 10,
+                        EndFrame = exo.Length,
                         LayerId = 1,
                         GroupId = common.IsGrouping ? 1 : 0,
                         IsClipping = charaStyle.IsTextClipping
                     };
-                
+
                 var c = charaStyle.Text.Clone();
                 ExoTextStyleTemplate.ClearUnused(c);
                 c.Text = text;
@@ -558,7 +558,6 @@ namespace VoiceroidUtil
 
                 exo.LayerItems.Add(item);
             }
-            
 
             // 音声レイヤー追加
             {
@@ -644,7 +643,7 @@ namespace VoiceroidUtil
                     new LayerItem
                     {
                         BeginFrame = 1,
-                        EndFrame = frameCount/2,
+                        EndFrame = frameCount / 2,
                         LayerId = 1,
                         GroupId = common.IsGrouping ? 1 : 0,
                         IsClipping = charaStyle.IsTextClipping
@@ -1041,6 +1040,7 @@ namespace VoiceroidUtil
             =>
             this.ParameterMaker();
 
+
         /// <summary>
         /// TRT's拡張：字幕テキストの改行or分割点を決定
         /// </summary>
@@ -1094,7 +1094,7 @@ namespace VoiceroidUtil
             if (splitPointCandidates.Length == 0)
             {
                 return -1;
-            } 
+            }
 
             // 中央付近の改行候補を選択
             int id = 0;
@@ -1113,7 +1113,7 @@ namespace VoiceroidUtil
         }
 
         /// <summary>
-        /// 字幕テキストの改行処理を行う
+        /// TRT's拡張：字幕テキストの改行処理を行う
         /// </summary>
         /// <param name="text">処理される字幕テキスト</param>
         /// <param name="lfPoint">何文字目で処理されるかの数値</param>
@@ -1121,20 +1121,21 @@ namespace VoiceroidUtil
             => $"{text.Substring(0, lfPoint)}\n{text.Substring(lfPoint)}";
 
         /// <summary>
-        /// 字幕テキストの分割処理を行う
+        /// TRT's拡張：字幕テキストの分割処理を行う
         /// </summary>
         /// <param name="text">処理される字幕テキスト</param>
         /// <param name="lfPoint">何文字目で処理されるかの数値</param>
         private static (string, string) SplitText(string text, int splitPoint)
             => (text.Substring(0, splitPoint), text.Substring(splitPoint));
-        
-        // 字幕テキストの処理方法のモード
+
+        // TRT's拡張：字幕テキストの処理方法のモード
         private enum SplitMode
         {
             SplitFile,
             LineFeed,
             Default
         }
+
 
         /// <summary>
         /// コマンド処理を行う。
@@ -1329,7 +1330,7 @@ namespace VoiceroidUtil
             string leftHarfText = "", rightHarfText = "";
             int splitPoint = GetTextSplitPoint(fileText);
             if (
-                appConfig.IsTextSpliting && 
+                appConfig.IsTextSpliting &&
                 fileText.Length > appConfig.MaxLineLength &&
                 splitPoint != -1)
             {
@@ -1337,12 +1338,12 @@ namespace VoiceroidUtil
                 {
                     splitMode = SplitMode.SplitFile;
                     (leftHarfText, rightHarfText) = SplitText(fileText, splitPoint);
-                } 
+                }
                 else if (appConfig.SplitModeValue == AppConfig.SplitMode.LineFeed)
                 {
                     splitMode = SplitMode.LineFeed;
                     fileText = InsertLineFeed(fileText, splitPoint);
-                } 
+                }
             }
 
             if (splitMode == SplitMode.SplitFile)
@@ -1401,8 +1402,8 @@ namespace VoiceroidUtil
 
 
             // .exo ファイル関連処理
-            var exoResult = 
-                splitMode == SplitMode.SplitFile 
+            var exoResult =
+                splitMode == SplitMode.SplitFile
                     ? await DoOperateExo(
                         filePath,
                         voiceroidId,
@@ -1417,7 +1418,7 @@ namespace VoiceroidUtil
                         fileText,
                         appConfig,
                         exoConfig,
-                        this.AviUtlFileDropService);        
+                        this.AviUtlFileDropService);
 
             if (exoResult.Item1 == ExoOperationResult.SaveFail)
             {
@@ -1448,7 +1449,6 @@ namespace VoiceroidUtil
                         new ProcessStartCommand(@"explorer.exe", $@"/select,""{filePath}""") :
                         null,
                     (warnText == null) ? Path.GetDirectoryName(filePath) : null);
-            
         }
 
         #endregion

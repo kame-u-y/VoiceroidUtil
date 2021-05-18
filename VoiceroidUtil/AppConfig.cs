@@ -186,6 +186,7 @@ namespace VoiceroidUtil
         }
         private bool uiAutomationEnabledOnSave = true;
 
+
         /// <summary>
         /// TRT's拡張：字幕テキストに対して改行or分割処理を適用するか否かを取得または設定する。
         /// </summary>
@@ -197,16 +198,15 @@ namespace VoiceroidUtil
         }
         private bool textSpliting = false;
 
-
-        /// <summary>
-        /// TRT's拡張：字幕テキストの処理方法（改行or分割）を取得または設定する。
-        /// </summary>
         public enum SplitMode
         {
             SplitFile,
             LineFeed,
         }
 
+        /// <summary>
+        /// TRT's拡張：字幕テキストの処理方法（改行or分割）を取得または設定する。
+        /// </summary>
         [DataMember]
         public SplitMode SplitModeValue
         {
@@ -226,6 +226,7 @@ namespace VoiceroidUtil
             set => this.SetProperty(ref this.maxLineLength, value);
         }
         private int maxLineLength = 1;
+
 
         /// <summary>
         /// 保存したファイルのパスを『ゆっくりMovieMaker3』に設定するか否かを
