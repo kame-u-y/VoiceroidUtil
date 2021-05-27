@@ -114,51 +114,162 @@
         </DockPanel>
 
         <!-- Row 1 -->
-        <v:ImeWatermarkTextBox
-            Text="{Binding TalkText.Value, UpdateSourceTrigger=Explicit}"
-            MaxLength="{Binding TalkTextLengthLimit.Value}"
-            IsEnabled="{Binding IsTalkTextEditable.Value}"
-            AcceptsReturn="True"
-            AcceptsTab="{Binding IsTalkTextTabAccepted.Value}"
-            Margin="0,2,0,0"
-            HorizontalScrollBarVisibility="Auto"
-            VerticalScrollBarVisibility="Auto"
-            Grid.Row="1">
-            <v:ImeWatermarkTextBox.Style>
-                <Style
-                    TargetType="v:ImeWatermarkTextBox"
-                    BasedOn="{StaticResource {x:Type tk:WatermarkTextBox}}">
-                    <Style.Triggers>
-                        <DataTrigger
-                            Binding="{Binding IsTalkTextEditable.Value}"
-                            Value="False">
-                            <Setter
-                                Property="Background"
-                                Value="{DynamicResource
-                                    {x:Static SystemColors.ControlLightBrushKey}}" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </v:ImeWatermarkTextBox.Style>
-            <v:ImeWatermarkTextBox.InputBindings>
-                <KeyBinding Gesture="Alt+Enter" Command="{Binding PlayStopCommand}" />
-                <KeyBinding Gesture="Ctrl+Enter" Command="{Binding SaveCommand}" />
-            </v:ImeWatermarkTextBox.InputBindings>
-            <v:ImeWatermarkTextBox.Watermark>
-                <TextBlock>
-                    しゃべらせたい文章を入力してください。<LineBreak />
-                    F5, Ctrl+Q または入力中に Alt+Enter で再生します。<LineBreak />
-                    F6, Ctrl+S または入力中に Ctrl+Enter で音声保存します。<LineBreak />
-                    F9, Ctrl+E で保存先フォルダーを開きます。
-                </TextBlock>
-            </v:ImeWatermarkTextBox.Watermark>
+        <Grid Grid.Row="1">
 
-            <i:Interaction.Behaviors>
-                <ru:DragDropCommandBehavior
-                    PreviewDragOverCommand="{Binding DragOverTalkTextFileCommand}"
-                    DropCommand="{Binding DropTalkTextFileCommand}" />
-            </i:Interaction.Behaviors>
-        </v:ImeWatermarkTextBox>
+            <v:ImeWatermarkTextBox
+                Text="{Binding TalkText.Value, UpdateSourceTrigger=Explicit}"
+                MaxLength="{Binding TalkTextLengthLimit.Value}"
+                IsEnabled="{Binding IsTalkTextEditable.Value}"
+                AcceptsReturn="True"
+                AcceptsTab="{Binding IsTalkTextTabAccepted.Value}"
+                Margin="0,2,0,0"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto"
+                >
+                <v:ImeWatermarkTextBox.Style>
+                    <Style
+                        TargetType="v:ImeWatermarkTextBox"
+                        BasedOn="{StaticResource {x:Type tk:WatermarkTextBox}}">
+                        <Style.Triggers>
+                            <DataTrigger
+                                Binding="{Binding IsTalkTextEditable.Value}"
+                                Value="False">
+                                <Setter
+                                    Property="Background"
+                                    Value="{DynamicResource
+                                        {x:Static SystemColors.ControlLightBrushKey}}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </v:ImeWatermarkTextBox.Style>
+                <v:ImeWatermarkTextBox.InputBindings>
+                    <KeyBinding Gesture="Alt+Enter" Command="{Binding PlayStopCommand}" />
+                    <KeyBinding Gesture="Ctrl+Enter" Command="{Binding SaveCommand}" />
+                </v:ImeWatermarkTextBox.InputBindings>
+                <v:ImeWatermarkTextBox.Watermark>
+                    <TextBlock>
+                        しゃべらせたい文章を入力してください。<LineBreak />
+                        F5, Ctrl+Q または入力中に Alt+Enter で再生します。<LineBreak />
+                        F6, Ctrl+S または入力中に Ctrl+Enter で音声保存します。<LineBreak />
+                        F9, Ctrl+E で保存先フォルダーを開きます。
+                    </TextBlock>
+                </v:ImeWatermarkTextBox.Watermark>
+
+                <i:Interaction.Behaviors>
+                    <ru:DragDropCommandBehavior
+                        PreviewDragOverCommand="{Binding DragOverTalkTextFileCommand}"
+                        DropCommand="{Binding DropTalkTextFileCommand}" />
+                </i:Interaction.Behaviors>
+            </v:ImeWatermarkTextBox>
+
+            <Border
+                BorderBrush="Silver"
+                BorderThickness="1"
+                CornerRadius="2"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Right"
+                Height="70"
+                Background="#fafafa"
+                Margin="0,0,2,2">
+                <Grid>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid
+                            Grid.Row="0" 
+                            Background="LightSteelBlue">
+                            <Label 
+                                Content="Preview"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                />
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="20"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0" Background="Silver"/>
+                            <StackPanel 
+                                Grid.Column="1"
+                                x:Name="GlyphsPanel" 
+                                Background="#ddd" 
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Center">
+                                <!-- Preview Glyphs -->
+                            </StackPanel>
+                            <Grid Grid.Column="2" Background="Silver"/>
+                        </Grid>
+                    </Grid>
+                    <Grid
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Height="15"
+                        Width="30"
+                        Background="#444"
+                        >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDown">
+                                <i:InvokeCommandAction Command="{Binding BackSceneCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Opacity" Value="0.7"/>
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMultiScenePreview.Value}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsFirstScene.Value}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="1"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Label HorizontalAlignment="Center" Content="&lt;" FontWeight="Bold"/>
+                    </Grid>
+                    <Grid
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Height="15"
+                        Width="30"
+                        Background="#444">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDown">
+                                <i:InvokeCommandAction Command="{Binding NextSceneCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Opacity" Value="0.7"/>
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMultiScenePreview.Value}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsLastScene.Value}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="1"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Label HorizontalAlignment="Center" Content="&gt;" FontWeight="Bold" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            
+        </Grid>
 
         <!-- Row 2 -->
         <StackPanel Orientation="Horizontal" Margin="0,2,0,0" Grid.Row="2">

@@ -1328,6 +1328,7 @@ namespace VoiceroidUtil
 
             var splitMode = SplitMode.Default;
             string leftHarfText = "", rightHarfText = "";
+            Debug.WriteLine(fileText);
             int splitPoint = GetTextSplitPoint(fileText);
             if (
                 appConfig.IsTextSpliting &&

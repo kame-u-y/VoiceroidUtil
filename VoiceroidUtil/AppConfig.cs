@@ -227,6 +227,22 @@ namespace VoiceroidUtil
         }
         private int maxLineLength = 1;
 
+        [DataMember]
+        public string LineFeedStrings
+        {
+            get => this.lineFeedStrings;
+            set => this.SetProperty(ref this.lineFeedStrings, value);
+        }
+        private string lineFeedStrings = "/-";
+
+        [DataMember]
+        public string FileSplitStrings
+        {
+            get => this.fileSplitStrings;
+            set => this.SetProperty(ref this.fileSplitStrings, value);
+        }
+        private string fileSplitStrings = "/--";
+
 
         /// <summary>
         /// 保存したファイルのパスを『ゆっくりMovieMaker3』に設定するか否かを

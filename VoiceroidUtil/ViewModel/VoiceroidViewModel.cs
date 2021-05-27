@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,7 +9,9 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using RucheHome.AviUtl.ExEdit;
@@ -18,6 +21,7 @@ using RucheHome.Util.Extensions.String;
 using RucheHome.Voiceroid;
 using VoiceroidUtil.Extensions;
 using VoiceroidUtil.Services;
+using VoiceroidUtil.View;
 using static RucheHome.Util.ArgumentValidater;
 
 namespace VoiceroidUtil.ViewModel
@@ -163,11 +167,67 @@ namespace VoiceroidUtil.ViewModel
             // トークテキスト
             this.TalkText =
                 new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
+            this.PreviewText =
+                new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
+            this.PreviewIndiceNum =
+                new ReactiveProperty<int>(60).AddTo(this.CompositeDisposable);
+            this.IsMultiScenePreview =
+                new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
+            this.PreviewSceneLength =
+                new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
+            this.LineFeedStrings =
+                this.MakeInnerPropertyOf(appConfig, c => c.LineFeedStrings);
+            this.FileSplitStrings =
+                this.MakeInnerPropertyOf(appConfig, c => c.FileSplitStrings);
+
+            this.TalkText.Subscribe(v => {
+                this.PreviewText.Value = v;
+                CreatePreviewGlyphs();
+            });
+
             this.TalkTextLengthLimit =
                 new ReactiveProperty<int>(TextComponent.TextLengthLimit)
                     .AddTo(this.CompositeDisposable);
             this.IsTalkTextTabAccepted =
                 this.MakeInnerPropertyOf(appConfig, c => c.IsTabAccepted);
+
+            this.DisplayPreviewSceneNum =
+                new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
+            this.IsFirstScene =
+                new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
+            this.IsLastScene =
+                new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
+            this.BackSceneCommand =
+                this.MakeCommand(
+                    () =>
+                    {
+                        if (this.IsMultiScenePreview.Value && 
+                            this.DisplayPreviewSceneNum.Value > 0)
+                        {
+                            this.DisplayPreviewSceneNum.Value--;
+                            if (this.DisplayPreviewSceneNum.Value == 0) {
+                                this.IsFirstScene.Value = true;
+                            }
+                            this.IsLastScene.Value = false;
+                            CreatePreviewGlyphs();
+                        }
+                    });
+            this.NextSceneCommand =
+                this.MakeCommand(
+                    () =>
+                    {
+                        if (this.IsMultiScenePreview.Value &&
+                            this.DisplayPreviewSceneNum.Value < this.PreviewSceneLength.Value - 1)
+                        {
+                            this.DisplayPreviewSceneNum.Value++;
+                            if (this.DisplayPreviewSceneNum.Value == this.PreviewSceneLength.Value - 1)
+                            {
+                                this.IsLastScene.Value = true;
+                            }
+                            this.IsFirstScene.Value = false;
+                            CreatePreviewGlyphs();
+                        }
+                    });
 
             // アイドル状態設定先
             var idle = new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
@@ -405,6 +465,91 @@ namespace VoiceroidUtil.ViewModel
         /// </summary>
         public IReactiveProperty<string> TalkText { get; }
 
+        public IReactiveProperty<string> PreviewText { get; set; }
+
+        public IReactiveProperty<int> PreviewIndiceNum { get; set; }
+
+        public IReactiveProperty<bool> IsMultiScenePreview { get; set; }
+
+        public IReactiveProperty<int> DisplayPreviewSceneNum { get; set; }
+
+        public IReactiveProperty<int> PreviewSceneLength { get; set; }
+
+        public IReactiveProperty<bool> IsFirstScene { get; set; }
+        
+        public IReactiveProperty<bool> IsLastScene { get; set; }
+
+        public IReadOnlyReactiveProperty<string> LineFeedStrings { get; }
+        public IReadOnlyReactiveProperty<string> FileSplitStrings { get; }
+
+        private void CreatePreviewGlyphs()
+        {
+            var window = Application.Current.Windows.OfType<Window>()
+                        .FirstOrDefault(w => w is MainWindow);
+            var mw = (MainWindow)window;
+            var glyphsPanel = mw.VoiceroidView.GlyphsPanel;
+            glyphsPanel.Children.Clear();
+            if (TalkText.Value.Length <= 0) return;
+
+            string[] sceneSplitter = { 
+                this.FileSplitStrings.Value, 
+                this.FileSplitStrings.Value + this.LineFeedStrings.Value };
+            string[] PreviewScenes = 
+                TalkText.Value.Split(
+                    sceneSplitter, 
+                    System.StringSplitOptions.RemoveEmptyEntries);
+            this.PreviewSceneLength.Value = PreviewScenes.Length;
+            this.IsMultiScenePreview.Value = PreviewScenes.Length > 1;
+            if (this.DisplayPreviewSceneNum.Value != 0 && this.DisplayPreviewSceneNum.Value >= this.PreviewSceneLength.Value)
+            {
+                this.DisplayPreviewSceneNum.Value = this.PreviewSceneLength.Value - 1;
+            }
+            if (this.DisplayPreviewSceneNum.Value < this.PreviewSceneLength.Value - 1)
+            {
+                this.IsLastScene.Value = false;
+            }
+            int sceneNum = this.IsMultiScenePreview.Value
+                ? this.DisplayPreviewSceneNum.Value
+                : 0;
+            Debug.WriteLine(PreviewSceneLength);
+            Debug.WriteLine(DisplayPreviewSceneNum);
+            Debug.WriteLine(sceneNum);
+
+            if (PreviewSceneLength.Value == 0) return;
+
+            string[] lineSplitter = { 
+                this.LineFeedStrings.Value,
+                this.LineFeedStrings.Value + this.FileSplitStrings.Value};
+          string[] PreviewLines = 
+                PreviewScenes[sceneNum].Split(
+                    lineSplitter,
+                    System.StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < PreviewLines.Length; i++)
+            {
+                if (PreviewLines[i].Length <= 0) continue;
+                PreviewGlyphs = new Glyphs();
+                PreviewGlyphs.UnicodeString = PreviewLines[i];
+                string indices = "";
+                for (int j = 0; j < PreviewLines[i].Length - 1; j++)
+                {
+                    indices += $",{PreviewIndiceNum.Value};";
+                }
+                PreviewGlyphs.Indices = indices;
+                PreviewGlyphs.FontUri = new Uri("file://c:/windows/fonts/uzura.ttf");
+                PreviewGlyphs.Fill = new SolidColorBrush(Colors.Black);
+                PreviewGlyphs.FontRenderingEmSize = 10;
+                PreviewGlyphs.HorizontalAlignment = HorizontalAlignment.Center;
+
+                glyphsPanel.Children.Add(PreviewGlyphs);
+            }
+            
+        }
+        public Glyphs PreviewGlyphs { get; set; }
+        public ICommand BackSceneCommand { get; }
+        public ICommand NextSceneCommand { get; }
+
+
         /// <summary>
         /// トークテキストの最大許容文字数を取得する。
         /// </summary>
@@ -423,6 +568,8 @@ namespace VoiceroidUtil.ViewModel
         /// トークテキストを編集可能な状態であるか否かを取得する。
         /// </summary>
         public IReadOnlyReactiveProperty<bool> IsTalkTextEditable { get; }
+
+        public IReadOnlyReactiveProperty<List<string>> TextList { get; }
 
         /// <summary>
         /// 再生や音声保存に本体側のテキストを用いるか否かを取得する。

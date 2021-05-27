@@ -161,7 +161,7 @@
                         <AccessText Text="操作(_1)" Margin="2,0,0,0" />
                     </StackPanel>
                 </TabItem.Header>
-                <v:VoiceroidView DataContext="{Binding Voiceroid}" Margin="4" />
+                <v:VoiceroidView x:Name="VoiceroidView" DataContext="{Binding Voiceroid}" Margin="4" />
             </TabItem>
             <TabItem
                 Style="{StaticResource modernTabItem}"

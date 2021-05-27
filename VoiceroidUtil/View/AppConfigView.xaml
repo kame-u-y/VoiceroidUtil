@@ -195,8 +195,8 @@
                             Content="TRT's拡張：テキストの改行・分割処理を行う"
                             IsChecked="{Binding Config.Value.IsTextSpliting}"
                             Margin="0,4,0,0" />
-                        <DockPanel>
-                            <Label
+                        <!--<DockPanel>-->
+                            <!--<Label
                                 Content="テキスト処理方法："
                                 Margin="20,4,0,0"
                                 />
@@ -245,8 +245,34 @@
                             <Label
                                 Content="以上"
                                 Margin="5,4,0,0"/>
+                        </DockPanel>-->
+                        <DockPanel>
+                            <Label
+                                Content="改行用文字列："
+                                Margin="20,4,0,0"/>
+                            <TextBox
+                                HorizontalAlignment="Left"
+                                Text="{Binding Config.Value.LineFeedStrings}"
+                                IsEnabled="{Binding 
+                                    Path=Config.Value.IsTextSpliting, 
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="5,4,0,0"/>
                         </DockPanel>
 
+                        <DockPanel>
+                            <Label
+                                Content="ファイル分割用文字列："
+                                Margin="20,4,0,0"/>
+                            <TextBox
+                                HorizontalAlignment="Left"
+                                Text="{Binding Config.Value.FileSplitStrings}"
+                                IsEnabled="{Binding 
+                                    Path=Config.Value.IsTextSpliting, 
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="5,4,0,0"/>
+                        </DockPanel>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
