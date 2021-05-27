@@ -429,8 +429,7 @@ namespace VoiceroidUtil
         private static async Task<Tuple<ExoOperationResult, string>> DoOperateExo(
             string filePath,
             VoiceroidId voiceroidId,
-            string text1,
-            string text2,
+            string[] textList,
             AppConfig appConfig,
             ExoConfig exoConfig,
             IAviUtlFileDropService aviUtlFileDropService)
@@ -455,8 +454,7 @@ namespace VoiceroidUtil
                     await DoOperateExoSave(
                         exoFilePath,
                         filePath,
-                        text1,
-                        text2,
+                        textList,
                         common ?? exoConfig.Common,
                         exoConfig.CharaStyles[voiceroidId]);
                 if (exo == null)
@@ -599,8 +597,7 @@ namespace VoiceroidUtil
         private static async Task<ExEditObject> DoOperateExoSave(
             string exoFilePath,
             string waveFilePath,
-            string text1,
-            string text2,
+            string[] textList,
             ExoCommonConfig common,
             ExoCharaStyle charaStyle)
         {
@@ -637,49 +634,29 @@ namespace VoiceroidUtil
             exo.FpsScale = (int)Math.Pow(10, scale);
             exo.FpsBase = decimal.Floor(common.Fps * exo.FpsScale);
 
-            // テキストレイヤー追加
+            foreach (string text in textList)
             {
-                var item =
-                    new LayerItem
-                    {
-                        BeginFrame = 1,
-                        EndFrame = frameCount / 2,
-                        LayerId = 1,
-                        GroupId = common.IsGrouping ? 1 : 0,
-                        IsClipping = charaStyle.IsTextClipping
-                    };
+                // テキストレイヤー追加
+                {
+                    var item =
+                        new LayerItem
+                        {
+                            BeginFrame = 1,
+                            EndFrame = frameCount / 2,
+                            LayerId = 1,
+                            GroupId = common.IsGrouping ? 1 : 0,
+                            IsClipping = charaStyle.IsTextClipping
+                        };
 
-                var c = charaStyle.Text.Clone();
-                ExoTextStyleTemplate.ClearUnused(c);
-                c.Text = text1;
-                item.Components.Add(c);
-                item.Components.Add(charaStyle.Render.Clone());
+                    var c = charaStyle.Text.Clone();
+                    ExoTextStyleTemplate.ClearUnused(c);
+                    c.Text = text;
+                    item.Components.Add(c);
+                    item.Components.Add(charaStyle.Render.Clone());
 
-                exo.LayerItems.Add(item);
+                    exo.LayerItems.Add(item);
+                }
             }
-
-            // テキストレイヤー追加
-
-            {
-                var item =
-                    new LayerItem
-                    {
-                        BeginFrame = frameCount / 2 + 1,
-                        EndFrame = frameCount,
-                        LayerId = 1,
-                        GroupId = common.IsGrouping ? 1 : 0,
-                        IsClipping = charaStyle.IsTextClipping
-                    };
-
-                var c = charaStyle.Text.Clone();
-                ExoTextStyleTemplate.ClearUnused(c);
-                c.Text = text2;
-                item.Components.Add(c);
-                item.Components.Add(charaStyle.Render.Clone());
-
-                exo.LayerItems.Add(item);
-            }
-
 
             // 音声レイヤー追加
             {
@@ -1326,75 +1303,43 @@ namespace VoiceroidUtil
                         @"ファイル分割時は音声ファイル保存のみ行います。");
             }
 
-            var splitMode = SplitMode.Default;
-            string leftHarfText = "", rightHarfText = "";
-            Debug.WriteLine(fileText);
-            int splitPoint = GetTextSplitPoint(fileText);
-            if (
-                appConfig.IsTextSpliting &&
-                fileText.Length > appConfig.MaxLineLength &&
-                splitPoint != -1)
+            string[] fileSplitStrings = { 
+                appConfig.FileSplitStrings, 
+                appConfig.FileSplitStrings + appConfig.LineFeedStrings };
+            string[] splitFileTexts = fileText.Split(fileSplitStrings, System.StringSplitOptions.RemoveEmptyEntries);
+            if (appConfig.IsTextFileForceMaking)
             {
-                if (appConfig.SplitModeValue == AppConfig.SplitMode.SplitFile)
-                {
-                    splitMode = SplitMode.SplitFile;
-                    (leftHarfText, rightHarfText) = SplitText(fileText, splitPoint);
-                }
-                else if (appConfig.SplitModeValue == AppConfig.SplitMode.LineFeed)
-                {
-                    splitMode = SplitMode.LineFeed;
-                    fileText = InsertLineFeed(fileText, splitPoint);
-                }
-            }
-
-            if (splitMode == SplitMode.SplitFile)
-            {
-                // テキストファイル保存
-                if (appConfig.IsTextFileForceMaking)
+                if (appConfig.IsTextSpliting)
                 {
                     var noExtFilePath = $"{Path.GetDirectoryName(filePath)}\\{Path.GetFileNameWithoutExtension(filePath)}";
-
-                    if (!(await WriteTextFile($"{noExtFilePath}_L.txt", leftHarfText, appConfig.IsTextFileUtf8)))
+                    for (int i=0; i<splitFileTexts.Length; i++)
                     {
-                        return
-                            MakeResult(
-                                parameter,
-                                AppStatusType.Success,
-                                statusText,
-                                AppStatusType.Fail,
-                                @"テキストファイルを保存できませんでした。");
+                        splitFileTexts[i] = splitFileTexts[i].Replace(appConfig.LineFeedStrings, "\n");
+                        if (!(await WriteTextFile($"{noExtFilePath}_{i}.txt", splitFileTexts[i], appConfig.IsTextFileUtf8)))
+                        {
+                            return
+                                MakeResult(
+                                    parameter,
+                                    AppStatusType.Success,
+                                    statusText,
+                                    AppStatusType.Fail,
+                                    @"テキストファイルを保存できませんでした。");
+                        }
                     }
-
-                    if (!(await WriteTextFile($"{noExtFilePath}_R.txt", rightHarfText, appConfig.IsTextFileUtf8)))
-                    {
-                        return
-                            MakeResult(
-                                parameter,
-                                AppStatusType.Success,
-                                statusText,
-                                AppStatusType.Fail,
-                                @"テキストファイルを保存できませんでした。");
-                    }
-                }
-            }
-            else if (splitMode == SplitMode.LineFeed || splitMode == SplitMode.Default)
-            {
-                // テキストファイル保存
-                if (appConfig.IsTextFileForceMaking)
+                } 
+                var txtPath = Path.ChangeExtension(filePath, @".txt");
+                if (!(await WriteTextFile(txtPath, fileText.Replace("/--","").Replace("/-",""), appConfig.IsTextFileUtf8)))
                 {
-                    var txtPath = Path.ChangeExtension(filePath, @".txt");
-                    if (!(await WriteTextFile(txtPath, fileText, appConfig.IsTextFileUtf8)))
-                    {
-                        return
-                            MakeResult(
-                                parameter,
-                                AppStatusType.Success,
-                                statusText,
-                                AppStatusType.Fail,
-                                @"テキストファイルを保存できませんでした。");
-                    }
+                    return MakeResult(
+                        parameter,
+                        AppStatusType.Success,
+                        statusText,
+                        AppStatusType.Fail,
+                        @"テキストファイルを保存できませんでした。");
                 }
             }
+            
+                    
             // 以降の処理の対象となるVOICEROID識別ID
             // 複数キャラクターを保持するならキャラクター名からキャラ選別
             var voiceroidId =
@@ -1403,24 +1348,22 @@ namespace VoiceroidUtil
 
 
             // .exo ファイル関連処理
-            var exoResult =
-                splitMode == SplitMode.SplitFile
-                    ? await DoOperateExo(
-                        filePath,
-                        voiceroidId,
-                        leftHarfText,
-                        rightHarfText,
-                        appConfig,
-                        exoConfig,
-                        this.AviUtlFileDropService)
-                    : await DoOperateExo(
-                        filePath,
-                        voiceroidId,
-                        fileText,
-                        appConfig,
-                        exoConfig,
-                        this.AviUtlFileDropService);
-
+            var exoResult = appConfig.IsTextSpliting
+                ? await DoOperateExo(
+                    filePath,
+                    voiceroidId,
+                    splitFileTexts,
+                    appConfig,
+                    exoConfig,
+                    this.AviUtlFileDropService)
+                : await DoOperateExo(
+                    filePath,
+                    voiceroidId,
+                    fileText,
+                    appConfig,
+                    exoConfig,
+                    this.AviUtlFileDropService);
+                    
             if (exoResult.Item1 == ExoOperationResult.SaveFail)
             {
                 return

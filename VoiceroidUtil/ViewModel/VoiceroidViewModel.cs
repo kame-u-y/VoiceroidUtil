@@ -520,7 +520,7 @@ namespace VoiceroidUtil.ViewModel
             string[] lineSplitter = { 
                 this.LineFeedStrings.Value,
                 this.LineFeedStrings.Value + this.FileSplitStrings.Value};
-          string[] PreviewLines = 
+            string[] PreviewLines = 
                 PreviewScenes[sceneNum].Split(
                     lineSplitter,
                     System.StringSplitOptions.RemoveEmptyEntries);
