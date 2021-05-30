@@ -6,6 +6,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:tk="http://schemas.xceed.com/wpf/xaml/toolkit"
     xmlns:ru="http://schemas.ruche-home.net/xaml/windows/mvvm"
+    xmlns:aviutl="http://schemas.ruche-home.net/xaml/aviutl"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:local="clr-namespace:VoiceroidUtil"
     xmlns:v="clr-namespace:VoiceroidUtil.View"
@@ -27,6 +28,8 @@
                 <ResourceDictionary
                     Source="/VoiceroidUtil;component/resources/TabStyles.xaml" />
                 <ResourceDictionary
+                    Source="/VoiceroidUtil;component/resources/VoiceroidStyles.xaml" />
+                <ResourceDictionary
                     Source="/VoiceroidUtil;component/resources/Converters.xaml" />
                 <ResourceDictionary>
                     <ObjectDataProvider
@@ -35,6 +38,14 @@
                         ObjectType="{x:Type sys:Enum}">
                         <ObjectDataProvider.MethodParameters>
                             <x:Type TypeName="local:FileNameFormat" />
+                        </ObjectDataProvider.MethodParameters>
+                    </ObjectDataProvider>
+                    <ObjectDataProvider
+                        x:Key="textAlignments"
+                        MethodName="GetValues"
+                        ObjectType="{x:Type sys:Enum}">
+                        <ObjectDataProvider.MethodParameters>
+                            <x:Type TypeName="aviutl:TextAlignment" />
                         </ObjectDataProvider.MethodParameters>
                     </ObjectDataProvider>
                 </ResourceDictionary>
@@ -246,6 +257,31 @@
                                 Content="以上"
                                 Margin="5,4,0,0"/>
                         </DockPanel>-->
+
+                        <!--<DockPanel>
+                            <Label
+                                Content="字幕用フォント:"
+                                Target="{Binding ElementName=Setting_FileName}"
+                                DockPanel.Dock="Left" />
+                            <ComboBox
+                                x:Name="Setting_FileName"
+                                ItemsSource="{Binding
+                                    Source={StaticResource fileNameFormats}}"
+                                SelectedItem="{Binding Config.Value.FileNameFormat}"
+                                Margin="4,0,0,0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            Text="{Binding
+                                                Converter={StaticResource
+                                                    ResourceKey=enumDisplayConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </DockPanel>-->
+
+
+
                         <DockPanel>
                             <Label
                                 Content="改行用文字列："
@@ -273,6 +309,291 @@
                                 Width="43"
                                 Margin="5,4,0,0"/>
                         </DockPanel>
+                        <!--<CheckBox
+                            Content="項目「.exo(4)」の字幕設定を使用"
+                            IsChecked="{Binding Config.Value.IsTextSpliting}"
+                            Margin="20,4,0,0" />-->
+                        <RadioButton 
+                            Content="項目「.exo(4)」の「キャラクター別」設定を使用"
+                            IsChecked="{Binding 
+                                Path=Config.Value.SplitModeValue,
+                                Mode=TwoWay,
+                                Converter={StaticResource boolToEnumConverter},
+                                ConverterParameter=LineFeed,
+                                UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="{Binding
+                                Path=Config.Value.IsTextSpliting,
+                                Mode=OneWay}"
+                            Margin="20,4,0,0"/>
+                        <RadioButton 
+                            Content="以下の設定を使用"
+                            IsChecked="{Binding 
+                                Path=Config.Value.SplitModeValue,
+                                Mode=TwoWay,
+                                Converter={StaticResource boolToEnumConverter},
+                                ConverterParameter=SplitFile,
+                                UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="{Binding
+                                Path=Config.Value.IsTextSpliting,
+                                Mode=OneWay}"
+                            Margin="20,4,0,0"/>
+                        <ComboBox
+                            ItemsSource="{Binding VisibleCharaStyles.Value}"
+                            SelectedItem="{Binding SelectedCharaStyle.Value}"
+                            ToolTip="{Binding SelectCharaStyleCommandTip.Value}"
+                            Padding="2,1"
+                            Margin="20,10,20,0"
+                            DockPanel.Dock="Top">
+                            <ComboBox.Resources>
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="Padding" Value="0,0,4,0" />
+                                </Style>
+                            </ComboBox.Resources>
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid
+                                    Columns="{Binding VisibleCharaStylesColumnCount.Value}" />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel>
+                                        <Image
+                                            DataContext="{Binding VoiceroidId}"
+                                            Style="{StaticResource VoiceroidIdImage}"
+                                            Margin="0,0,4,0"
+                                            DockPanel.Dock="Left" />
+                                        <StackPanel
+                                            Orientation="Vertical"
+                                            VerticalAlignment="Center">
+                                            <TextBlock
+                                                Text="{Binding VoiceroidName, Mode=OneWay}"
+                                                FontWeight="Bold" />
+                                            <TextBlock
+                                                Text="※キャラ不確定時のみ"
+                                                FontSize="11"
+                                                Margin="0,2,0,0">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter
+                                                            Property="Visibility"
+                                                            Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger
+                                                                Binding="{Binding
+                                                                    Path=HasMultiVoiceroidCharacters}"
+                                                                Value="True">
+                                                                <Setter
+                                                                    Property="Visibility"
+                                                                    Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <StackPanel Margin="20,10,20,0">
+                            
+                            <v:MovableValueControl DataContext="{Binding X}" Margin="0,0,0,0" />
+                            <v:MovableValueControl DataContext="{Binding Y}" Margin="0,4,0,0" />
+                            <v:MovableValueControl DataContext="{Binding Z}" Margin="0,4,0,0" />
+                            <v:MovableValueControl
+                                DataContext="{Binding Scale}"
+                                Margin="0,4,0,0" />
+                            <v:MovableValueControl
+                                DataContext="{Binding FontSize}"
+                                Margin="0,4,0,0" />
+                        </StackPanel>
+                        <!--<DockPanel Margin="0,4,0,0">
+                            <Label
+                                Content="X："
+                                Margin="30,4,0,0"/>
+                            <tk:IntegerUpDown 
+                                HorizontalAlignment="Left"
+                                Value="{Binding
+                                    ,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="0,4,0,0"/>
+                            <Label
+                                Content="拡大率："
+                                Margin="40,4,0,0"/>
+                            <tk:IntegerUpDown 
+                                HorizontalAlignment="Left"
+                                Value="{Binding 
+                                    Config.Value.MaxLineLength,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="0,4,0,0"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label
+                                Content="Y："
+                                Margin="30,4,0,0"/>
+                            <tk:IntegerUpDown 
+                                HorizontalAlignment="Left"
+                                Value="{Binding 
+                                    Config.Value.MaxLineLength,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="0,4,0,0"/>
+                            <Label
+                                Content="サイズ："
+                                Margin="40,4,0,0"/>
+                            <tk:IntegerUpDown 
+                                HorizontalAlignment="Left"
+                                Value="{Binding 
+                                    Config.Value.MaxLineLength,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="8,4,0,0"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label
+                                Content="Z："
+                                Margin="30,4,0,0"/>
+                            <tk:IntegerUpDown 
+                                HorizontalAlignment="Left"
+                                Value="{Binding 
+                                    Config.Value.MaxLineLength,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="0,4,0,0"/>
+                            <Label
+                                Content="字間："
+                                Margin="40,4,0,0"/>
+                            <tk:IntegerUpDown 
+                                HorizontalAlignment="Left"
+                                Value="{Binding 
+                                    Config.Value.MaxLineLength,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="12,4,0,0"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label
+                                Content="行間："
+                                Margin="132,4,0,0"/>
+                            <tk:IntegerUpDown 
+                                HorizontalAlignment="Left"
+                                Value="{Binding 
+                                    Config.Value.MaxLineLength,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                IsEnabled="{Binding
+                                    Path=Config.Value.IsTextSpliting,
+                                    Mode=OneWay}"
+                                Width="43"
+                                Margin="12,4,0,0"/>
+                        </DockPanel>-->
+                        <StackPanel Orientation="Horizontal" Margin="26,10,8,0">
+                            <Label
+                                Content="フォント："
+                                Margin="4,0,0,0"/>
+                            <ComboBox
+                                x:Name="Text_FontFamilyName"
+                                ItemsSource="{Binding FontFamilyNames}"
+                                SelectedItem="{Binding Text.Value.FontFamilyName}"
+                                Margin="4,0,0,0"
+                                Grid.Row="0" 
+                                Grid.Column="1" 
+                                Width="130"/>
+                            <tk:DropDownButton
+                                Padding="6,3"
+                                Margin="4,0,0,0"
+                                Grid.Row="0" Grid.Column="2">
+                                <tk:DropDownButton.DropDownContent>
+                                    <tk:ColorCanvas
+                                        SelectedColor="{Binding Text.Value.FontColor}"
+                                        UsingAlphaChannel="False" />
+                                </tk:DropDownButton.DropDownContent>
+
+                                <StackPanel Orientation="Horizontal" MinWidth="86">
+                                    <Rectangle
+                                        Stroke="Gray"
+                                        Width="16"
+                                        RadiusX="4" RadiusY="4">
+                                        <Rectangle.Fill>
+                                            <SolidColorBrush
+                                                Color="{Binding Text.Value.FontColor}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                    <AccessText Text="文字色(_C)" Margin="4,0,0,0" />
+                                </StackPanel>
+                            </tk:DropDownButton>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="26,8,8,0">
+                            <Label
+                                Content="配置(_G):"
+                                Target="{Binding ElementName=Text_TextAlignment}" 
+                                Margin="4,0,0,0"/>
+                            <ComboBox
+                                x:Name="Text_TextAlignment"
+                                ItemsSource="{Binding
+                                    Source={StaticResource textAlignments}}"
+                                SelectedItem="{Binding Text.Value.TextAlignment}"
+                                MinWidth="104"
+                                Margin="4,0,0,0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            Text="{Binding
+                                                Converter={StaticResource
+                                                    ResourceKey=enumDisplayConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="26,8,0,0">
+                            <Label
+                                Content="字間(_T):"
+                                Target="{Binding ElementName=Text_LetterSpace}"
+                                Margin="4,0,0,0"/>
+                            <tk:IntegerUpDown
+                                x:Name="Text_LetterSpace"
+                                Value="{Binding
+                                    Path=Text.Value.LetterSpace,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                Minimum="-100"
+                                Maximum="100"
+                                MinWidth="56"
+                                Margin="4,0,0,0" />
+                            <Label
+                                Content="行間(_R):"
+                                Target="{Binding ElementName=Text_LineSpace}"
+                                Margin="8,0,0,0" />
+                            <tk:IntegerUpDown
+                                x:Name="Text_LineSpace"
+                                Value="{Binding
+                                    Path=Text.Value.LineSpace,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                Minimum="-100"
+                                Maximum="100"
+                                MinWidth="56"
+                                Margin="4,0,0,0" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>

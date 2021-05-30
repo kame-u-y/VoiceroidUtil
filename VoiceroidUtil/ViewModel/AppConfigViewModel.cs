@@ -1,15 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
+using RucheHome.AviUtl;
+using RucheHome.AviUtl.ExEdit;
 using RucheHome.Windows.Mvvm.Commands;
+using VoiceroidUtil.Extensions;
 using VoiceroidUtil.Services;
 using static RucheHome.Util.ArgumentValidater;
 
@@ -111,7 +119,163 @@ namespace VoiceroidUtil.ViewModel
                     this.ExecuteExoFileMakingCommand,
                     this.CanModify,
                     this.IsExoFileMakingCommandVisible);
+
+
+
+            var charaStyles = this.MakeInnerReadOnlyPropertyOf(config, c => c.PreviewCharaStyles);
+            this.VisibleCharaStyles = 
+                Observable
+                    .CombineLatest(
+                        config.ObserveInnerProperty(c => c.VoiceroidVisibilities),
+                        charaStyles.Select(s => s.Count()).DistinctUntilChanged(),
+                        (vv, _) => vv.SelectVisibleOf(charaStyles.Value))
+                    .ToReadOnlyReactiveProperty()
+                    .AddTo(this.CompositeDisposable);
+
+            this.SelectedCharaStyle =
+                new ReactiveProperty<PreviewCharaStyle>(this.VisibleCharaStyles.Value.First())
+                    .AddTo(this.CompositeDisposable);
+            
+
+            this.IsSelectCharaStyleCommandExecutable =
+                this.VisibleCharaStyles
+                    .Select(vcs => vcs.Count > 2)
+                    .ToReadOnlyReactiveProperty()
+                    .AddTo(this.CompositeDisposable);
+
+            this.SelectCharaStyleCommandTip =
+                this.VisibleCharaStyles
+                    .Select(_ => this.MakeSelectCharaStyleCommandTip())
+                    .ToReadOnlyReactiveProperty()
+                    .AddTo(this.CompositeDisposable);
+
+            this.VisibleCharaStylesColumnCount =
+                this.VisibleCharaStyles
+                    .Select(vp => Math.Min(Math.Max(1, (vp.Count + 5) / 6), 3))
+                    .ToReadOnlyReactiveProperty()
+                    .AddTo(this.CompositeDisposable);
+
+            this.Text = this.MakeInnerReadOnlyPropertyOf(this.SelectedCharaStyle, c => c.Text);
+            this.Render = this.MakeInnerReadOnlyPropertyOf(this.SelectedCharaStyle, c => c.Render);
+
+            this.SetupUIConfig(uiConfig);
+
+            //this.SelectedFontFamilyName =
+            //    new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
+
+            //this.FontColor =
+            //    new ReactiveProperty<Color>(Colors.Black).AddTo(this.CompositeDisposable);
+
+            this.X = this.MakeMovableValueViewModel(this.Render, r => r.X);
+            this.Y = this.MakeMovableValueViewModel(this.Render, r => r.Y);
+            this.Z = this.MakeMovableValueViewModel(this.Render, r => r.Z);
+            this.Scale = this.MakeMovableValueViewModel(this.Render, r => r.Scale);
+            this.FontSize = this.MakeMovableValueViewModel(this.Text, t => t.FontSize);
+
         }
+
+        public IReadOnlyReactiveProperty<ReadOnlyCollection<PreviewCharaStyle>>
+            VisibleCharaStyles
+            {
+                get;
+            }
+
+        public ReactiveProperty<PreviewCharaStyle> SelectedCharaStyle { get; }
+
+        public IReadOnlyReactiveProperty<string> SelectCharaStyleCommandTip { get; }
+
+        public IReadOnlyReactiveProperty<bool> IsSelectCharaStyleCommandExecutable { get; }
+
+        public IReadOnlyReactiveProperty<int> VisibleCharaStylesColumnCount { get; }
+
+        /// <summary>
+        /// キャラ別スタイル設定選択コマンドのチップテキストを作成する。
+        /// </summary>
+        /// <returns>チップテキスト。表示不要ならば null 。</returns>
+        private string MakeSelectCharaStyleCommandTip() =>
+            !this.IsSelectCharaStyleCommandExecutable.Value ?
+                null :
+                @"F1/F2 : 前/次のキャラを選択" + Environment.NewLine +
+                string.Join(
+                    Environment.NewLine,
+                    this.VisibleCharaStyles.Value
+                        .Take(10)
+                        .Select(
+                            (p, i) =>
+                                @"Ctrl+" + ((i < 9) ? (i + 1) : 0) + @" : " +
+                                p.VoiceroidName + @" を選択"));
+
+        public IEnumerable<string> FontFamilyNames { get; } = new FontFamilyNameEnumerable();
+
+        public IReadOnlyReactiveProperty<RenderComponent> Render { get; }
+        public IReadOnlyReactiveProperty<TextComponent> Text { get; }
+        //public IReadOnlyReactiveProperty<string> SelectedFontFamilyName { get; }
+
+        //public IReadOnlyReactiveProperty<Color> FontColor { get; }
+
+        public MovableValueViewModel X { get; private set; }
+        public MovableValueViewModel Y { get; private set; }
+        public MovableValueViewModel Z { get; private set; }
+        public MovableValueViewModel Scale { get; private set; }
+        public MovableValueViewModel FontSize { get; private set; }
+
+        private MovableValueViewModel MakeMovableValueViewModel<T, TConstants>(
+            IReadOnlyReactiveProperty<T> holder,
+            Expression<Func<T, MovableValue<TConstants>>> selector,
+            string name = null)
+            where T : INotifyPropertyChanged
+            where TConstants : IMovableValueConstants, new()
+        {
+            Debug.Assert(holder != null);
+            Debug.Assert(selector != null);
+
+            // 値取得
+            var value = this.MakeInnerPropertyOf(holder, selector, this.CanModify);
+
+            // 名前取得
+            var info = ((MemberExpression)selector.Body).Member;
+            name =
+                name ??
+                info.GetCustomAttribute<ExoFileItemAttribute>(true)?.Name ??
+                info.Name;
+
+            return
+                new MovableValueViewModel(this.CanModify, value, name)
+                    .AddTo(this.CompositeDisposable);
+        }
+
+        private void SetupUIConfig(IReadOnlyReactiveProperty<UIConfig> uiConfig)
+        {
+            // 設定変更時に選択中キャラ別スタイル反映
+            Observable
+                .CombineLatest(
+                    this.VisibleCharaStyles,
+                    uiConfig
+                        .ObserveInnerProperty(c => c.ExoCharaVoiceroidId)
+                        .DistinctUntilChanged(),
+                    (vcs, id) => vcs.FirstOrDefault(s => s.VoiceroidId == id) ?? vcs.First())
+                .DistinctUntilChanged()
+                .Subscribe(s => this.SelectedCharaStyle.Value = s)
+                .AddTo(this.CompositeDisposable);
+
+            // 選択中キャラ別スタイル変更時処理
+            this.SelectedCharaStyle
+                .Where(s => s != null)
+                .Subscribe(s => uiConfig.Value.ExoCharaVoiceroidId = s.VoiceroidId)
+                .AddTo(this.CompositeDisposable);
+            this.SelectedCharaStyle
+                .Where(s => s == null)
+                .ObserveOnUIDispatcher()
+                .Subscribe(
+                    _ =>
+                        this.SelectedCharaStyle.Value =
+                            this.Config.Value.PreviewCharaStyles.First(
+                                s => s.VoiceroidId == uiConfig.Value.ExoCharaVoiceroidId))
+                .AddTo(this.CompositeDisposable);
+        }
+
+
+
 
         /// <summary>
         /// 選択中タブインデックスを取得する。
@@ -175,6 +339,9 @@ namespace VoiceroidUtil.ViewModel
         /// .exo ファイル作成設定有効化コマンドを取得する。
         /// </summary>
         public ICommand ExoFileMakingCommand { get; }
+
+
+
 
         /// <summary>
         /// IDataObject オブジェクトから有効なディレクトリパスを検索する。
@@ -398,6 +565,9 @@ namespace VoiceroidUtil.ViewModel
                         string.IsNullOrEmpty(subStatusCommandTip) ?
                             null : subStatusCommandTip,
                 };
+
+
+
 
         #region デザイン時用定義
 

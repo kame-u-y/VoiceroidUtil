@@ -29,6 +29,8 @@ namespace VoiceroidUtil
             this.VoiceroidVisibilities = new VoiceroidVisibilitySet();
             this.YmmCharaRelations = new YmmCharaRelationSet();
             this.AviUtlDropLayers = new AviUtlDropLayerSet();
+
+            this.PreviewCharaStyles = new PreviewCharaStyleSet();
         }
 
         /// <summary>
@@ -244,6 +246,7 @@ namespace VoiceroidUtil
         private string fileSplitStrings = "/--";
 
 
+
         /// <summary>
         /// 保存したファイルのパスを『ゆっくりMovieMaker3』に設定するか否かを
         /// 取得または設定する。
@@ -332,6 +335,17 @@ namespace VoiceroidUtil
                     value ?? (new AviUtlDropLayerSet()));
         }
         private AviUtlDropLayerSet aviUtlDropLayers = null;
+
+        [DataMember]
+        public PreviewCharaStyleSet PreviewCharaStyles
+        {
+            get => this.previewCharaStyles;
+            set =>
+                this.SetPropertyWithPropertyChangedChain(
+                    ref this.previewCharaStyles,
+                    value ?? new PreviewCharaStyleSet());
+        }
+        private PreviewCharaStyleSet previewCharaStyles = null;
 
         /// <summary>
         /// デシリアライズの直前に呼び出される。

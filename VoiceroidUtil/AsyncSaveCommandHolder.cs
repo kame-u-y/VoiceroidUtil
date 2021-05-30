@@ -1328,7 +1328,7 @@ namespace VoiceroidUtil
                     }
                 } 
                 var txtPath = Path.ChangeExtension(filePath, @".txt");
-                if (!(await WriteTextFile(txtPath, fileText.Replace("/--","").Replace("/-",""), appConfig.IsTextFileUtf8)))
+                if (!(await WriteTextFile(txtPath, fileText.Replace(appConfig.FileSplitStrings,"").Replace(appConfig.LineFeedStrings,""), appConfig.IsTextFileUtf8)))
                 {
                     return MakeResult(
                         parameter,

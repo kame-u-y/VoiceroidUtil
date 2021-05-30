@@ -56,7 +56,7 @@ namespace VoiceroidUtil.ViewModel
                 this.MakeReadOnlyConfigProperty(
                     c => c.CharaStyles,
                     notifyOnSameValue: true);
-
+            
             // 表示状態のキャラ別スタイル設定コレクション
             this.VisibleCharaStyles =
                 Observable
@@ -97,7 +97,7 @@ namespace VoiceroidUtil.ViewModel
 
             // UI設定周りのセットアップ
             this.SetupUIConfig(uiConfig);
-
+            
             // 選択中キャラ別スタイル ViewModel 作成
             this.SelectedCharaStyleViewModel =
                 new ExoCharaStyleViewModel(
