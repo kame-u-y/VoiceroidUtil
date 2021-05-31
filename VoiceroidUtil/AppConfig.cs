@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
@@ -216,6 +217,31 @@ namespace VoiceroidUtil
             set => this.SetProperty(ref this.splitModeValue, value);
         }
         private SplitMode splitModeValue;
+
+        public enum PreviewStyleMode
+        {
+            UseExoSettingStyle,
+            UseNewStyle,
+        }
+
+        [DataMember]
+        public PreviewStyleMode PreviewStyleModeValue
+        {
+            get => this.previewStyleModeValue;
+            set 
+            {
+                //this.SetProperty(ref this.isUsingNewPreviewStyle, value == PreviewStyleMode.UseNewStyle);
+                this.SetProperty(ref this.previewStyleModeValue, value);
+                RaisePropertyChanged("IsUsingNewPreviewStyle");
+            }
+        }
+        private PreviewStyleMode previewStyleModeValue;
+
+        public bool IsUsingNewPreviewStyle
+        {
+            get => this.previewStyleModeValue == PreviewStyleMode.UseNewStyle;
+        }
+        //private bool isUsingNewPreviewStyle = false;
 
         /// <summary>
         /// TRT's拡張：字幕テキストに対する改行or分割処理の

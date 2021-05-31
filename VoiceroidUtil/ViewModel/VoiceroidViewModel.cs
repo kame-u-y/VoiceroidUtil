@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,6 +13,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.Win32;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using RucheHome.AviUtl.ExEdit;
@@ -228,6 +230,13 @@ namespace VoiceroidUtil.ViewModel
                             CreatePreviewGlyphs();
                         }
                     });
+            this.PreviewTextList =
+                new ObservableCollection<PreviewTextStore>();
+
+            this.PreviewCharaStyles = 
+                this.MakeInnerPropertyOf(appConfig, c => c.PreviewCharaStyles);
+
+
 
             // アイドル状態設定先
             var idle = new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
@@ -484,11 +493,16 @@ namespace VoiceroidUtil.ViewModel
 
         private void CreatePreviewGlyphs()
         {
-            var window = Application.Current.Windows.OfType<Window>()
-                        .FirstOrDefault(w => w is MainWindow);
-            var mw = (MainWindow)window;
-            var glyphsPanel = mw.VoiceroidView.GlyphsPanel;
-            glyphsPanel.Children.Clear();
+            //var window = Application.Current.Windows.OfType<Window>()
+            //            .FirstOrDefault(w => w is MainWindow);
+            //var mw = (MainWindow)window;
+            //var glyphsPanel = mw.VoiceroidView.GlyphsPanel;
+            //glyphsPanel.Children.Clear();
+            if (this.PreviewTextList != null)
+            {
+                this.PreviewTextList.Clear();
+            }
+            
             if (TalkText.Value.Length <= 0) return;
 
             string[] sceneSplitter = { 
@@ -541,13 +555,81 @@ namespace VoiceroidUtil.ViewModel
                 PreviewGlyphs.FontRenderingEmSize = 10;
                 PreviewGlyphs.HorizontalAlignment = HorizontalAlignment.Center;
 
-                glyphsPanel.Children.Add(PreviewGlyphs);
+                //glyphsPanel.Children.Add(PreviewGlyphs);
+
+                this.PreviewTextList.Add(new PreviewTextStore(
+                    PreviewLines[i],
+                    this.PreviewCharaStyles.Value[this.SelectedProcess.Value.Id]));
+
             }
-            
         }
         public Glyphs PreviewGlyphs { get; set; }
         public ICommand BackSceneCommand { get; }
         public ICommand NextSceneCommand { get; }
+
+        public class PreviewTextStore
+        {
+            public string Text { get; set; }
+            public PreviewCharaStyle SelectedPreviewStyle { get; set; }
+            public Uri PreviewFontUri { get; set; }
+            public SolidColorBrush PreviewFontColor { get; set; }
+            public PreviewTextStore(string text, PreviewCharaStyle previewStyle)
+            {
+                this.Text = text;
+                this.SelectedPreviewStyle = previewStyle;
+                this.PreviewFontUri = new Uri(FontPathDictionary[previewStyle.Text.FontFamilyName]);
+
+                
+                this.PreviewFontColor = new SolidColorBrush(previewStyle.Text.FontColor);
+            }
+        }
+        //public IReactiveProperty<List<PreviewTextStore>> PreviewTextList { get; set; }
+        public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
+
+        public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; set; }
+
+        public IReactiveProperty<PreviewCharaStyleSet> PreviewCharaStyles { get; set; }
+
+        static Dictionary<string, string> FontPathDictionary
+        {
+            get
+            {
+                return fontPathDictionary;
+            }
+        }
+        static Dictionary<string, string> fontPathDictionary = 
+            SearchFontNamePathPair(new CultureInfo[] { CultureInfo.CurrentCulture, new CultureInfo("en-US") });
+        
+        static Dictionary<string, string> SearchFontNamePathPair(IEnumerable<CultureInfo> cultures)
+        {
+            Dictionary<string, string> ret = new Dictionary<string, string>();
+            string FontDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+
+            RegistryKey regKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts", false);
+            string[] FontFiles = regKey.GetValueNames().Select(p => (string)regKey.GetValue(p)).ToArray();
+
+            foreach(string file in FontFiles)
+            {
+                try
+                {
+                    string path = FontDir + System.IO.Path.DirectorySeparatorChar + file;
+                    GlyphTypeface typeface = new GlyphTypeface(new Uri(path));
+
+                    foreach (CultureInfo culture in cultures)
+                    {
+                        string FamilyName = typeface.FamilyNames[culture];
+
+                        if (!string.IsNullOrEmpty(FamilyName) && !ret.ContainsKey(FamilyName))
+                        {
+                            ret.Add(FamilyName, path);
+                        }
+                    }
+                }
+                catch (FileFormatException) { }
+                catch (NotSupportedException) { }
+            }
+            return ret;
+        }
 
 
         /// <summary>
