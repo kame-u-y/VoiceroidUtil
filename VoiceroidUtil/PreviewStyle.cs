@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using RucheHome.AviUtl.ExEdit;
+using RucheHome.Util;
 using RucheHome.Voiceroid;
 
 namespace VoiceroidUtil
@@ -9,19 +10,17 @@ namespace VoiceroidUtil
     /// AviUtl拡張編集ファイル用のキャラ別スタイルを保持するクラス。
     /// </summary>
     [DataContract(Namespace = "")]
-    public class PreviewCharaStyle : VoiceroidItemBase
+    public class PreviewStyle : BindableConfigBase
     {
         /// <summary>
         /// コンストラクタ。
         /// </summary>
         /// <param name="voiceroidId">VOICEROID識別ID。</param>
-        public PreviewCharaStyle(VoiceroidId voiceroidId) : base(voiceroidId)
+        public PreviewStyle()
         {
             // イベントハンドラ追加のためにプロパティ経由で設定
             this.Render = new RenderComponent();
             this.Text = new TextComponent();
-            this.Play = new PlayComponent();
-            this.PlaySpeed = new MovableValue<AudioFileComponent.PlaySpeedConst>();
         }
 
         /// <summary>
@@ -52,45 +51,23 @@ namespace VoiceroidUtil
         }
         private TextComponent text = null;
 
-        /// <summary>
-        /// テキストを1つ上のオブジェクトでクリッピングするか否かを取得または設定する。
-        /// </summary>
         [DataMember]
-        public bool IsTextClipping
+        public int MarginLeft
         {
-            get => this.textClipping;
-            set => this.SetProperty(ref this.textClipping, value);
+            get => this.marginLeft;
+            set => this.SetProperty(ref this.marginLeft, value);
         }
-        private bool textClipping = false;
+        private int marginLeft = 20;
 
-        /// <summary>
-        /// 標準再生コンポーネントを取得または設定する。
-        /// </summary>
         [DataMember]
-        public PlayComponent Play
+        public int MarginRight
         {
-            get => this.play;
-            set =>
-                this.SetPropertyWithPropertyChangedChain(
-                    ref this.play,
-                    value ?? new PlayComponent());
+            get => this.marginRight;
+            set => this.SetProperty(ref this.marginRight, value);
         }
-        private PlayComponent play = null;
+        private int marginRight = 20;
 
-        /// <summary>
-        /// 再生速度を取得または設定する。
-        /// </summary>
-        [DataMember]
-        public MovableValue<AudioFileComponent.PlaySpeedConst> PlaySpeed
-        {
-            get => this.playSpeed;
-            set =>
-                this.SetPropertyWithPropertyChangedChain(
-                    ref this.playSpeed,
-                    value ?? new MovableValue<AudioFileComponent.PlaySpeedConst>());
-        }
-        private MovableValue<AudioFileComponent.PlaySpeedConst> playSpeed = null;
-
+        
         /// <summary>
         /// デシリアライズの直前に呼び出される。
         /// </summary>

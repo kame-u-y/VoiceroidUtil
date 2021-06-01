@@ -31,7 +31,8 @@ namespace VoiceroidUtil
             this.YmmCharaRelations = new YmmCharaRelationSet();
             this.AviUtlDropLayers = new AviUtlDropLayerSet();
 
-            this.PreviewCharaStyles = new PreviewCharaStyleSet();
+            //this.PreviewCharaStyles = new PreviewCharaStyleSet();
+            this.PreviewStyleValue = new PreviewStyle();
         }
 
         /// <summary>
@@ -362,16 +363,24 @@ namespace VoiceroidUtil
         }
         private AviUtlDropLayerSet aviUtlDropLayers = null;
 
+        //[DataMember]
+        //public PreviewCharaStyleSet PreviewCharaStyles
+        //{
+        //    get => this.previewCharaStyles;
+        //    set =>
+        //        this.SetPropertyWithPropertyChangedChain(
+        //            ref this.previewCharaStyles,
+        //            value ?? new PreviewCharaStyleSet());
+        //}
+        //private PreviewCharaStyleSet previewCharaStyles = null;
+
         [DataMember]
-        public PreviewCharaStyleSet PreviewCharaStyles
+        public PreviewStyle PreviewStyleValue
         {
-            get => this.previewCharaStyles;
-            set =>
-                this.SetPropertyWithPropertyChangedChain(
-                    ref this.previewCharaStyles,
-                    value ?? new PreviewCharaStyleSet());
+            get => this.previewStyleValue;
+            set => this.SetProperty(ref this.previewStyleValue, value);
         }
-        private PreviewCharaStyleSet previewCharaStyles = null;
+        private PreviewStyle previewStyleValue;
 
         /// <summary>
         /// デシリアライズの直前に呼び出される。

@@ -233,8 +233,9 @@ namespace VoiceroidUtil.ViewModel
             this.PreviewTextList =
                 new ObservableCollection<PreviewTextStore>();
 
-            this.PreviewCharaStyles = 
-                this.MakeInnerPropertyOf(appConfig, c => c.PreviewCharaStyles);
+            //this.PreviewCharaStyles = 
+            //    this.MakeInnerPropertyOf(appConfig, c => c.PreviewCharaStyles);
+            this.PreviewStyleValue = this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyleValue);
 
 
 
@@ -544,7 +545,7 @@ namespace VoiceroidUtil.ViewModel
 
                 this.PreviewTextList.Add(new PreviewTextStore(
                     PreviewLines[i],
-                    this.PreviewCharaStyles.Value[this.SelectedProcess.Value.Id],
+                    this.PreviewStyleValue.Value,
                     PreviewLines[i].Length - 1));
             }
         }
@@ -555,15 +556,15 @@ namespace VoiceroidUtil.ViewModel
         public class PreviewTextStore
         {
             public string Text { get; set; }
-            public PreviewCharaStyle SelectedPreviewStyle { get; set; }
+            public PreviewStyle PreviewStyleValue { get; set; }
             public Uri PreviewFontUri { get; set; }
             public SolidColorBrush PreviewFontColor { get; set; }
             public string PreviewIndices { get; set; }
-            public PreviewTextStore(string text, PreviewCharaStyle previewStyle, int indicesNum)
+            public PreviewTextStore(string text, PreviewStyle previewStyle, int indicesNum)
             {
                 this.Text = text;
                 if (previewStyle == null) return;
-                this.SelectedPreviewStyle = previewStyle;
+                this.PreviewStyleValue = previewStyle;
                 this.PreviewFontUri = new Uri(FontPathDictionary[previewStyle.Text.FontFamilyName]);
                 
                 this.PreviewFontColor = new SolidColorBrush(previewStyle.Text.FontColor);
@@ -580,7 +581,8 @@ namespace VoiceroidUtil.ViewModel
 
         public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; set; }
 
-        public IReactiveProperty<PreviewCharaStyleSet> PreviewCharaStyles { get; set; }
+        public IReactiveProperty<PreviewStyle> PreviewStyleValue { get; set; }
+        //public IReactiveProperty<PreviewCharaStyleSet> PreviewCharaStyles { get; set; }
 
         static Dictionary<string, string> FontPathDictionary
         {

@@ -123,7 +123,7 @@
     <Compile Include="ConfigManager.cs" />
     <Compile Include="ErrorLogFileTraceListener.cs" />
     <Compile Include="PreviewCharaStyleSet.cs" />
-    <Compile Include="PreviewCharaStyle.cs" />
+    <Compile Include="PreviewStyle.cs" />
     <Compile Include="ExoCharaStyle.cs" />
     <Compile Include="ExoCharaStyleSet.cs" />
     <Compile Include="ExoCommonConfig.cs" />

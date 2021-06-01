@@ -233,7 +233,7 @@
                                 Width="43"
                                 Margin="5,4,0,0"/>
                         </DockPanel>
-                        <RadioButton 
+                        <!--<RadioButton 
                             Content="項目「.exo(4)」の「キャラクター別」設定を使用"
                             IsChecked="{Binding 
                                 Path=Config.Value.PreviewStyleModeValue,
@@ -256,7 +256,7 @@
                             IsEnabled="{Binding
                                 Path=Config.Value.IsTextSpliting,
                                 Mode=OneWay}"
-                            Margin="20,4,0,0"/>
+                            Margin="20,4,0,0"/>-->
                         <StackPanel>
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
@@ -267,16 +267,16 @@
                                             Value="False">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                         </DataTrigger>
-                                        <DataTrigger 
+                                        <!--<DataTrigger 
                                             Binding="{Binding Config.Value.IsUsingNewPreviewStyle}"
                                             Value="False">
                                             <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
+                                        </DataTrigger>-->
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
                             
-                            <ComboBox
+                            <!--<ComboBox
                                 ItemsSource="{Binding VisibleCharaStyles.Value}"
                                 SelectedItem="{Binding SelectedCharaStyle.Value}"
                                 ToolTip="{Binding SelectCharaStyleCommandTip.Value}"
@@ -334,18 +334,18 @@
                                         </DockPanel>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
-                            </ComboBox>
+                            </ComboBox>-->
 
                             <StackPanel Margin="20,10,20,0">
 
-                                <v:MovableValueControl DataContext="{Binding X}" Margin="0,0,0,0" />
-                                <v:MovableValueControl DataContext="{Binding Y}" Margin="0,4,0,0" />
-                                <v:MovableValueControl DataContext="{Binding Z}" Margin="0,4,0,0" />
+                                <v:MovableValueControl DataContext="{Binding PreviewX}" Margin="0,0,0,0" />
+                                <v:MovableValueControl DataContext="{Binding PreviewY}" Margin="0,4,0,0" />
+                                <v:MovableValueControl DataContext="{Binding PreviewZ}" Margin="0,4,0,0" />
                                 <v:MovableValueControl
-                                    DataContext="{Binding Scale}"
+                                    DataContext="{Binding PreviewScale}"
                                     Margin="0,4,0,0" />
                                 <v:MovableValueControl
-                                    DataContext="{Binding FontSize}"
+                                    DataContext="{Binding PreviewFontSize}"
                                     Margin="0,4,0,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="26,10,8,0">
@@ -355,7 +355,7 @@
                                 <ComboBox
                                     x:Name="Text_FontFamilyName"
                                     ItemsSource="{Binding FontFamilyNames}"
-                                    SelectedItem="{Binding Text.Value.FontFamilyName}"
+                                    SelectedItem="{Binding PreviewText.Value.FontFamilyName}"
                                     Margin="4,0,0,0"
                                     Grid.Row="0" 
                                     Grid.Column="1" 
@@ -366,7 +366,7 @@
                                     Grid.Row="0" Grid.Column="2">
                                     <tk:DropDownButton.DropDownContent>
                                         <tk:ColorCanvas
-                                            SelectedColor="{Binding Text.Value.FontColor}"
+                                            SelectedColor="{Binding PreviewText.Value.FontColor}"
                                             UsingAlphaChannel="False" />
                                     </tk:DropDownButton.DropDownContent>
 
@@ -377,7 +377,7 @@
                                             RadiusX="4" RadiusY="4">
                                             <Rectangle.Fill>
                                                 <SolidColorBrush
-                                                    Color="{Binding Text.Value.FontColor}" />
+                                                    Color="{Binding PreviewText.Value.FontColor}" />
                                             </Rectangle.Fill>
                                         </Rectangle>
                                         <AccessText Text="文字色(_C)" Margin="4,0,0,0" />
@@ -393,7 +393,7 @@
                                     x:Name="Text_TextAlignment"
                                     ItemsSource="{Binding
                                         Source={StaticResource textAlignments}}"
-                                    SelectedItem="{Binding Text.Value.TextAlignment}"
+                                    SelectedItem="{Binding PreviewText.Value.TextAlignment}"
                                     MinWidth="104"
                                     Margin="4,0,0,0">
                                     <ComboBox.ItemTemplate>
@@ -414,7 +414,7 @@
                                 <tk:IntegerUpDown
                                     x:Name="Text_LetterSpace"
                                     Value="{Binding
-                                        Path=Text.Value.LetterSpace,
+                                        Path=PreviewText.Value.LetterSpace,
                                         UpdateSourceTrigger=PropertyChanged}"
                                     Minimum="-100"
                                     Maximum="100"
@@ -427,7 +427,35 @@
                                 <tk:IntegerUpDown
                                     x:Name="Text_LineSpace"
                                     Value="{Binding
-                                        Path=Text.Value.LineSpace,
+                                        Path=PreviewText.Value.LineSpace,
+                                        UpdateSourceTrigger=PropertyChanged}"
+                                    Minimum="-100"
+                                    Maximum="100"
+                                    MinWidth="56"
+                                    Margin="4,0,0,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="26,8,0,0">
+                                <Label
+                                    Content="左余白:"
+                                    Target="{Binding ElementName=Text_MarginLeft}"
+                                    Margin="4,0,0,0"/>
+                                <tk:IntegerUpDown
+                                    x:Name="Text_MarginLeft"
+                                    Value="{Binding
+                                        Path=PreviewMarginLeft.Value,
+                                        UpdateSourceTrigger=PropertyChanged}"
+                                    Minimum="-100"
+                                    Maximum="100"
+                                    MinWidth="56"
+                                    Margin="4,0,0,0" />
+                                <Label
+                                    Content="右余白:"
+                                    Target="{Binding ElementName=Text_MarginRight}"
+                                    Margin="8,0,0,0" />
+                                <tk:IntegerUpDown
+                                    x:Name="Text_MarginRight"
+                                    Value="{Binding
+                                        Path=PreviewMarginRight.Value,
                                         UpdateSourceTrigger=PropertyChanged}"
                                     Minimum="-100"
                                     Maximum="100"
