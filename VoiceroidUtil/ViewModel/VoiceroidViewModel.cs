@@ -493,11 +493,6 @@ namespace VoiceroidUtil.ViewModel
 
         private void CreatePreviewGlyphs()
         {
-            //var window = Application.Current.Windows.OfType<Window>()
-            //            .FirstOrDefault(w => w is MainWindow);
-            //var mw = (MainWindow)window;
-            //var glyphsPanel = mw.VoiceroidView.GlyphsPanel;
-            //glyphsPanel.Children.Clear();
             if (this.PreviewTextList != null)
             {
                 this.PreviewTextList.Clear();
@@ -525,9 +520,6 @@ namespace VoiceroidUtil.ViewModel
             int sceneNum = this.IsMultiScenePreview.Value
                 ? this.DisplayPreviewSceneNum.Value
                 : 0;
-            Debug.WriteLine(PreviewSceneLength);
-            Debug.WriteLine(DisplayPreviewSceneNum);
-            Debug.WriteLine(sceneNum);
 
             if (PreviewSceneLength.Value == 0) return;
 
@@ -542,25 +534,18 @@ namespace VoiceroidUtil.ViewModel
             for (int i = 0; i < PreviewLines.Length; i++)
             {
                 if (PreviewLines[i].Length <= 0) continue;
-                PreviewGlyphs = new Glyphs();
-                PreviewGlyphs.UnicodeString = PreviewLines[i];
-                string indices = "";
-                for (int j = 0; j < PreviewLines[i].Length - 1; j++)
-                {
-                    indices += $",{PreviewIndiceNum.Value};";
-                }
-                PreviewGlyphs.Indices = indices;
-                PreviewGlyphs.FontUri = new Uri("file://c:/windows/fonts/uzura.ttf");
-                PreviewGlyphs.Fill = new SolidColorBrush(Colors.Black);
-                PreviewGlyphs.FontRenderingEmSize = 10;
-                PreviewGlyphs.HorizontalAlignment = HorizontalAlignment.Center;
-
-                //glyphsPanel.Children.Add(PreviewGlyphs);
+                //int indicesNum = 0;
+                //for (int j = 0; j < PreviewLines[i].Length - 1; j++)
+                //{
+                //    //indices += $",{PreviewIndiceNum.Value};";
+                //    indicesNum++;
+                //}
+                
 
                 this.PreviewTextList.Add(new PreviewTextStore(
                     PreviewLines[i],
-                    this.PreviewCharaStyles.Value[this.SelectedProcess.Value.Id]));
-
+                    this.PreviewCharaStyles.Value[this.SelectedProcess.Value.Id],
+                    PreviewLines[i].Length - 1));
             }
         }
         public Glyphs PreviewGlyphs { get; set; }
@@ -573,14 +558,21 @@ namespace VoiceroidUtil.ViewModel
             public PreviewCharaStyle SelectedPreviewStyle { get; set; }
             public Uri PreviewFontUri { get; set; }
             public SolidColorBrush PreviewFontColor { get; set; }
-            public PreviewTextStore(string text, PreviewCharaStyle previewStyle)
+            public string PreviewIndices { get; set; }
+            public PreviewTextStore(string text, PreviewCharaStyle previewStyle, int indicesNum)
             {
                 this.Text = text;
+                if (previewStyle == null) return;
                 this.SelectedPreviewStyle = previewStyle;
                 this.PreviewFontUri = new Uri(FontPathDictionary[previewStyle.Text.FontFamilyName]);
-
                 
                 this.PreviewFontColor = new SolidColorBrush(previewStyle.Text.FontColor);
+                var indices = "";
+                for (int i=0; i<indicesNum; i++)
+                {
+                    indices += $",{previewStyle.Text.LetterSpace};";
+                }
+                this.PreviewIndices = indices;
             }
         }
         //public IReactiveProperty<List<PreviewTextStore>> PreviewTextList { get; set; }

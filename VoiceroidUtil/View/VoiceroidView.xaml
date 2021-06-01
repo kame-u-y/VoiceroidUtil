@@ -199,27 +199,18 @@
                                 Background="#ddd" 
                                 VerticalAlignment="Bottom"
                                 HorizontalAlignment="Center">
-                                <!-- Preview Glyphs -->
                                 <ItemsControl ItemsSource="{Binding PreviewTextList}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <!--<Grid>
-                                                --><!--<Label Content="{Binding Text}"/>-->
-                                                <!--Indices=",60;,60;,60;,60;"--><!--
-                                            </Grid>-->
                                             <Glyphs
                                                 HorizontalAlignment="Center"
                                                 UnicodeString="{Binding Text}"
+                                                Indices="{Binding PreviewIndices}"
                                                 Fill="{Binding PreviewFontColor}"
                                                 FontUri="{Binding PreviewFontUri}"
                                                 FontRenderingEmSize="10"/>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
-                                    <!--<ItemsControl.ItemContainerStyle>
-                                        <Style TargetType=">
-                                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                                        </Style>
-                                    </ItemsControl.ItemContainerStyle>-->
                                 </ItemsControl>
                                 
                             </StackPanel>

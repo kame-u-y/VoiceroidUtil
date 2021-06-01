@@ -206,82 +206,6 @@
                             Content="TRT's拡張：テキストの改行・分割処理を行う"
                             IsChecked="{Binding Config.Value.IsTextSpliting}"
                             Margin="0,4,0,0" />
-                        <!--<DockPanel>-->
-                            <!--<Label
-                                Content="テキスト処理方法："
-                                Margin="20,4,0,0"
-                                />
-                            <RadioButton 
-                                Content="改行"
-                                IsChecked="{Binding 
-                                    Path=Config.Value.SplitModeValue,
-                                    Mode=TwoWay,
-                                    Converter={StaticResource boolToEnumConverter},
-                                    ConverterParameter=LineFeed,
-                                    UpdateSourceTrigger=PropertyChanged}"
-                                IsEnabled="{Binding
-                                    Path=Config.Value.IsTextSpliting,
-                                    Mode=OneWay}"
-                                Margin="0,4,0,0"/>
-                            <RadioButton 
-                                Content="ファイル分割"
-                                IsChecked="{Binding 
-                                    Path=Config.Value.SplitModeValue,
-                                    Mode=TwoWay,
-                                    Converter={StaticResource boolToEnumConverter},
-                                    ConverterParameter=SplitFile,
-                                    UpdateSourceTrigger=PropertyChanged}"
-                                IsEnabled="{Binding
-                                    Path=Config.Value.IsTextSpliting,
-                                    Mode=OneWay}"
-                                Margin="10,4,0,0"/>
-                            
-
-                        </DockPanel>
-
-                        <DockPanel>
-                            <Label
-                                Content="処理を適用する文字数："
-                                Margin="20,4,0,0"/>
-                            <tk:IntegerUpDown 
-                                HorizontalAlignment="Left"
-                                Value="{Binding 
-                                    Config.Value.MaxLineLength,
-                                    UpdateSourceTrigger=PropertyChanged}"
-                                IsEnabled="{Binding
-                                    Path=Config.Value.IsTextSpliting,
-                                    Mode=OneWay}"
-                                Width="43"
-                                Margin="10,4,0,0"/>
-                            <Label
-                                Content="以上"
-                                Margin="5,4,0,0"/>
-                        </DockPanel>-->
-
-                        <!--<DockPanel>
-                            <Label
-                                Content="字幕用フォント:"
-                                Target="{Binding ElementName=Setting_FileName}"
-                                DockPanel.Dock="Left" />
-                            <ComboBox
-                                x:Name="Setting_FileName"
-                                ItemsSource="{Binding
-                                    Source={StaticResource fileNameFormats}}"
-                                SelectedItem="{Binding Config.Value.FileNameFormat}"
-                                Margin="4,0,0,0">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock
-                                            Text="{Binding
-                                                Converter={StaticResource
-                                                    ResourceKey=enumDisplayConverter}}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </DockPanel>-->
-
-
-
                         <DockPanel>
                             <Label
                                 Content="改行用文字列："
@@ -309,10 +233,6 @@
                                 Width="43"
                                 Margin="5,4,0,0"/>
                         </DockPanel>
-                        <!--<CheckBox
-                            Content="項目「.exo(4)」の字幕設定を使用"
-                            IsChecked="{Binding Config.Value.IsTextSpliting}"
-                            Margin="20,4,0,0" />-->
                         <RadioButton 
                             Content="項目「.exo(4)」の「キャラクター別」設定を使用"
                             IsChecked="{Binding 
@@ -417,7 +337,7 @@
                             </ComboBox>
 
                             <StackPanel Margin="20,10,20,0">
-                            
+
                                 <v:MovableValueControl DataContext="{Binding X}" Margin="0,0,0,0" />
                                 <v:MovableValueControl DataContext="{Binding Y}" Margin="0,4,0,0" />
                                 <v:MovableValueControl DataContext="{Binding Z}" Margin="0,4,0,0" />
@@ -428,105 +348,6 @@
                                     DataContext="{Binding FontSize}"
                                     Margin="0,4,0,0" />
                             </StackPanel>
-                            <!--<DockPanel Margin="0,4,0,0">
-                                <Label
-                                    Content="X："
-                                    Margin="30,4,0,0"/>
-                                <tk:IntegerUpDown 
-                                    HorizontalAlignment="Left"
-                                    Value="{Binding
-                                        ,
-                                        UpdateSourceTrigger=PropertyChanged}"
-                                    IsEnabled="{Binding
-                                        Path=Config.Value.IsTextSpliting,
-                                        Mode=OneWay}"
-                                    Width="43"
-                                    Margin="0,4,0,0"/>
-                                <Label
-                                    Content="拡大率："
-                                    Margin="40,4,0,0"/>
-                                <tk:IntegerUpDown 
-                                    HorizontalAlignment="Left"
-                                    Value="{Binding 
-                                        Config.Value.MaxLineLength,
-                                        UpdateSourceTrigger=PropertyChanged}"
-                                    IsEnabled="{Binding
-                                        Path=Config.Value.IsTextSpliting,
-                                        Mode=OneWay}"
-                                    Width="43"
-                                    Margin="0,4,0,0"/>
-                            </DockPanel>
-                            <DockPanel>
-                                <Label
-                                    Content="Y："
-                                    Margin="30,4,0,0"/>
-                                <tk:IntegerUpDown 
-                                    HorizontalAlignment="Left"
-                                    Value="{Binding 
-                                        Config.Value.MaxLineLength,
-                                        UpdateSourceTrigger=PropertyChanged}"
-                                    IsEnabled="{Binding
-                                        Path=Config.Value.IsTextSpliting,
-                                        Mode=OneWay}"
-                                    Width="43"
-                                    Margin="0,4,0,0"/>
-                                <Label
-                                    Content="サイズ："
-                                    Margin="40,4,0,0"/>
-                                <tk:IntegerUpDown 
-                                    HorizontalAlignment="Left"
-                                    Value="{Binding 
-                                        Config.Value.MaxLineLength,
-                                        UpdateSourceTrigger=PropertyChanged}"
-                                    IsEnabled="{Binding
-                                        Path=Config.Value.IsTextSpliting,
-                                        Mode=OneWay}"
-                                    Width="43"
-                                    Margin="8,4,0,0"/>
-                            </DockPanel>
-                            <DockPanel>
-                                <Label
-                                    Content="Z："
-                                    Margin="30,4,0,0"/>
-                                <tk:IntegerUpDown 
-                                    HorizontalAlignment="Left"
-                                    Value="{Binding 
-                                        Config.Value.MaxLineLength,
-                                        UpdateSourceTrigger=PropertyChanged}"
-                                    IsEnabled="{Binding
-                                        Path=Config.Value.IsTextSpliting,
-                                        Mode=OneWay}"
-                                    Width="43"
-                                    Margin="0,4,0,0"/>
-                                <Label
-                                    Content="字間："
-                                    Margin="40,4,0,0"/>
-                                <tk:IntegerUpDown 
-                                    HorizontalAlignment="Left"
-                                    Value="{Binding 
-                                        Config.Value.MaxLineLength,
-                                        UpdateSourceTrigger=PropertyChanged}"
-                                    IsEnabled="{Binding
-                                        Path=Config.Value.IsTextSpliting,
-                                        Mode=OneWay}"
-                                    Width="43"
-                                    Margin="12,4,0,0"/>
-                            </DockPanel>
-                            <DockPanel>
-                                <Label
-                                    Content="行間："
-                                    Margin="132,4,0,0"/>
-                                <tk:IntegerUpDown 
-                                    HorizontalAlignment="Left"
-                                    Value="{Binding 
-                                        Config.Value.MaxLineLength,
-                                        UpdateSourceTrigger=PropertyChanged}"
-                                    IsEnabled="{Binding
-                                        Path=Config.Value.IsTextSpliting,
-                                        Mode=OneWay}"
-                                    Width="43"
-                                    Margin="12,4,0,0"/>
-                            </DockPanel>-->
                             <StackPanel Orientation="Horizontal" Margin="26,10,8,0">
                                 <Label
                                     Content="フォント："

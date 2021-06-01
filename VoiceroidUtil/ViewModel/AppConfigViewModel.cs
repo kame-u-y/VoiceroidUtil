@@ -160,11 +160,6 @@ namespace VoiceroidUtil.ViewModel
 
             this.SetupUIConfig(uiConfig);
 
-            //this.SelectedFontFamilyName =
-            //    new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
-
-            //this.FontColor =
-            //    new ReactiveProperty<Color>(Colors.Black).AddTo(this.CompositeDisposable);
 
             this.X = this.MakeMovableValueViewModel(this.Render, r => r.X);
             this.Y = this.MakeMovableValueViewModel(this.Render, r => r.Y);
