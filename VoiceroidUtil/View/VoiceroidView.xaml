@@ -198,7 +198,8 @@
 
                         <Grid 
                             Grid.Row="1"
-                            Width="{Binding PreviewStyleValue.Value.PreviewWindowWidth}">
+                            Width="{Binding PreviewStyleValue.Value.PreviewWindowWidth}"
+                            Background="#f5f5f5">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="{Binding PreviewStyleValue.Value.PreviewLeftMargin}"/>
                                 <ColumnDefinition Width="*"/>
@@ -213,15 +214,39 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid 
-                                                Background="#ddd"
-                                                Margin="{Binding LineSpace}">
+                                                Margin="{
+                                                    Binding 
+                                                        Path=DataContext.PreviewStyleValue.Value.Text.PreviewLineSpace,
+                                                        RelativeSource={
+                                                            RelativeSource FindAncestor, 
+                                                            AncestorType={x:Type UserControl}}}">
                                                 <!-- 1行ごとのGlyphs字幕 -->
                                                 <Glyphs
-                                                    HorizontalAlignment="{Binding Horizon}"
                                                     UnicodeString="{Binding Text}"
-                                                    FontUri="{Binding FontUri}"
-                                                    Fill="{Binding FontColor}"
-                                                    FontRenderingEmSize="{Binding FontSize}"/>
+                                                    HorizontalAlignment="{
+                                                        Binding 
+                                                            Path=DataContext.PreviewStyleValue.Value.Text.Horizontal,
+                                                            RelativeSource={
+                                                                RelativeSource FindAncestor, 
+                                                                AncestorType={x:Type UserControl}}}"
+                                                    FontUri="{
+                                                        Binding 
+                                                            Path=DataContext.PreviewStyleValue.Value.Text.PreviewFontUri,
+                                                            RelativeSource={
+                                                                RelativeSource FindAncestor, 
+                                                                AncestorType={x:Type UserControl}}}"
+                                                    Fill="{
+                                                        Binding 
+                                                            Path=DataContext.PreviewStyleValue.Value.Text.PreviewFontColor,
+                                                            RelativeSource={
+                                                                RelativeSource FindAncestor, 
+                                                                AncestorType={x:Type UserControl}}}"
+                                                    FontRenderingEmSize="{
+                                                        Binding 
+                                                            Path=DataContext.PreviewStyleValue.Value.PreviewFontSize,
+                                                            RelativeSource={
+                                                                RelativeSource FindAncestor, 
+                                                                AncestorType={x:Type UserControl}}}"/>
                                                     <!--Indices="{Binding Indices}"-->
                                             </Grid>
                                         </DataTemplate>

@@ -6,6 +6,7 @@ using System.Windows;
 using RucheHome.AviUtl.ExEdit;
 using RucheHome.Util;
 using RucheHome.Voiceroid;
+using VoiceroidUtil.TRToys;
 
 namespace VoiceroidUtil
 {
@@ -15,6 +16,7 @@ namespace VoiceroidUtil
     [DataContract(Namespace = "")]
     public class PreviewStyle : BindableConfigBase
     {
+        
         /// <summary>
         /// コンストラクタ。
         /// </summary>
@@ -22,8 +24,8 @@ namespace VoiceroidUtil
         public PreviewStyle()
         {
             // イベントハンドラ追加のためにプロパティ経由で設定
-            this.Render = new RenderComponent();
-            this.Text = new TextComponent();
+            this.Render = new PreviewRenderComponent(() => this.SetPreviewFontSize());
+            this.Text = new PreviewTextComponent(() => this.SetPreviewFontSize());
         }
 
         /// <summary>
@@ -33,7 +35,11 @@ namespace VoiceroidUtil
         public bool IsTextSplitting
         {
             get => this.textSplitting;
-            set => this.SetProperty(ref this.textSplitting, value);
+            set
+            {
+                this.SetProperty(ref this.textSplitting, value);
+                this.SetPreviewFontSize();
+            }
         }
         private bool textSplitting = false;
 
@@ -75,31 +81,31 @@ namespace VoiceroidUtil
         /// 標準描画コンポーネントを取得または設定する。
         /// </summary>
         [DataMember]
-        public RenderComponent Render
+        public PreviewRenderComponent Render
         {
             get => this.render;
             set =>
                 this.SetPropertyWithPropertyChangedChain(
                     ref this.render,
-                    value ?? new RenderComponent());
+                    value ?? new PreviewRenderComponent());
         }
-        private RenderComponent render = null;
+        private PreviewRenderComponent render = null;
 
         /// <summary>
         /// テキストコンポーネントを取得または設定する。
         /// </summary>
         [DataMember]
-        public TextComponent Text
+        public PreviewTextComponent Text
         {
             get => this.text;
             set
             {
                 this.SetPropertyWithPropertyChangedChain(
                     ref this.text,
-                    value ?? new TextComponent());
+                    value ?? new PreviewTextComponent(()=> Debug.WriteLine("はっか")));
             }
         }
-        private TextComponent text = null;
+        private PreviewTextComponent text = null;
 
         /// <summary>
         /// 編集中のAviUtlプロジェクトの横幅を設定または取得する。
@@ -113,6 +119,7 @@ namespace VoiceroidUtil
                 this.SetProperty(ref this.aviUtlWindowWidth, value);
                 this.SetPreviewLeftMargin();
                 this.SetPreviewRightMargin();
+                this.SetPreviewFontSize();
             }
         }
         private int aviUtlWindowWidth = 1920;
@@ -129,6 +136,7 @@ namespace VoiceroidUtil
                 this.SetProperty(ref this.previewWindowWidth, value);
                 this.SetPreviewLeftMargin();
                 this.SetPreviewRightMargin();
+                this.SetPreviewFontSize();
             }
         }
         private int previewWindowWidth = 200;
@@ -197,11 +205,23 @@ namespace VoiceroidUtil
             => this.PreviewRightMargin
                 = this.AviUtlRightMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
 
+        private void SetPreviewFontSize()
+        {
+            this.PreviewFontSize = this.Text.FontSize.Begin
+                * ((decimal)this.PreviewWindowWidth / (decimal)this.AviUtlWindowWidth)
+                * Render.Scale.Begin / (decimal)100.0;
+        }
+        public decimal PreviewFontSize
+        {
+            get => this.previewFontSize;
+            set => this.SetProperty(ref this.previewFontSize, value);
+        }
+        private decimal previewFontSize = 100;
 
-        /// <summary>
-        /// デシリアライズの直前に呼び出される。
-        /// </summary>
-        [OnDeserializing]
+    /// <summary>
+    /// デシリアライズの直前に呼び出される。
+    /// </summary>
+    [OnDeserializing]
         private void OnDeserializing(StreamingContext context) =>
             this.ResetDataMembers(VoiceroidId.YukariEx);
     }

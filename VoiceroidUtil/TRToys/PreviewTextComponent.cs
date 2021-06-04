@@ -1,21 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Media;
+using Microsoft.Win32;
+using RucheHome.AviUtl.ExEdit;
 using RucheHome.Text;
 using RucheHome.Util.Extensions.String;
+using TextAlignment = RucheHome.AviUtl.ExEdit.TextAlignment;
 
-namespace RucheHome.AviUtl.ExEdit
+namespace VoiceroidUtil.TRToys
 {
-    /// <summary>
-    /// テキストコンポーネントを表すクラス。
-    /// </summary>
     [DataContract(Namespace = "")]
-    public class TextComponent : ComponentBase, ICloneable
+    public class PreviewTextComponent : ComponentBase, ICloneable
     {
         #region アイテム名定数群
 
@@ -125,7 +127,7 @@ namespace RucheHome.AviUtl.ExEdit
         /// <summary>
         /// 規定のフォントファミリ名。
         /// </summary>
-        public static readonly string DefaultFontFamilyName = @"MS UI Gothic";
+        public static readonly string DefaultFontFamilyName = @"MS Gothic";
 
         /// <summary>
         /// テキストの最大許容文字数。
@@ -147,24 +149,26 @@ namespace RucheHome.AviUtl.ExEdit
         /// </summary>
         /// <param name="items">アイテムコレクション。</param>
         /// <returns>コンポーネント。</returns>
-        public static TextComponent FromExoFileItems(IniFileItemCollection items) =>
-            FromExoFileItemsCore(items, () => new TextComponent());
+        //public static PreviewTextComponent FromExoFileItems(IniFileItemCollection items) =>
+        //    FromExoFileItemsCore(items, () => new PreviewTextComponent());
 
         /// <summary>
         /// コンストラクタ。
         /// </summary>
-        public TextComponent() : base()
+        public PreviewTextComponent(Action action) : base()
         {
             // イベントハンドラ追加のためにプロパティ経由で設定
-            this.FontSize = new MovableValue<FontSizeConst>();
-            this.TextSpeed = new MovableValue<TextSpeedConst>();
+            this.FontSize = new PreviewMovableValue<FontSizeConst>(action);
+            this.TextSpeed = new PreviewMovableValue<TextSpeedConst>();
+
+            //this.SetPreviewFontSize = setPreviewFontSize;
         }
 
         /// <summary>
         /// コピーコンストラクタ。
         /// </summary>
         /// <param name="src">コピー元。</param>
-        public TextComponent(TextComponent src) : base()
+        public PreviewTextComponent(PreviewTextComponent src) : base()
         {
             if (src == null)
             {
@@ -184,30 +188,32 @@ namespace RucheHome.AviUtl.ExEdit
         /// </summary>
         [ExoFileItem(ExoFileItemNameOfFontSize, Order = 1)]
         [DataMember]
-        public MovableValue<FontSizeConst> FontSize
+        public PreviewMovableValue<FontSizeConst> FontSize
         {
             get => this.fontSize;
-            set =>
+            set
+            {
                 this.SetPropertyWithPropertyChangedChain(
                     ref this.fontSize,
-                    value ?? new MovableValue<FontSizeConst>());
+                    value ?? new PreviewMovableValue<FontSizeConst>());
+            }
         }
-        private MovableValue<FontSizeConst> fontSize = null;
+        private PreviewMovableValue<FontSizeConst> fontSize = null;
 
         /// <summary>
         /// 表示速度を取得または設定する。
         /// </summary>
         [ExoFileItem(ExoFileItemNameOfTextSpeed, Order = 2)]
         [DataMember]
-        public MovableValue<TextSpeedConst> TextSpeed
+        public PreviewMovableValue<TextSpeedConst> TextSpeed
         {
             get => this.textSpeed;
             set =>
                 this.SetPropertyWithPropertyChangedChain(
                     ref this.textSpeed,
-                    value ?? new MovableValue<TextSpeedConst>());
+                    value ?? new PreviewMovableValue<TextSpeedConst>());
         }
-        private MovableValue<TextSpeedConst> textSpeed = null;
+        private PreviewMovableValue<TextSpeedConst> textSpeed = null;
 
         /// <summary>
         /// 自動スクロールするか否かを取得または設定する。
@@ -265,12 +271,23 @@ namespace RucheHome.AviUtl.ExEdit
         public Color FontColor
         {
             get => this.fontColor;
-            set =>
+            set
+            {
                 this.SetProperty(
                     ref this.fontColor,
                     Color.FromRgb(value.R, value.G, value.B));
+                this.PreviewFontColor = new SolidColorBrush(this.fontColor);
+            }
         }
-        private Color fontColor = Colors.White;
+        private Color fontColor = Colors.Black;
+
+        [DataMember]
+        public SolidColorBrush PreviewFontColor
+        {
+            get => this.previewFontColor;
+            private set => this.SetProperty(ref this.previewFontColor, value);
+        }
+        private SolidColorBrush previewFontColor = new SolidColorBrush(Colors.Black);
 
         /// <summary>
         /// フォント装飾色を取得または設定する。
@@ -295,10 +312,61 @@ namespace RucheHome.AviUtl.ExEdit
         public string FontFamilyName
         {
             get => this.fontFamilyName;
-            set =>
+            set
+            {
                 this.SetProperty(ref this.fontFamilyName, value ?? DefaultFontFamilyName);
+            }
         }
         private string fontFamilyName = DefaultFontFamilyName;
+
+
+        /// <summary>
+        /// フォントファミリー名とフォントUriとが対応する辞書
+        /// </summary>
+        static Dictionary<string, string> FontPathDictionary
+        {
+            get
+            {
+                return fontPathDictionary;
+            }
+        }
+        static Dictionary<string, string> fontPathDictionary =
+            SearchFontNamePathPair(new CultureInfo[] { CultureInfo.CurrentCulture, new CultureInfo("en-US") });
+        static Dictionary<string, string> SearchFontNamePathPair(IEnumerable<CultureInfo> cultures)
+        {
+            Dictionary<string, string> ret = new Dictionary<string, string>();
+            string FontDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+
+            RegistryKey regKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts", false);
+            string[] FontFiles = regKey.GetValueNames().Select(p => (string)regKey.GetValue(p)).ToArray();
+
+            foreach (string file in FontFiles)
+            {
+                try
+                {
+                    string path = FontDir + System.IO.Path.DirectorySeparatorChar + file;
+                    GlyphTypeface typeface = new GlyphTypeface(new Uri(path));
+
+                    foreach (CultureInfo culture in cultures)
+                    {
+                        string FamilyName = typeface.FamilyNames[culture];
+
+                        if (!string.IsNullOrEmpty(FamilyName) && !ret.ContainsKey(FamilyName))
+                        {
+                            ret.Add(FamilyName, path);
+                        }
+                    }
+                }
+                catch (FileFormatException) { }
+                catch (NotSupportedException) { }
+            }
+            return ret;
+        }
+
+        public Uri PreviewFontUri
+        {
+            get => new Uri(FontPathDictionary[this.FontFamilyName]);
+        }
 
         /// <summary>
         /// フォント装飾種別を取得または設定する。
@@ -471,11 +539,89 @@ namespace RucheHome.AviUtl.ExEdit
         }
         private string text = "";
 
+        private bool isTopAlignment(TextAlignment alignment)
+            => alignment == TextAlignment.TopLeft
+            || alignment == TextAlignment.TopCenter
+            || alignment == TextAlignment.TopRight;
+        private bool isMiddleAlignment(TextAlignment alignment)
+            => alignment == TextAlignment.MiddleLeft
+            || alignment == TextAlignment.MiddleCenter
+            || alignment == TextAlignment.MiddleRight;
+        private bool isBottomAlignment(TextAlignment alignment)
+            => alignment == TextAlignment.BottomLeft
+            || alignment == TextAlignment.BottomCenter
+            || alignment == TextAlignment.BottomRight;
+        
+        private Thickness getPreviewLineSpace()
+        {
+            var val = 2;
+            if (isTopAlignment(this.TextAlignment))
+                return new Thickness(0, 0, 0, val);
+            else if (isMiddleAlignment(this.TextAlignment))
+                return new Thickness(0, val / 2.0, 0, val / 2.0);
+            else if (isBottomAlignment(this.TextAlignment))
+                return new Thickness(0, val, 0, 0);
+            else
+                return new Thickness(0);
+        }
+
+        public Thickness PreviewLineSpace
+        {
+            get => getPreviewLineSpace();
+        }
+        
+        private VerticalAlignment getVertical()
+        {
+            if (isTopAlignment(this.TextAlignment))
+                return VerticalAlignment.Top;
+            else if (isMiddleAlignment(this.TextAlignment))
+                return VerticalAlignment.Center;
+            else if (isBottomAlignment(this.TextAlignment))
+                return VerticalAlignment.Bottom;
+            else
+                return VerticalAlignment.Center;
+        }
+
+        public VerticalAlignment Vertical
+        {
+            get => getVertical();
+        }
+
+        private bool isLeftAlignment(TextAlignment alignment)
+                => alignment == TextAlignment.TopLeft
+                || alignment == TextAlignment.MiddleLeft
+                || alignment == TextAlignment.BottomLeft;
+        private bool isCenterAlignment(TextAlignment alignment)
+            => alignment == TextAlignment.TopCenter
+            || alignment == TextAlignment.MiddleCenter
+            || alignment == TextAlignment.BottomCenter;
+        private bool isRightAlignment(TextAlignment alignment)
+            => alignment == TextAlignment.TopRight
+            || alignment == TextAlignment.MiddleRight
+            || alignment == TextAlignment.BottomRight;
+
+        private HorizontalAlignment getHorizontal()
+        {
+            if (isLeftAlignment(this.TextAlignment))
+                return HorizontalAlignment.Left;
+            else if (isCenterAlignment(this.TextAlignment))
+                return HorizontalAlignment.Center;
+            else if (isRightAlignment(this.TextAlignment))
+                return HorizontalAlignment.Right;
+            else
+                return HorizontalAlignment.Center;
+        }
+
+        public HorizontalAlignment Horizontal
+        {
+            get => getHorizontal();
+        }
+
         /// <summary>
         /// このコンポーネントのクローンを作成する。
         /// </summary>
         /// <returns>クローン。</returns>
-        public TextComponent Clone() => new TextComponent(this);
+        public PreviewTextComponent Clone() => new PreviewTextComponent(this);
 
         /// <summary>
         /// デシリアライズの直前に呼び出される。
@@ -493,7 +639,7 @@ namespace RucheHome.AviUtl.ExEdit
 
         #endregion
 
-        #region MovableValue{TConstants} ジェネリッククラス用の定数情報構造体群
+        #region PreviewMovableValue{TConstants} ジェネリッククラス用の定数情報構造体群
 
         /// <summary>
         /// フォントサイズ用の定数情報クラス。
@@ -503,7 +649,7 @@ namespace RucheHome.AviUtl.ExEdit
         public struct FontSizeConst : IMovableValueConstants
         {
             public int Digits => 0;
-            public decimal DefaultValue => 34;
+            public decimal DefaultValue => 100;
             public decimal MinValue => 0;
             public decimal MaxValue => 1000;
             public decimal MinSliderValue => 0;

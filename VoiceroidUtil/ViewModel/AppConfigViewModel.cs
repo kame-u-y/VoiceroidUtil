@@ -19,6 +19,7 @@ using RucheHome.AviUtl.ExEdit;
 using RucheHome.Windows.Mvvm.Commands;
 using VoiceroidUtil.Extensions;
 using VoiceroidUtil.Services;
+using VoiceroidUtil.TRToys;
 using static RucheHome.Util.ArgumentValidater;
 
 namespace VoiceroidUtil.ViewModel
@@ -387,12 +388,12 @@ namespace VoiceroidUtil.ViewModel
         /// <summary>
         /// TRToys'拡張：プレビュー字幕テキストのフォント関連の設定を取得する。
         /// </summary>
-        public IReadOnlyReactiveProperty<RenderComponent> PreviewRender { get; }
+        public IReadOnlyReactiveProperty<PreviewRenderComponent> PreviewRender { get; }
 
         /// <summary>
         /// TRToys'拡張：プレビュー字幕テキストの表示関連の設定を取得する。
         /// </summary>
-        public IReadOnlyReactiveProperty<TextComponent> PreviewText { get; }
+        public IReadOnlyReactiveProperty<PreviewTextComponent> PreviewText { get; }
 
         /// <summary>
         /// TRToys'拡張：プレビュー設定「拡大率」のMovableValueViewModelを取得・設定する。
@@ -412,7 +413,7 @@ namespace VoiceroidUtil.ViewModel
 
         private MovableValueViewModel MakeMovableValueViewModel<T, TConstants>(
             IReadOnlyReactiveProperty<T> holder,
-            Expression<Func<T, MovableValue<TConstants>>> selector,
+            Expression<Func<T, PreviewMovableValue<TConstants>>> selector,
             string name = null)
             where T : INotifyPropertyChanged
             where TConstants : IMovableValueConstants, new()

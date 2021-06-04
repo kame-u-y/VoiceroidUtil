@@ -152,6 +152,9 @@
     <Compile Include="TalkTextReplaceItem.cs" />
     <Compile Include="TalkTextReplaceItemCollection.cs" />
     <Compile Include="TalkTextReplacePreset.cs" />
+    <Compile Include="TRToys\PreviewMovableValue.cs" />
+    <Compile Include="TRToys\PreviewRenderComponent.cs" />
+    <Compile Include="TRToys\PreviewTextComponent.cs" />
     <Compile Include="UIConfig.cs" />
     <Compile Include="ViewModel\AppConfigViewModel.cs" />
     <Compile Include="ViewModel\AppStatusViewModel.cs" />
