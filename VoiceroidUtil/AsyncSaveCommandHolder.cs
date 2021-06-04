@@ -1304,17 +1304,20 @@ namespace VoiceroidUtil
             }
 
             string[] fileSplitStrings = { 
-                appConfig.FileSplitStrings, 
-                appConfig.FileSplitStrings + appConfig.LineFeedStrings };
+                appConfig.PreviewStyleValue.FileSplitString, 
+                appConfig.PreviewStyleValue.FileSplitString + appConfig.PreviewStyleValue.LineFeedString };
             string[] splitFileTexts = fileText.Split(fileSplitStrings, System.StringSplitOptions.RemoveEmptyEntries);
             if (appConfig.IsTextFileForceMaking)
             {
-                if (appConfig.IsTextSpliting)
+                if (appConfig.PreviewStyleValue.IsTextSplitting)
                 {
-                    var noExtFilePath = $"{Path.GetDirectoryName(filePath)}\\{Path.GetFileNameWithoutExtension(filePath)}";
+                    var noExtFilePath = string.Format(
+                        "{0}\\{1}",
+                        Path.GetDirectoryName(filePath),
+                        Path.GetFileNameWithoutExtension(filePath));
                     for (int i=0; i<splitFileTexts.Length; i++)
                     {
-                        splitFileTexts[i] = splitFileTexts[i].Replace(appConfig.LineFeedStrings, "\n");
+                        splitFileTexts[i] = splitFileTexts[i].Replace(appConfig.PreviewStyleValue.LineFeedString, "\n");
                         if (!(await WriteTextFile($"{noExtFilePath}_{i}.txt", splitFileTexts[i], appConfig.IsTextFileUtf8)))
                         {
                             return
@@ -1326,9 +1329,28 @@ namespace VoiceroidUtil
                                     @"テキストファイルを保存できませんでした。");
                         }
                     }
+
+                    var previewTxtPath = string.Format(
+                        "{0}\\PreviewRawText\\{1}",
+                        Path.GetDirectoryName(filePath),
+                        Path.GetFileName(Path.ChangeExtension(filePath, @".txt")));
+                    if (!(await WriteTextFile(previewTxtPath, fileText, appConfig.IsTextFileUtf8)))
+                    {
+                        return MakeResult(
+                            parameter,
+                            AppStatusType.Success,
+                            statusText,
+                            AppStatusType.Fail,
+                            @"プレビュー用テキストファイルを保存できませんでした。");
+                    }
                 } 
                 var txtPath = Path.ChangeExtension(filePath, @".txt");
-                if (!(await WriteTextFile(txtPath, fileText.Replace(appConfig.FileSplitStrings,"").Replace(appConfig.LineFeedStrings,""), appConfig.IsTextFileUtf8)))
+                if (!(await WriteTextFile(
+                    txtPath, 
+                    fileText
+                        .Replace(appConfig.PreviewStyleValue.FileSplitString,"")
+                        .Replace(appConfig.PreviewStyleValue.LineFeedString,""), 
+                    appConfig.IsTextFileUtf8)))
                 {
                     return MakeResult(
                         parameter,
@@ -1348,7 +1370,7 @@ namespace VoiceroidUtil
 
 
             // .exo ファイル関連処理
-            var exoResult = appConfig.IsTextSpliting
+            var exoResult = appConfig.PreviewStyleValue.IsTextSplitting
                 ? await DoOperateExo(
                     filePath,
                     voiceroidId,
