@@ -514,26 +514,8 @@ namespace VoiceroidUtil.ViewModel
         public class PreviewTextStore
         {
             public string Text { get; set; }
-            public PreviewStyle Style { get; set; }
-            public Uri FontUri { get; set; }
-            public SolidColorBrush FontColor { get; set; }
-            public decimal FontSize { get; set; }
             public string Indices { get; set; }
-            public Thickness LineSpace { get; set; }
-            public HorizontalAlignment Horizon { get; set; }
-
-            private Uri getFontUri(PreviewStyle style)
-                => (style != null && style.Text.FontFamilyName != "MS UI Gothic")
-                    ? new Uri(FontPathDictionary[style.Text.FontFamilyName])
-                    : new Uri(FontPathDictionary["MS Gothic"]);
-            private SolidColorBrush getFontColor(PreviewStyle style)
-                => (style != null)
-                    ? new SolidColorBrush(style.Text.FontColor)
-                    : new SolidColorBrush(Colors.Black);
-            private decimal getFontSize(PreviewStyle style)
-                => (style != null ? style.Text.FontSize.Begin : 34)
-                    * (decimal)style.PreviewWindowWidth / (decimal)style.AviUtlWindowWidth
-                    * style.Render.Scale.Begin / (decimal)100.0;
+            
             private string getIndices(string text, PreviewStyle style)
             {
                 var indices = "";
@@ -545,70 +527,10 @@ namespace VoiceroidUtil.ViewModel
                 return indices;
             }
             
-            private bool isTopAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
-                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopLeft 
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopCenter 
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopRight;
-            private bool isMiddleAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
-                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleLeft
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleCenter
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleRight;
-            private bool isBottomAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
-                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomLeft
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomCenter
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomRight;
-            private Thickness getLineSpace(PreviewStyle style)
-            {
-                if (style == null) return new Thickness(0, 10, 0, 0);
-                
-                var val = style.Text.LineSpace;
-                if (isTopAlignment(style.Text.TextAlignment))
-                    return new Thickness(0, 0, 0, val);
-                else if (isMiddleAlignment(style.Text.TextAlignment))
-                    return new Thickness(0, val / 2.0, 0, val / 2.0);
-                else if (isBottomAlignment(style.Text.TextAlignment))
-                    return new Thickness(0, val, 0, 0);
-                else
-                    return new Thickness(0);
-            }
-            
-            private bool isLeftAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
-                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopLeft
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleLeft
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomLeft;
-            private bool isCenterAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
-                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopCenter
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleCenter
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomCenter;
-            private bool isRightAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
-                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopRight
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleRight
-                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomRight;
-
-            private HorizontalAlignment getHorizontalAlignment(PreviewStyle style)
-            {
-                if (style == null) return HorizontalAlignment.Center;
-
-                if (isLeftAlignment(style.Text.TextAlignment))
-                    return HorizontalAlignment.Left;
-                else if (isCenterAlignment(style.Text.TextAlignment))
-                    return HorizontalAlignment.Center;
-                else if (isRightAlignment(style.Text.TextAlignment))
-                    return HorizontalAlignment.Right;
-                else
-                    return HorizontalAlignment.Center;
-            }
-
             public PreviewTextStore(string text, PreviewStyle style)
             {
                 this.Text = text;
-                this.Style = style;
-                this.FontUri = getFontUri(style);
-                this.FontColor = getFontColor(style);
-                this.FontSize = getFontSize(style);
                 this.Indices = getIndices(text, style);
-                this.LineSpace = getLineSpace(style);
-                this.Horizon = getHorizontalAlignment(style);
             }
         }
 
@@ -669,16 +591,7 @@ namespace VoiceroidUtil.ViewModel
             for (int i = 0; i < PreviewLines.Length; i++)
             {
                 if (PreviewLines[i].Length <= 0) continue;
-                //int indicesNum = 0;
-                //for (int j = 0; j < PreviewLines[i].Length - 1; j++)
-                //{
-                //    //indices += $",{PreviewIndiceNum.Value};";
-                //    indicesNum++;
-                //}
 
-                //var glyphsWidth = this.PreviewWindowWidth.Value
-                //    - this.PreviewStyleValue.Value.MarginLeft
-                //    - this.PreviewStyleValue.Value.MarginRight;
                 this.PreviewTextList.Add(
                     new PreviewTextStore(PreviewLines[i], this.PreviewStyleValue.Value));
             }
@@ -693,51 +606,7 @@ namespace VoiceroidUtil.ViewModel
         /// TRToys'拡張：一つ後のプレビューシーンに進むコマンド
         /// </summary>
         public ICommand NextSceneCommand { get; }
-
         
-        /// <summary>
-        /// フォントファミリー名とフォントUriとが対応する辞書
-        /// </summary>
-        static Dictionary<string, string> FontPathDictionary
-        {
-            get
-            {
-                return fontPathDictionary;
-            }
-        }
-        static Dictionary<string, string> fontPathDictionary = 
-            SearchFontNamePathPair(new CultureInfo[] { CultureInfo.CurrentCulture, new CultureInfo("en-US") });
-        static Dictionary<string, string> SearchFontNamePathPair(IEnumerable<CultureInfo> cultures)
-        {
-            Dictionary<string, string> ret = new Dictionary<string, string>();
-            string FontDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-
-            RegistryKey regKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts", false);
-            string[] FontFiles = regKey.GetValueNames().Select(p => (string)regKey.GetValue(p)).ToArray();
-
-            foreach(string file in FontFiles)
-            {
-                try
-                {
-                    string path = FontDir + System.IO.Path.DirectorySeparatorChar + file;
-                    GlyphTypeface typeface = new GlyphTypeface(new Uri(path));
-
-                    foreach (CultureInfo culture in cultures)
-                    {
-                        string FamilyName = typeface.FamilyNames[culture];
-
-                        if (!string.IsNullOrEmpty(FamilyName) && !ret.ContainsKey(FamilyName))
-                        {
-                            ret.Add(FamilyName, path);
-                        }
-                    }
-                }
-                catch (FileFormatException) { }
-                catch (NotSupportedException) { }
-            }
-            return ret;
-        }
-
 
         /// <summary>
         /// トークテキストの最大許容文字数を取得する。
