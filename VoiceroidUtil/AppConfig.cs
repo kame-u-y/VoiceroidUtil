@@ -31,7 +31,6 @@ namespace VoiceroidUtil
             this.YmmCharaRelations = new YmmCharaRelationSet();
             this.AviUtlDropLayers = new AviUtlDropLayerSet();
 
-            //this.PreviewCharaStyles = new PreviewCharaStyleSet();
             this.PreviewStyleValue = new PreviewStyle();
         }
 
@@ -190,90 +189,6 @@ namespace VoiceroidUtil
         }
         private bool uiAutomationEnabledOnSave = true;
 
-
-        /// <summary>
-        /// TRT's拡張：字幕テキストに対して改行or分割処理を適用するか否かを取得または設定する。
-        /// </summary>
-        [DataMember]
-        public bool IsTextSpliting
-        {
-            get => this.textSpliting;
-            set => this.SetProperty(ref this.textSpliting, value);
-        }
-        private bool textSpliting = false;
-
-        public enum SplitMode
-        {
-            SplitFile,
-            LineFeed,
-        }
-
-        /// <summary>
-        /// TRT's拡張：字幕テキストの処理方法（改行or分割）を取得または設定する。
-        /// </summary>
-        [DataMember]
-        public SplitMode SplitModeValue
-        {
-            get => this.splitModeValue;
-            set => this.SetProperty(ref this.splitModeValue, value);
-        }
-        private SplitMode splitModeValue;
-
-        public enum PreviewStyleMode
-        {
-            UseExoSettingStyle,
-            UseNewStyle,
-        }
-
-        [DataMember]
-        public PreviewStyleMode PreviewStyleModeValue
-        {
-            get => this.previewStyleModeValue;
-            set 
-            {
-                //this.SetProperty(ref this.isUsingNewPreviewStyle, value == PreviewStyleMode.UseNewStyle);
-                this.SetProperty(ref this.previewStyleModeValue, value);
-                RaisePropertyChanged("IsUsingNewPreviewStyle");
-            }
-        }
-        private PreviewStyleMode previewStyleModeValue;
-
-        public bool IsUsingNewPreviewStyle
-        {
-            get => this.previewStyleModeValue == PreviewStyleMode.UseNewStyle;
-        }
-        //private bool isUsingNewPreviewStyle = false;
-
-        /// <summary>
-        /// TRT's拡張：字幕テキストに対する改行or分割処理の
-        /// 適用する文字数の閾値を取得または設定する。
-        /// </summary>
-        [DataMember]
-        public int MaxLineLength
-        {
-            get => this.maxLineLength;
-            set => this.SetProperty(ref this.maxLineLength, value);
-        }
-        private int maxLineLength = 1;
-
-        [DataMember]
-        public string LineFeedStrings
-        {
-            get => this.lineFeedStrings;
-            set => this.SetProperty(ref this.lineFeedStrings, value);
-        }
-        private string lineFeedStrings = "/-";
-
-        [DataMember]
-        public string FileSplitStrings
-        {
-            get => this.fileSplitStrings;
-            set => this.SetProperty(ref this.fileSplitStrings, value);
-        }
-        private string fileSplitStrings = "/--";
-
-
-
         /// <summary>
         /// 保存したファイルのパスを『ゆっくりMovieMaker3』に設定するか否かを
         /// 取得または設定する。
@@ -363,16 +278,6 @@ namespace VoiceroidUtil
         }
         private AviUtlDropLayerSet aviUtlDropLayers = null;
 
-        //[DataMember]
-        //public PreviewCharaStyleSet PreviewCharaStyles
-        //{
-        //    get => this.previewCharaStyles;
-        //    set =>
-        //        this.SetPropertyWithPropertyChangedChain(
-        //            ref this.previewCharaStyles,
-        //            value ?? new PreviewCharaStyleSet());
-        //}
-        //private PreviewCharaStyleSet previewCharaStyles = null;
 
         [DataMember]
         public PreviewStyle PreviewStyleValue

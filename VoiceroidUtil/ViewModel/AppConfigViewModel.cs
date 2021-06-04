@@ -159,66 +159,35 @@ namespace VoiceroidUtil.ViewModel
 
             //this.SetupUIConfig(uiConfig);
 
-            this.PreviewX = this.MakeMovableValueViewModel(this.PreviewRender, r => r.X);
-            this.PreviewY = this.MakeMovableValueViewModel(this.PreviewRender, r => r.Y);
-            this.PreviewZ = this.MakeMovableValueViewModel(this.PreviewRender, r => r.Z);
+            //this.PreviewX = this.MakeMovableValueViewModel(this.PreviewRender, r => r.X);
+            //this.PreviewY = this.MakeMovableValueViewModel(this.PreviewRender, r => r.Y);
+            //this.PreviewZ = this.MakeMovableValueViewModel(this.PreviewRender, r => r.Z);
             this.PreviewScale = this.MakeMovableValueViewModel(this.PreviewRender, r => r.Scale);
             this.PreviewFontSize = this.MakeMovableValueViewModel(this.PreviewText, t => t.FontSize);
 
-            this.PreviewMarginLeft = this.MakeInnerPropertyOf(this.PreviewStyleValue, c => c.MarginLeft);
-            this.PreviewMarginRight = this.MakeInnerPropertyOf(this.PreviewStyleValue, c => c.MarginRight);
+            //this.PreviewMarginLeft = this.MakeInnerPropertyOf(this.PreviewStyleValue, c => c.MarginLeft);
+            //this.PreviewMarginRight = this.MakeInnerPropertyOf(this.PreviewStyleValue, c => c.MarginRight);
             
         }
-
-        //public IReadOnlyReactiveProperty<ReadOnlyCollection<PreviewCharaStyle>>
-        //    VisibleCharaStyles
-        //    {
-        //        get;
-        //    }
-
-        //public ReactiveProperty<PreviewCharaStyle> SelectedCharaStyle { get; }
-
-        //public IReadOnlyReactiveProperty<string> SelectCharaStyleCommandTip { get; }
-
-        //public IReadOnlyReactiveProperty<bool> IsSelectCharaStyleCommandExecutable { get; }
-
-        //public IReadOnlyReactiveProperty<int> VisibleCharaStylesColumnCount { get; }
-
-        /// <summary>
-        /// キャラ別スタイル設定選択コマンドのチップテキストを作成する。
-        /// </summary>
-        /// <returns>チップテキスト。表示不要ならば null 。</returns>
-        //private string MakeSelectCharaStyleCommandTip() =>
-        //    !this.IsSelectCharaStyleCommandExecutable.Value ?
-        //        null :
-        //        @"F1/F2 : 前/次のキャラを選択" + Environment.NewLine +
-        //        string.Join(
-        //            Environment.NewLine,
-        //            this.VisibleCharaStyles.Value
-        //                .Take(10)
-        //                .Select(
-        //                    (p, i) =>
-        //                        @"Ctrl+" + ((i < 9) ? (i + 1) : 0) + @" : " +
-        //                        p.VoiceroidName + @" を選択"));
 
         public IReactiveProperty<PreviewStyle> PreviewStyleValue { get; }
 
         public IEnumerable<string> FontFamilyNames { get; } = new FontFamilyNameEnumerable();
 
-        public IReadOnlyReactiveProperty<RenderComponent> PreviewRender { get; }
-        public IReadOnlyReactiveProperty<TextComponent> PreviewText { get; }
         //public IReadOnlyReactiveProperty<string> SelectedFontFamilyName { get; }
 
         //public IReadOnlyReactiveProperty<Color> FontColor { get; }
 
-        public MovableValueViewModel PreviewX { get;  set; }
-        public MovableValueViewModel PreviewY { get;  set; }
-        public MovableValueViewModel PreviewZ { get;  set; }
+        public IReadOnlyReactiveProperty<RenderComponent> PreviewRender { get; }
+        public IReadOnlyReactiveProperty<TextComponent> PreviewText { get; }
+        //public MovableValueViewModel PreviewX { get;  set; }
+        //public MovableValueViewModel PreviewY { get;  set; }
+        //public MovableValueViewModel PreviewZ { get;  set; }
         public MovableValueViewModel PreviewScale { get;  set; }
         public MovableValueViewModel PreviewFontSize { get;  set; }
 
-        public IReactiveProperty<int> PreviewMarginLeft { get; }
-        public IReactiveProperty<int> PreviewMarginRight { get; }
+        //public IReactiveProperty<double> PreviewMarginLeft { get; }
+        //public IReactiveProperty<double> PreviewMarginRight { get; }
         
 
         private MovableValueViewModel MakeMovableValueViewModel<T, TConstants>(
@@ -230,9 +199,6 @@ namespace VoiceroidUtil.ViewModel
         {
             Debug.Assert(holder != null);
             Debug.Assert(selector != null);
-
-            Debug.WriteLine(holder); // RenderComponent
-            Debug.WriteLine(selector); // r => r.X
 
 
             // 値取得
@@ -249,32 +215,6 @@ namespace VoiceroidUtil.ViewModel
                 new MovableValueViewModel(this.CanModify, value, name)
                     .AddTo(this.CompositeDisposable);
         }
-
-        private void SetupUIConfig(IReadOnlyReactiveProperty<UIConfig> uiConfig)
-        {
-            //設定変更時に選択中キャラ別スタイル反映
-            //Observable
-            //    .CombineLatest(
-            //        this.VisibleCharaStyles,
-            //        uiConfig
-            //            .ObserveInnerProperty(c => c.ExoCharaVoiceroidId)
-            //            .DistinctUntilChanged(),
-            //        (vcs, id) => vcs.FirstOrDefault(s => s.VoiceroidId == id) ?? vcs.First())
-            //    .DistinctUntilChanged()
-            //    .Subscribe(s => this.SelectedCharaStyle.Value = s)
-            //    .AddTo(this.CompositeDisposable);
-
-            // 選択中キャラ別スタイル変更時処理
-            this.PreviewStyleValue
-                .Where(s => s == null)
-                .ObserveOnUIDispatcher()
-                .Subscribe(
-                    _ =>
-                        this.PreviewStyleValue.Value =
-                            this.Config.Value.PreviewStyleValue)
-                .AddTo(this.CompositeDisposable);
-        }
-
 
 
 

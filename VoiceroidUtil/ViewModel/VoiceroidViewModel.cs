@@ -169,23 +169,31 @@ namespace VoiceroidUtil.ViewModel
             // トークテキスト
             this.TalkText =
                 new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
-            this.PreviewText =
-                new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
-            this.PreviewIndiceNum =
-                new ReactiveProperty<int>(60).AddTo(this.CompositeDisposable);
+            //this.PreviewText =
+            //    new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
+            //this.PreviewIndiceNum =
+            //    new ReactiveProperty<int>(60).AddTo(this.CompositeDisposable);
             this.IsMultiScenePreview =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
             this.PreviewSceneLength =
                 new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
-            this.LineFeedStrings =
-                this.MakeInnerPropertyOf(appConfig, c => c.LineFeedStrings);
-            this.FileSplitStrings =
-                this.MakeInnerPropertyOf(appConfig, c => c.FileSplitStrings);
+            //this.LineFeedStrings =
+            //    this.MakeInnerPropertyOf(appConfig, c => c.LineFeedStrings);
+            //this.FileSplitStrings =
+            //    this.MakeInnerPropertyOf(appConfig, c => c.FileSplitStrings);
+
+            //this.PreviewCharaStyles = 
+            //    this.MakeInnerPropertyOf(appConfig, c => c.PreviewCharaStyles);
+            this.PreviewStyleValue = this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyleValue);
+
+            //this.IsTextSplitting = this.MakeInnerReadOnlyPropertyOf(appConfig, c => c.IsTextSpliting);
 
             this.TalkText.Subscribe(v => {
-                this.PreviewText.Value = v;
+                //this.PreviewText.Value = v;
                 CreatePreviewGlyphs();
             });
+
+
 
             this.TalkTextLengthLimit =
                 new ReactiveProperty<int>(TextComponent.TextLengthLimit)
@@ -199,6 +207,14 @@ namespace VoiceroidUtil.ViewModel
                 new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
             this.IsLastScene =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
+            this.PreviewTextList =
+                new ObservableCollection<PreviewTextStore>();
+
+            //this.AviUtlWindowWidth = this.MakeInnerPropertyOf(appConfig, c => c.AviUtlWindowWidth);
+            //this.PreviewWindowWidth =
+            //    this.MakeInnerPropertyOf(appConfig, c => c.PreviewWindowWidth);
+
+            
             this.BackSceneCommand =
                 this.MakeCommand(
                     () =>
@@ -230,13 +246,6 @@ namespace VoiceroidUtil.ViewModel
                             CreatePreviewGlyphs();
                         }
                     });
-            this.PreviewTextList =
-                new ObservableCollection<PreviewTextStore>();
-
-            //this.PreviewCharaStyles = 
-            //    this.MakeInnerPropertyOf(appConfig, c => c.PreviewCharaStyles);
-            this.PreviewStyleValue = this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyleValue);
-
 
 
             // アイドル状態設定先
@@ -312,6 +321,14 @@ namespace VoiceroidUtil.ViewModel
                     processSaving.Inverse(),
                     processDialogShowing.Inverse());
 
+            // TRT's拡張
+            Func<string, string> replacePreviewStrings = (string text)
+                => this.PreviewStyleValue.Value.IsPreviewReplacingToComma
+                ? text.Replace(this.PreviewStyleValue.Value.FileSplitString, "、")
+                      .Replace(this.PreviewStyleValue.Value.LineFeedString, "、")
+                : text.Replace(this.PreviewStyleValue.Value.FileSplitString, "")
+                      .Replace(this.PreviewStyleValue.Value.LineFeedString, "");
+
             // 再生/停止コマンド
             var playStopCommandHolder =
                 new AsyncPlayStopCommandHolder(
@@ -329,7 +346,7 @@ namespace VoiceroidUtil.ViewModel
                     .ObserveOnUIDispatcher(),
                     () => this.SelectedProcess.Value,
                     () => talkTextReplaceConfig.Value.VoiceReplaceItems,
-                    () => this.TalkText.Value,
+                    () => replacePreviewStrings(this.TalkText.Value),
                     () => appConfig.Value.UseTargetText);
             this.PlayStopCommand = playStopCommandHolder.Command;
             playStopCommandHolder.Result
@@ -475,25 +492,25 @@ namespace VoiceroidUtil.ViewModel
         /// </summary>
         public IReactiveProperty<string> TalkText { get; }
 
-        public IReactiveProperty<string> PreviewText { get; set; }
-
-        public IReactiveProperty<int> PreviewIndiceNum { get; set; }
-
+        //public IReactiveProperty<string> PreviewText { get; set; }
+        //public IReactiveProperty<int> PreviewIndiceNum { get; set; }
         public IReactiveProperty<bool> IsMultiScenePreview { get; set; }
-
         public IReactiveProperty<int> DisplayPreviewSceneNum { get; set; }
-
         public IReactiveProperty<int> PreviewSceneLength { get; set; }
-
         public IReactiveProperty<bool> IsFirstScene { get; set; }
-        
         public IReactiveProperty<bool> IsLastScene { get; set; }
 
-        public IReadOnlyReactiveProperty<string> LineFeedStrings { get; }
-        public IReadOnlyReactiveProperty<string> FileSplitStrings { get; }
+        //public IReadOnlyReactiveProperty<string> LineFeedStrings { get; }
+        //public IReadOnlyReactiveProperty<string> FileSplitStrings { get; }
 
         private void CreatePreviewGlyphs()
         {
+
+            if (!this.PreviewStyleValue.Value.IsTextSplitting)
+            {
+                return;
+            }
+
             if (this.PreviewTextList != null)
             {
                 this.PreviewTextList.Clear();
@@ -502,8 +519,8 @@ namespace VoiceroidUtil.ViewModel
             if (TalkText.Value.Length <= 0) return;
 
             string[] sceneSplitter = { 
-                this.FileSplitStrings.Value, 
-                this.FileSplitStrings.Value + this.LineFeedStrings.Value };
+                this.PreviewStyleValue.Value.FileSplitString, 
+                this.PreviewStyleValue.Value.FileSplitString + this.PreviewStyleValue.Value.LineFeedString };
             string[] PreviewScenes = 
                 TalkText.Value.Split(
                     sceneSplitter, 
@@ -525,8 +542,8 @@ namespace VoiceroidUtil.ViewModel
             if (PreviewSceneLength.Value == 0) return;
 
             string[] lineSplitter = { 
-                this.LineFeedStrings.Value,
-                this.LineFeedStrings.Value + this.FileSplitStrings.Value};
+                this.PreviewStyleValue.Value.LineFeedString,
+                this.PreviewStyleValue.Value.LineFeedString + this.PreviewStyleValue.Value.FileSplitString};
             string[] PreviewLines = 
                 PreviewScenes[sceneNum].Split(
                     lineSplitter,
@@ -541,41 +558,126 @@ namespace VoiceroidUtil.ViewModel
                 //    //indices += $",{PreviewIndiceNum.Value};";
                 //    indicesNum++;
                 //}
-                
 
+                //var glyphsWidth = this.PreviewWindowWidth.Value
+                //    - this.PreviewStyleValue.Value.MarginLeft
+                //    - this.PreviewStyleValue.Value.MarginRight;
                 this.PreviewTextList.Add(new PreviewTextStore(
                     PreviewLines[i],
-                    this.PreviewStyleValue.Value,
-                    PreviewLines[i].Length - 1));
+                    this.PreviewStyleValue.Value));
             }
         }
         public Glyphs PreviewGlyphs { get; set; }
         public ICommand BackSceneCommand { get; }
         public ICommand NextSceneCommand { get; }
 
+
         public class PreviewTextStore
         {
             public string Text { get; set; }
-            public PreviewStyle PreviewStyleValue { get; set; }
-            public Uri PreviewFontUri { get; set; }
-            public SolidColorBrush PreviewFontColor { get; set; }
-            public string PreviewIndices { get; set; }
-            public PreviewTextStore(string text, PreviewStyle previewStyle, int indicesNum)
+            public PreviewStyle Style { get; set; }
+            public Uri FontUri { get; set; }
+            public SolidColorBrush FontColor { get; set; }
+            public decimal FontSize { get; set; }
+            public string Indices { get; set; }
+            public Thickness LineSpace { get; set; }
+            public HorizontalAlignment Horizon { get; set; }
+            public double GlyphsWidth { get; set; }
+
+            private Uri getFontUri(PreviewStyle style)
+                => (style != null && style.Text.FontFamilyName != "MS UI Gothic")
+                    ? new Uri(FontPathDictionary[style.Text.FontFamilyName])
+                    : new Uri(FontPathDictionary["MS Gothic"]);
+            private SolidColorBrush getFontColor(PreviewStyle style)
+                => (style != null)
+                    ? new SolidColorBrush(style.Text.FontColor)
+                    : new SolidColorBrush(Colors.Black);
+            private decimal getFontSize(PreviewStyle style)
+                => (style != null ? style.Text.FontSize.Begin : 34)
+                    * (decimal)style.PreviewWindowWidth / (decimal)style.AviUtlWindowWidth
+                    * style.Render.Scale.Begin / (decimal)100.0;
+            private string getIndices(string text, PreviewStyle style)
+            {
+                var indices = "";
+                for (int i = 0; i < text.Length - 1; i++)
+                {
+                    var val = style != null ? style.Text.LetterSpace + 60 : 60;
+                    indices += $",{val};";
+                }
+                return indices;
+            }
+            
+            private bool isTopAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopLeft 
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopCenter 
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopRight;
+            private bool isMiddleAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleLeft
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleCenter
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleRight;
+            private bool isBottomAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomLeft
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomCenter
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomRight;
+            private Thickness getLineSpace(PreviewStyle style)
+            {
+                if (style == null) return new Thickness(0, 10, 0, 0);
+                
+                var val = style.Text.LineSpace;
+                if (isTopAlignment(style.Text.TextAlignment))
+                    return new Thickness(0, 0, 0, val);
+                else if (isMiddleAlignment(style.Text.TextAlignment))
+                    return new Thickness(0, val / 2.0, 0, val / 2.0);
+                else if (isBottomAlignment(style.Text.TextAlignment))
+                    return new Thickness(0, val, 0, 0);
+                else
+                    return new Thickness(0);
+            }
+            
+            private bool isLeftAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopLeft
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleLeft
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomLeft;
+            private bool isCenterAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopCenter
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleCenter
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomCenter;
+            private bool isRightAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+                => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopRight
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleRight
+                || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomRight;
+
+            private HorizontalAlignment getHorizontalAlignment(PreviewStyle style)
+            {
+                if (style == null) return HorizontalAlignment.Center;
+
+                if (isLeftAlignment(style.Text.TextAlignment))
+                    return HorizontalAlignment.Left;
+                else if (isCenterAlignment(style.Text.TextAlignment))
+                    return HorizontalAlignment.Center;
+                else if (isRightAlignment(style.Text.TextAlignment))
+                    return HorizontalAlignment.Right;
+                else
+                    return HorizontalAlignment.Center;
+            }
+            private double getGlyphsWidth(PreviewStyle style)
+                => style.PreviewWindowWidth - style.PreviewLeftMargin - style.PreviewRightMargin;
+                //=> style.PreviewWindowWidth * (1 - style.LeftMarginRatio - style.RightMarginRatio);
+            
+            public PreviewTextStore(string text, PreviewStyle style)
             {
                 this.Text = text;
-                if (previewStyle == null) return;
-                this.PreviewStyleValue = previewStyle;
-                this.PreviewFontUri = new Uri(FontPathDictionary[previewStyle.Text.FontFamilyName]);
-                
-                this.PreviewFontColor = new SolidColorBrush(previewStyle.Text.FontColor);
-                var indices = "";
-                for (int i=0; i<indicesNum; i++)
-                {
-                    indices += $",{previewStyle.Text.LetterSpace};";
-                }
-                this.PreviewIndices = indices;
+                this.Style = style;
+                this.FontUri = getFontUri(style);
+                this.FontColor = getFontColor(style);
+                this.FontSize = getFontSize(style);
+                this.Indices = getIndices(text, style);
+                this.LineSpace = getLineSpace(style);
+                this.Horizon = getHorizontalAlignment(style);
+                this.GlyphsWidth = getGlyphsWidth(style);
             }
         }
+
         //public IReactiveProperty<List<PreviewTextStore>> PreviewTextList { get; set; }
         public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
 
@@ -583,6 +685,9 @@ namespace VoiceroidUtil.ViewModel
 
         public IReactiveProperty<PreviewStyle> PreviewStyleValue { get; set; }
         //public IReactiveProperty<PreviewCharaStyleSet> PreviewCharaStyles { get; set; }
+
+        //public IReactiveProperty<double> PreviewLeftMargin { get; set; }
+
 
         static Dictionary<string, string> FontPathDictionary
         {

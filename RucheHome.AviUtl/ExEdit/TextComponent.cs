@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Windows;
 using System.Windows.Media;
 using RucheHome.Text;
 using RucheHome.Util.Extensions.String;
@@ -469,6 +470,34 @@ namespace RucheHome.AviUtl.ExEdit
             }
         }
         private string text = "";
+
+        private bool isTopAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+            => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopLeft
+            || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopCenter
+            || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.TopRight;
+        private bool isMiddleAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+            => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleLeft
+            || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleCenter
+            || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.MiddleRight;
+        private bool isBottomAlignment(RucheHome.AviUtl.ExEdit.TextAlignment alignment)
+            => alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomLeft
+            || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomCenter
+            || alignment == RucheHome.AviUtl.ExEdit.TextAlignment.BottomRight;
+        private VerticalAlignment getVertical()
+        {
+            if (isTopAlignment(this.TextAlignment))
+                return VerticalAlignment.Top;
+            else if (isMiddleAlignment(this.TextAlignment))
+                return VerticalAlignment.Center;
+            else if (isBottomAlignment(this.TextAlignment))
+                return VerticalAlignment.Bottom;
+            else
+                return VerticalAlignment.Center;
+        }
+        public VerticalAlignment Vertical
+        {
+            get => getVertical();
+        }
 
         /// <summary>
         /// このコンポーネントのクローンを作成する。
