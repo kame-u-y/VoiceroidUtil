@@ -169,85 +169,72 @@ namespace VoiceroidUtil.ViewModel
             // トークテキスト
             this.TalkText =
                 new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
-            //this.PreviewText =
-            //    new ReactiveProperty<string>(@"").AddTo(this.CompositeDisposable);
-            //this.PreviewIndiceNum =
-            //    new ReactiveProperty<int>(60).AddTo(this.CompositeDisposable);
-            this.IsMultiScenePreview =
-                new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
-            this.PreviewSceneLength =
-                new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
-            //this.LineFeedStrings =
-            //    this.MakeInnerPropertyOf(appConfig, c => c.LineFeedStrings);
-            //this.FileSplitStrings =
-            //    this.MakeInnerPropertyOf(appConfig, c => c.FileSplitStrings);
-
-            //this.PreviewCharaStyles = 
-            //    this.MakeInnerPropertyOf(appConfig, c => c.PreviewCharaStyles);
-            this.PreviewStyleValue = this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyleValue);
-
-            //this.IsTextSplitting = this.MakeInnerReadOnlyPropertyOf(appConfig, c => c.IsTextSpliting);
-
-            this.TalkText.Subscribe(v => {
-                //this.PreviewText.Value = v;
-                CreatePreviewGlyphs();
-            });
-
-
-
             this.TalkTextLengthLimit =
                 new ReactiveProperty<int>(TextComponent.TextLengthLimit)
                     .AddTo(this.CompositeDisposable);
             this.IsTalkTextTabAccepted =
                 this.MakeInnerPropertyOf(appConfig, c => c.IsTabAccepted);
 
-            this.DisplayPreviewSceneNum =
-                new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
+            // TRToys'拡張
+            this.PreviewStyleValue = 
+                this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyleValue);
+
+            this.IsMultiScenePreview =
+                new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
             this.IsFirstScene =
                 new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
             this.IsLastScene =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
+            this.PreviewSceneLength = 0;
+            this.DisplayPreviewSceneNum = 0;
             this.PreviewTextList =
                 new ObservableCollection<PreviewTextStore>();
-
-            //this.AviUtlWindowWidth = this.MakeInnerPropertyOf(appConfig, c => c.AviUtlWindowWidth);
-            //this.PreviewWindowWidth =
-            //    this.MakeInnerPropertyOf(appConfig, c => c.PreviewWindowWidth);
-
             
+            // TRToys'拡張：テキスト入力のたびにプレビューを更新
+            this.TalkText.Subscribe(v => CreatePreviewGlyphs()).AddTo(this.CompositeDisposable);
+
+            // TRToys'拡張：一つ前のプレビューシーンに戻るコマンド
             this.BackSceneCommand =
                 this.MakeCommand(
                     () =>
                     {
-                        if (this.IsMultiScenePreview.Value && 
-                            this.DisplayPreviewSceneNum.Value > 0)
+                        if (!this.IsMultiScenePreview.Value) return;
+                        if (this.DisplayPreviewSceneNum <= 0)
                         {
-                            this.DisplayPreviewSceneNum.Value--;
-                            if (this.DisplayPreviewSceneNum.Value == 0) {
-                                this.IsFirstScene.Value = true;
-                            }
-                            this.IsLastScene.Value = false;
-                            CreatePreviewGlyphs();
+                            this.DisplayPreviewSceneNum = 0;
+                            return;
                         }
+                        
+                        this.DisplayPreviewSceneNum--;
+                        if (this.DisplayPreviewSceneNum == 0) 
+                        {
+                            this.IsFirstScene.Value = true;
+                        }
+                        this.IsLastScene.Value = false;
+                        CreatePreviewGlyphs();
                     });
+
+            // TRToys'拡張：一つ後のプレビューシーンに進むコマンド
             this.NextSceneCommand =
                 this.MakeCommand(
                     () =>
                     {
-                        if (this.IsMultiScenePreview.Value &&
-                            this.DisplayPreviewSceneNum.Value < this.PreviewSceneLength.Value - 1)
+                        if (!this.IsMultiScenePreview.Value) return;
+                        if (this.DisplayPreviewSceneNum >= this.PreviewSceneLength - 1)
                         {
-                            this.DisplayPreviewSceneNum.Value++;
-                            if (this.DisplayPreviewSceneNum.Value == this.PreviewSceneLength.Value - 1)
-                            {
-                                this.IsLastScene.Value = true;
-                            }
-                            this.IsFirstScene.Value = false;
-                            CreatePreviewGlyphs();
+                            this.DisplayPreviewSceneNum = this.PreviewSceneLength - 1;
+                            return;
                         }
+
+                        this.DisplayPreviewSceneNum++;
+                        if (this.DisplayPreviewSceneNum == this.PreviewSceneLength - 1)
+                        {
+                            this.IsLastScene.Value = true;
+                        }
+                        this.IsFirstScene.Value = false;
+                        CreatePreviewGlyphs();
                     });
-
-
+            
             // アイドル状態設定先
             var idle = new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
             this.IsIdle = idle;
@@ -491,86 +478,38 @@ namespace VoiceroidUtil.ViewModel
         /// トークテキストを取得する。
         /// </summary>
         public IReactiveProperty<string> TalkText { get; }
+        
+        /// <summary>
+        /// プレビュー用の設定を取得する。
+        /// </summary>
+        public IReactiveProperty<PreviewStyle> PreviewStyleValue { get; set; }
 
-        //public IReactiveProperty<string> PreviewText { get; set; }
-        //public IReactiveProperty<int> PreviewIndiceNum { get; set; }
+        /// <summary>
+        /// TRToys'拡張：プレビューが複数シーンであるかを取得・設定する。
+        /// </summary>
         public IReactiveProperty<bool> IsMultiScenePreview { get; set; }
-        public IReactiveProperty<int> DisplayPreviewSceneNum { get; set; }
-        public IReactiveProperty<int> PreviewSceneLength { get; set; }
+        
+        /// <summary>
+        /// TRToys'拡張：現在表示プレビューが最初のシーンであるかを取得・設定する。
+        /// Style.Triggerに利用。Converterを検討する必要あり
+        /// </summary>
         public IReactiveProperty<bool> IsFirstScene { get; set; }
+
+        /// <summary>
+        /// TRToys'拡張：現在表示プレビューが最後のシーンであるかを取得・設定する。
+        /// Style.Triggerに利用。Converterを検討する必要あり
+        /// </summary>
         public IReactiveProperty<bool> IsLastScene { get; set; }
 
-        //public IReadOnlyReactiveProperty<string> LineFeedStrings { get; }
-        //public IReadOnlyReactiveProperty<string> FileSplitStrings { get; }
-
-        private void CreatePreviewGlyphs()
-        {
-
-            if (!this.PreviewStyleValue.Value.IsTextSplitting)
-            {
-                return;
-            }
-
-            if (this.PreviewTextList != null)
-            {
-                this.PreviewTextList.Clear();
-            }
-            
-            if (TalkText.Value.Length <= 0) return;
-
-            string[] sceneSplitter = { 
-                this.PreviewStyleValue.Value.FileSplitString, 
-                this.PreviewStyleValue.Value.FileSplitString + this.PreviewStyleValue.Value.LineFeedString };
-            string[] PreviewScenes = 
-                TalkText.Value.Split(
-                    sceneSplitter, 
-                    System.StringSplitOptions.RemoveEmptyEntries);
-            this.PreviewSceneLength.Value = PreviewScenes.Length;
-            this.IsMultiScenePreview.Value = PreviewScenes.Length > 1;
-            if (this.DisplayPreviewSceneNum.Value != 0 && this.DisplayPreviewSceneNum.Value >= this.PreviewSceneLength.Value)
-            {
-                this.DisplayPreviewSceneNum.Value = this.PreviewSceneLength.Value - 1;
-            }
-            if (this.DisplayPreviewSceneNum.Value < this.PreviewSceneLength.Value - 1)
-            {
-                this.IsLastScene.Value = false;
-            }
-            int sceneNum = this.IsMultiScenePreview.Value
-                ? this.DisplayPreviewSceneNum.Value
-                : 0;
-
-            if (PreviewSceneLength.Value == 0) return;
-
-            string[] lineSplitter = { 
-                this.PreviewStyleValue.Value.LineFeedString,
-                this.PreviewStyleValue.Value.LineFeedString + this.PreviewStyleValue.Value.FileSplitString};
-            string[] PreviewLines = 
-                PreviewScenes[sceneNum].Split(
-                    lineSplitter,
-                    System.StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < PreviewLines.Length; i++)
-            {
-                if (PreviewLines[i].Length <= 0) continue;
-                //int indicesNum = 0;
-                //for (int j = 0; j < PreviewLines[i].Length - 1; j++)
-                //{
-                //    //indices += $",{PreviewIndiceNum.Value};";
-                //    indicesNum++;
-                //}
-
-                //var glyphsWidth = this.PreviewWindowWidth.Value
-                //    - this.PreviewStyleValue.Value.MarginLeft
-                //    - this.PreviewStyleValue.Value.MarginRight;
-                this.PreviewTextList.Add(new PreviewTextStore(
-                    PreviewLines[i],
-                    this.PreviewStyleValue.Value));
-            }
-        }
-        public Glyphs PreviewGlyphs { get; set; }
-        public ICommand BackSceneCommand { get; }
-        public ICommand NextSceneCommand { get; }
-
+        /// <summary>
+        /// TRToys'拡張：プレビューのシーン数を取得・設定する。
+        /// </summary>
+        public int PreviewSceneLength { get; set; }
+        
+        /// <summary>
+        /// TRToys'拡張：現在表示シーンの番号を取得・設定する。
+        /// </summary>
+        public int DisplayPreviewSceneNum { get; set; }
 
         public class PreviewTextStore
         {
@@ -582,7 +521,6 @@ namespace VoiceroidUtil.ViewModel
             public string Indices { get; set; }
             public Thickness LineSpace { get; set; }
             public HorizontalAlignment Horizon { get; set; }
-            public double GlyphsWidth { get; set; }
 
             private Uri getFontUri(PreviewStyle style)
                 => (style != null && style.Text.FontFamilyName != "MS UI Gothic")
@@ -660,10 +598,7 @@ namespace VoiceroidUtil.ViewModel
                 else
                     return HorizontalAlignment.Center;
             }
-            private double getGlyphsWidth(PreviewStyle style)
-                => style.PreviewWindowWidth - style.PreviewLeftMargin - style.PreviewRightMargin;
-                //=> style.PreviewWindowWidth * (1 - style.LeftMarginRatio - style.RightMarginRatio);
-            
+
             public PreviewTextStore(string text, PreviewStyle style)
             {
                 this.Text = text;
@@ -674,21 +609,95 @@ namespace VoiceroidUtil.ViewModel
                 this.Indices = getIndices(text, style);
                 this.LineSpace = getLineSpace(style);
                 this.Horizon = getHorizontalAlignment(style);
-                this.GlyphsWidth = getGlyphsWidth(style);
             }
         }
 
-        //public IReactiveProperty<List<PreviewTextStore>> PreviewTextList { get; set; }
+        /// <summary>
+        /// TRToys'拡張：現在表示シーンの字幕テキストを構成する行ごとのデータリスト
+        /// </summary>
         public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
 
-        public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; set; }
+        /// <summary>
+        /// TRToys'拡張：プレビューの字幕を生成する。
+        /// </summary>
+        private void CreatePreviewGlyphs()
+        {
 
-        public IReactiveProperty<PreviewStyle> PreviewStyleValue { get; set; }
-        //public IReactiveProperty<PreviewCharaStyleSet> PreviewCharaStyles { get; set; }
+            if (!this.PreviewStyleValue.Value.IsTextSplitting)
+            {
+                return;
+            }
 
-        //public IReactiveProperty<double> PreviewLeftMargin { get; set; }
+            if (this.PreviewTextList != null)
+            {
+                this.PreviewTextList.Clear();
+            }
+            
+            if (TalkText.Value.Length <= 0) return;
 
+            string[] sceneSplitter = { 
+                this.PreviewStyleValue.Value.FileSplitString, 
+                this.PreviewStyleValue.Value.FileSplitString + this.PreviewStyleValue.Value.LineFeedString };
+            string[] PreviewScenes = 
+                TalkText.Value.Split(
+                    sceneSplitter, 
+                    System.StringSplitOptions.RemoveEmptyEntries);
+            this.PreviewSceneLength = PreviewScenes.Length;
+            this.IsMultiScenePreview.Value = PreviewScenes.Length > 1;
+            if (this.DisplayPreviewSceneNum != 0 && this.DisplayPreviewSceneNum >= this.PreviewSceneLength)
+            {
+                this.DisplayPreviewSceneNum = this.PreviewSceneLength - 1;
+            }
+            if (this.DisplayPreviewSceneNum < this.PreviewSceneLength - 1)
+            {
+                this.IsLastScene.Value = false;
+            }
+            int sceneNum = this.IsMultiScenePreview.Value
+                ? this.DisplayPreviewSceneNum
+                : 0;
 
+            if (PreviewSceneLength == 0) return;
+
+            string[] lineSplitter = { 
+                this.PreviewStyleValue.Value.LineFeedString,
+                this.PreviewStyleValue.Value.LineFeedString + this.PreviewStyleValue.Value.FileSplitString};
+            string[] PreviewLines = 
+                PreviewScenes[sceneNum].Split(
+                    lineSplitter,
+                    System.StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < PreviewLines.Length; i++)
+            {
+                if (PreviewLines[i].Length <= 0) continue;
+                //int indicesNum = 0;
+                //for (int j = 0; j < PreviewLines[i].Length - 1; j++)
+                //{
+                //    //indices += $",{PreviewIndiceNum.Value};";
+                //    indicesNum++;
+                //}
+
+                //var glyphsWidth = this.PreviewWindowWidth.Value
+                //    - this.PreviewStyleValue.Value.MarginLeft
+                //    - this.PreviewStyleValue.Value.MarginRight;
+                this.PreviewTextList.Add(
+                    new PreviewTextStore(PreviewLines[i], this.PreviewStyleValue.Value));
+            }
+        }
+
+        /// <summary>
+        /// TRToys'拡張：一つ前のプレビューシーンに戻るコマンド
+        /// </summary>
+        public ICommand BackSceneCommand { get; }
+        
+        /// <summary>
+        /// TRToys'拡張：一つ後のプレビューシーンに進むコマンド
+        /// </summary>
+        public ICommand NextSceneCommand { get; }
+
+        
+        /// <summary>
+        /// フォントファミリー名とフォントUriとが対応する辞書
+        /// </summary>
         static Dictionary<string, string> FontPathDictionary
         {
             get
@@ -698,7 +707,6 @@ namespace VoiceroidUtil.ViewModel
         }
         static Dictionary<string, string> fontPathDictionary = 
             SearchFontNamePathPair(new CultureInfo[] { CultureInfo.CurrentCulture, new CultureInfo("en-US") });
-        
         static Dictionary<string, string> SearchFontNamePathPair(IEnumerable<CultureInfo> cultures)
         {
             Dictionary<string, string> ret = new Dictionary<string, string>();

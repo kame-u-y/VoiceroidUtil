@@ -10,12 +10,11 @@ using RucheHome.Voiceroid;
 namespace VoiceroidUtil
 {
     /// <summary>
-    /// AviUtl拡張編集ファイル用のキャラ別スタイルを保持するクラス。
+    /// TRToys'拡張：プレビュー用の設定・スタイルを保持するクラス。
     /// </summary>
     [DataContract(Namespace = "")]
     public class PreviewStyle : BindableConfigBase
     {
-
         /// <summary>
         /// コンストラクタ。
         /// </summary>
@@ -38,6 +37,9 @@ namespace VoiceroidUtil
         }
         private bool textSplitting = false;
 
+        /// <summary>
+        /// 改行用の文字列を取得または設定する。
+        /// </summary>
         [DataMember]
         public string LineFeedString
         {
@@ -46,6 +48,9 @@ namespace VoiceroidUtil
         }
         private string lineFeedString = "/-";
 
+        /// <summary>
+        /// プレビューシーン・テキストファイル分割用の文字列を取得または設定する。
+        /// </summary>
         [DataMember]
         public string FileSplitString
         {
@@ -54,6 +59,9 @@ namespace VoiceroidUtil
         }
         private string fileSplitString = "/--";
 
+        /// <summary>
+        /// 改行・分割用文字列の文字列を音声再生時に「、」へ変換する
+        /// </summary>
         [DataMember]
         public bool IsPreviewReplacingToComma
         {
@@ -93,6 +101,9 @@ namespace VoiceroidUtil
         }
         private TextComponent text = null;
 
+        /// <summary>
+        /// 編集中のAviUtlプロジェクトの横幅を設定または取得する。
+        /// </summary>
         [DataMember]
         public int AviUtlWindowWidth
         {
@@ -100,24 +111,15 @@ namespace VoiceroidUtil
             set
             {
                 this.SetProperty(ref this.aviUtlWindowWidth, value);
-                this.setPreviewLeftMargin();
-                this.setPreviewRightMargin();
+                this.SetPreviewLeftMargin();
+                this.SetPreviewRightMargin();
             }
         }
         private int aviUtlWindowWidth = 1920;
 
-        //private void setLeftMargin()
-        //    => this.LeftMargin = this.PreviewWindowWidth * this.LeftMarginRatio;
-        
-        //private void setRightMargin()
-        //    => this.RightMargin = this.PreviewWindowWidth * this.RightMarginRatio;
-        private void setPreviewLeftMargin()
-            => this.PreviewLeftMargin = this.AviUtlLeftMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
-
-        private void setPreviewRightMargin()
-            => this.PreviewRightMargin = this.AviUtlRightMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
-
-
+        /// <summary>
+        /// プレビューウィンドウの横幅を設定または取得する。
+        /// </summary>
         [DataMember]
         public int PreviewWindowWidth
         {
@@ -125,34 +127,15 @@ namespace VoiceroidUtil
             set
             {
                 this.SetProperty(ref this.previewWindowWidth, value);
-                //this.setLeftMargin();
-                //this.setRightMargin();
-                this.setPreviewLeftMargin();
-                this.setPreviewRightMargin();
+                this.SetPreviewLeftMargin();
+                this.SetPreviewRightMargin();
             }
         }
         private int previewWindowWidth = 200;
-
-        //[DataMember]
-        //public double LeftMarginRatio
-        //{
-        //    get => this.leftMarginRatio;
-        //    set
-        //    {
-        //        Debug.WriteLine(value);
-        //        this.SetProperty(ref this.leftMarginRatio, value);
-        //        this.setLeftMargin();
-        //    }
-        //}
-        //private double leftMarginRatio = 0.1;
-
-        //public double LeftMargin
-        //{
-        //    get => this.leftMargin;
-        //    set => this.SetProperty(ref this.leftMargin, value);
-        //}
-        //private double leftMargin = 20;
-
+        
+        /// <summary>
+        /// AviUtl上の字幕の左余白幅を設定または取得する。
+        /// </summary>
         [DataMember]
         public double AviUtlLeftMargin
         {
@@ -160,37 +143,31 @@ namespace VoiceroidUtil
             set
             {
                 this.SetProperty(ref this.aviUtlLeftMargin, value);
-                this.setPreviewLeftMargin();
+                this.SetPreviewLeftMargin();
             }
         }
         private double aviUtlLeftMargin = 300;
-
+        
+        /// <summary>
+        /// プレビュー上の字幕の左余白幅を設定または取得する。
+        /// </summary>
         public double PreviewLeftMargin
         {
             get => this.previewLeftMargin;
-            set => this.SetProperty(ref this.previewLeftMargin, value);
+            private set => this.SetProperty(ref this.previewLeftMargin, value);
         }
         private double previewLeftMargin = 300.0 * 200.0 / 1920.0;
+        
+        /// <summary>
+        /// AviUtlに対するプレビューの横幅倍率をもとに、プレビュー上の字幕の左余白幅を設定する。
+        /// </summary>
+        private void SetPreviewLeftMargin()
+            => this.PreviewLeftMargin = 
+                this.AviUtlLeftMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
 
-        //[DataMember]
-        //public double RightMarginRatio
-        //{
-        //    get => this.rightMarginRatio;
-        //    set
-        //    {
-        //        this.SetProperty(ref this.rightMarginRatio, value);
-        //        this.setRightMargin();
-        //    }
-        //}
-        //private double rightMarginRatio = 0.1;
-
-        //public double RightMargin
-        //{
-        //    get => this.rightMargin;
-        //    set => this.SetProperty(ref this.rightMargin, value);
-        //}
-        //private double rightMargin = 20;
-
+        /// <summary>
+        /// AviUtl上の字幕の右余白幅を設定または取得する。
+        /// </summary>
         [DataMember]
         public double AviUtlRightMargin
         {
@@ -198,17 +175,28 @@ namespace VoiceroidUtil
             set
             {
                 this.SetProperty(ref this.aviUtlRightMargin, value);
-                this.setPreviewRightMargin();
+                this.SetPreviewRightMargin();
             }
         }
         private double aviUtlRightMargin = 300;
 
+        /// <summary>
+        /// プレビュー上の字幕の右余白幅を設定または取得する。
+        /// </summary>
         public double PreviewRightMargin
         {
             get => this.previewRightMargin;
             set => this.SetProperty(ref this.previewRightMargin, value);
         }
         private double previewRightMargin = 300.0 * 200.0 / 1920.0;
+
+        /// <summary>
+        /// AviUtlに対するプレビューの横幅倍率をもとに、プレビュー上の字幕の右余白幅を設定する。
+        /// </summary>
+        private void SetPreviewRightMargin()
+            => this.PreviewRightMargin
+                = this.AviUtlRightMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
+
 
         /// <summary>
         /// デシリアライズの直前に呼び出される。

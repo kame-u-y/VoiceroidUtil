@@ -115,7 +115,6 @@
 
         <!-- Row 1 -->
         <Grid Grid.Row="1">
-
             <v:ImeWatermarkTextBox
                 Text="{Binding TalkText.Value, UpdateSourceTrigger=Explicit}"
                 MaxLength="{Binding TalkTextLengthLimit.Value}"
@@ -161,7 +160,7 @@
                         DropCommand="{Binding DropTalkTextFileCommand}" />
                 </i:Interaction.Behaviors>
             </v:ImeWatermarkTextBox>
-
+            <!-- TRToys'拡張：プレビューウィンドウ -->
             <Border
                 BorderBrush="Silver"
                 BorderThickness="1"
@@ -196,7 +195,7 @@
                                 HorizontalAlignment="Center"
                                 />
                         </Grid>
-                            
+
                         <Grid 
                             Grid.Row="1"
                             Width="{Binding PreviewStyleValue.Value.PreviewWindowWidth}">
@@ -206,48 +205,39 @@
                                 <ColumnDefinition Width="{Binding PreviewStyleValue.Value.PreviewRightMargin}"/>
                             </Grid.ColumnDefinitions>
 
+                            <Grid Grid.Column="0" Background="Silver"/>
                             <StackPanel 
                                 Grid.Column="1"
-                                HorizontalAlignment="Center"
                                 VerticalAlignment="{Binding PreviewStyleValue.Value.Text.Vertical}">
-                                <StackPanel>
-                                    
                                 <ItemsControl ItemsSource="{Binding PreviewTextList}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                                <!--Indices="{Binding Indices}"-->
-                                                <Grid 
-                                                    Width="{Binding GlyphsWidth}"
-                                                    Background="#ddd">
-                                                    <!--<Grid.RenderTransform>
-                                                        <TranslateTransform Y="{Binding TranslateY}"/>
-                                                    </Grid.RenderTransform>-->
-                                                    <Glyphs
-                                                        HorizontalAlignment="{Binding Horizon}"
-                                                        UnicodeString="{Binding Text}"
-                                                        Fill="{Binding FontColor}"
-                                                        FontUri="{Binding FontUri}"
-                                                        FontRenderingEmSize="{Binding FontSize}"
-                                                        Margin="{Binding LineSpace}"/>
-                                                </Grid>
+                                            <Grid 
+                                                Background="#ddd"
+                                                Margin="{Binding LineSpace}">
+                                                <!-- 1行ごとのGlyphs字幕 -->
+                                                <Glyphs
+                                                    HorizontalAlignment="{Binding Horizon}"
+                                                    UnicodeString="{Binding Text}"
+                                                    FontUri="{Binding FontUri}"
+                                                    Fill="{Binding FontColor}"
+                                                    FontRenderingEmSize="{Binding FontSize}"/>
+                                                    <!--Indices="{Binding Indices}"-->
+                                            </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                </StackPanel>
-                                
                             </StackPanel>
-                            <Grid Grid.Column="0" Background="Silver"/>
-                            
                             <Grid Grid.Column="2" Background="Silver"/>
                         </Grid>
                     </Grid>
+                    <!-- 前のプレビューシーンに戻るボタン-->
                     <Grid
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Height="15"
                         Width="30"
-                        Background="#444"
-                        >
+                        Background="#444">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDown">
                                 <i:InvokeCommandAction Command="{Binding BackSceneCommand}"/>
@@ -272,6 +262,7 @@
                         </Grid.Style>
                         <Label HorizontalAlignment="Center" Content="&lt;" FontWeight="Bold"/>
                     </Grid>
+                    <!-- 次のプレビューシーンに進むボタン-->
                     <Grid
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
@@ -288,15 +279,15 @@
                                 <Setter Property="Opacity" Value="0.7"/>
                                 <Setter Property="Visibility" Value="Visible"/>
                                 <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="1"/>
+                                    </Trigger>
                                     <DataTrigger Binding="{Binding IsMultiScenePreview.Value}" Value="False">
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding IsLastScene.Value}" Value="True">
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Opacity" Value="1"/>
-                                    </Trigger>
                                 </Style.Triggers>
                             </Style>
                         </Grid.Style>
@@ -304,8 +295,7 @@
                     </Grid>
                 </Grid>
             </Border>
-
-            
+            <!-- /TRToys'拡張 -->
         </Grid>
 
         <!-- Row 2 -->

@@ -426,7 +426,19 @@ namespace VoiceroidUtil
             return Tuple.Create(ExoOperationResult.Success, (string)null);
         }
 
-        private static async Task<Tuple<ExoOperationResult, string>> DoOperateExo(
+        /// <summary>
+        /// TRToys'拡張：設定を基に複数のテキストを含むAviUtl拡張編集ファイル関連の処理を行う。
+        /// </summary>
+        /// <param name="filePath">WAVEファイルパス。</param>
+        /// <param name="voiceroidId">VOICEROID識別ID。</param>
+        /// <param name="textList">テキストリスト。</param>
+        /// <param name="appConfig">アプリ設定。</param>
+        /// <param name="exoConfig">AviUtl拡張編集ファイル用設定。</param>
+        /// <param name="aviUtlFileDropService">
+        /// AviUtl拡張編集ファイルドロップサービス。
+        /// </param>
+        /// <returns>処理結果とエラー文字列のタプル。</returns>
+        private static async Task<Tuple<ExoOperationResult, string>> DoOperateMultiTextExo(
             string filePath,
             VoiceroidId voiceroidId,
             string[] textList,
@@ -451,7 +463,7 @@ namespace VoiceroidUtil
 
                 // ファイル保存
                 var exo =
-                    await DoOperateExoSave(
+                    await DoOperateMultiTextExoSave(
                         exoFilePath,
                         filePath,
                         textList,
@@ -594,7 +606,16 @@ namespace VoiceroidUtil
             return exo;
         }
 
-        private static async Task<ExEditObject> DoOperateExoSave(
+        /// <summary>
+        /// TRToys'拡張：設定を基に複数をテキストを含むAviUtl拡張編集ファイルの保存処理を行う。
+        /// </summary>
+        /// <param name="exoFilePath">AviUtl拡張編集ファイルパス。</param>
+        /// <param name="waveFilePath">WAVEファイルパス。</param>
+        /// <param name="textList">テキストリスト。</param>
+        /// <param name="common">共通設定。</param>
+        /// <param name="charaStyle">キャラ別スタイル。</param>
+        /// <returns>保存した拡張編集オブジェクト。失敗したならば null 。</returns>
+        private static async Task<ExEditObject> DoOperateMultiTextExoSave(
             string exoFilePath,
             string waveFilePath,
             string[] textList,
@@ -1017,103 +1038,6 @@ namespace VoiceroidUtil
             =>
             this.ParameterMaker();
 
-
-        /// <summary>
-        /// TRT's拡張：字幕テキストの改行or分割点を決定
-        /// </summary>
-        /// <param name="text">テキスト</param>
-        /// <returns>何文字目で処理を行うかの数値</returns>
-        private static int GetTextSplitPoint(string text)
-        {
-            int wordsCount = 0;
-            int[] splitPointCandidates = { };
-
-            foreach (var node in MeCab.MeCabTagger.Create().ParseToNodes(text))
-            {
-                if (node.CharType > 0)
-                {
-                    wordsCount += node.Surface.Length;
-
-                    var features = node.Feature.Split(',');
-                    if (features[0] == "名詞"
-                        || features[0] == "動詞"
-                        || features[0] == "形容詞"
-                        || features[0] == "形容動詞"
-                        || features[0] == "副詞"
-                        || features[0] == "連体詞"
-                        || features[0] == "接続詞"
-                        || features[0] == "感動詞"
-                        ) continue;
-
-                    if (features[0] == "助動詞"
-                        && (node.Surface == "たり"
-                            || node.Surface == "て"
-                            || node.Surface == "し"
-                        )) continue;
-
-                    if (features[1] == "格助詞"
-                        && (node.Surface == "に"
-                            || node.Surface == "へ"
-                            || node.Surface == "より"
-                            || node.Surface == "で"
-                            || node.Surface == "と"
-                            || node.Surface == "や"
-                            || node.Surface == "から"
-                        )) continue;
-
-                    if (features[1] == "副助詞") continue;
-                    if (features[1] == "終助詞") continue;
-                    if (features[1] == "連体化") continue;
-
-                    splitPointCandidates = splitPointCandidates.Concat(new int[] { wordsCount }).ToArray();
-                }
-            }
-            if (splitPointCandidates.Length == 0)
-            {
-                return -1;
-            }
-
-            // 中央付近の改行候補を選択
-            int id = 0;
-
-            for (int i = 1; i < splitPointCandidates.Length; i++)
-            {
-                int m0 = Math.Abs(splitPointCandidates[i - 1] - text.Length / 2);
-                int m1 = Math.Abs(splitPointCandidates[i] - text.Length / 2);
-                if (m0 < m1)
-                {
-                    id = i - 1;
-                    break;
-                }
-            }
-            return splitPointCandidates[id];
-        }
-
-        /// <summary>
-        /// TRT's拡張：字幕テキストの改行処理を行う
-        /// </summary>
-        /// <param name="text">処理される字幕テキスト</param>
-        /// <param name="lfPoint">何文字目で処理されるかの数値</param>
-        private static string InsertLineFeed(string text, int lfPoint)
-            => $"{text.Substring(0, lfPoint)}\n{text.Substring(lfPoint)}";
-
-        /// <summary>
-        /// TRT's拡張：字幕テキストの分割処理を行う
-        /// </summary>
-        /// <param name="text">処理される字幕テキスト</param>
-        /// <param name="lfPoint">何文字目で処理されるかの数値</param>
-        private static (string, string) SplitText(string text, int splitPoint)
-            => (text.Substring(0, splitPoint), text.Substring(splitPoint));
-
-        // TRT's拡張：字幕テキストの処理方法のモード
-        private enum SplitMode
-        {
-            SplitFile,
-            LineFeed,
-            Default
-        }
-
-
         /// <summary>
         /// コマンド処理を行う。
         /// </summary>
@@ -1303,6 +1227,7 @@ namespace VoiceroidUtil
                         @"ファイル分割時は音声ファイル保存のみ行います。");
             }
 
+            // テキストファイル保存
             string[] fileSplitStrings = { 
                 appConfig.PreviewStyleValue.FileSplitString, 
                 appConfig.PreviewStyleValue.FileSplitString + appConfig.PreviewStyleValue.LineFeedString };
@@ -1311,6 +1236,7 @@ namespace VoiceroidUtil
             {
                 if (appConfig.PreviewStyleValue.IsTextSplitting)
                 {
+                    // TRToys'拡張：ファイルを分割してそれぞれ保存
                     var noExtFilePath = string.Format(
                         "{0}\\{1}",
                         Path.GetDirectoryName(filePath),
@@ -1330,6 +1256,7 @@ namespace VoiceroidUtil
                         }
                     }
 
+                    // TRToys'拡張：再編集用の生テキストファイルを保存
                     var previewTxtPath = string.Format(
                         "{0}\\PreviewRawText\\{1}",
                         Path.GetDirectoryName(filePath),
@@ -1341,7 +1268,7 @@ namespace VoiceroidUtil
                             AppStatusType.Success,
                             statusText,
                             AppStatusType.Fail,
-                            @"プレビュー用テキストファイルを保存できませんでした。");
+                            @"再編集用生テキストファイルを保存できませんでした。");
                     }
                 } 
                 var txtPath = Path.ChangeExtension(filePath, @".txt");
@@ -1371,7 +1298,7 @@ namespace VoiceroidUtil
 
             // .exo ファイル関連処理
             var exoResult = appConfig.PreviewStyleValue.IsTextSplitting
-                ? await DoOperateExo(
+                ? await DoOperateMultiTextExo(
                     filePath,
                     voiceroidId,
                     splitFileTexts,

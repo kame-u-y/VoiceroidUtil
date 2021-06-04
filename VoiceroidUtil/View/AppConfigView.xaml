@@ -202,68 +202,49 @@
                             FontSize="11"
                             Margin="20,0,0,0" />
 
+                        <!-- TRToys'拡張：追加設定 -->
                         <CheckBox
                             Content="TRT's拡張：指定文字列により、字幕の改行・分割処理を行う"
                             IsChecked="{Binding PreviewStyleValue.Value.IsTextSplitting}"
                             Margin="0,4,0,0" />
-                        <DockPanel>
-                            <Label
-                                Content="改行用文字列："
-                                Margin="20,4,0,0"/>
+                        <Grid Margin="20,4,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="4"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="4"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Label 
+                                Grid.Row="0" Grid.Column="0"
+                                Content="改行用文字列："/>
                             <TextBox
-                                HorizontalAlignment="Left"
+                                Grid.Row="0" Grid.Column="2"
                                 Text="{Binding PreviewStyleValue.Value.LineFeedString}"
                                 IsEnabled="{Binding 
                                     Path=PreviewStyleValue.Value.IsTextSplitting, 
                                     Mode=OneWay}"
-                                Width="43"
-                                Margin="5,4,0,0"/>
-                        </DockPanel>
-
-                        <DockPanel>
-                            <Label
-                                Content="ファイル分割用文字列："
-                                Margin="20,4,0,0"/>
+                                Width="30"/>
+                            <Label 
+                                Grid.Row="2" Grid.Column="0"
+                                Content="ファイル分割用文字列："/>
                             <TextBox
-                                HorizontalAlignment="Left"
+                                Grid.Row="2" Grid.Column="2"
                                 Text="{Binding PreviewStyleValue.Value.FileSplitString}"
                                 IsEnabled="{Binding 
                                     Path=PreviewStyleValue.Value.IsTextSplitting, 
                                     Mode=OneWay}"
-                                Width="43"
-                                Margin="5,4,0,0"/>
-                        </DockPanel>
-
+                                Width="30"/>
+                        </Grid>
                         <CheckBox
                             Content="再生時、改行・分割用文字列を「、」に変換"
                             IsChecked="{Binding PreviewStyleValue.Value.IsPreviewReplacingToComma}"
                             IsEnabled="{Binding PreviewStyleValue.Value.IsTextSplitting}"
                             Margin="20,4,0,0" />
-
-                        <!--<RadioButton 
-                            Content="項目「.exo(4)」の「キャラクター別」設定を使用"
-                            IsChecked="{Binding 
-                                Path=Config.Value.PreviewStyleModeValue,
-                                Mode=TwoWay,
-                                Converter={StaticResource boolToEnumConverter},
-                                ConverterParameter=UseExoSettingStyle,
-                                UpdateSourceTrigger=PropertyChanged}"
-                            IsEnabled="{Binding
-                                Path=Config.Value.IsTextSpliting,
-                                Mode=OneWay}"
-                            Margin="20,4,0,0"/>
-                        <RadioButton 
-                            Content="以下の設定を使用"
-                            IsChecked="{Binding 
-                                Path=Config.Value.PreviewStyleModeValue,
-                                Mode=TwoWay,
-                                Converter={StaticResource boolToEnumConverter},
-                                ConverterParameter=UseNewStyle,
-                                UpdateSourceTrigger=PropertyChanged}"
-                            IsEnabled="{Binding
-                                Path=Config.Value.IsTextSpliting,
-                                Mode=OneWay}"
-                            Margin="20,4,0,0"/>-->
                         <StackPanel>
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
@@ -274,74 +255,10 @@
                                             Value="False">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                         </DataTrigger>
-                                        <!--<DataTrigger 
-                                            Binding="{Binding Config.Value.IsUsingNewPreviewStyle}"
-                                            Value="False">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>-->
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
-
-                            <!--<ComboBox
-                                ItemsSource="{Binding VisibleCharaStyles.Value}"
-                                SelectedItem="{Binding SelectedCharaStyle.Value}"
-                                ToolTip="{Binding SelectCharaStyleCommandTip.Value}"
-                                Padding="2,1"
-                                Margin="20,10,20,0"
-                                DockPanel.Dock="Top">
-                                <ComboBox.Resources>
-                                    <Style TargetType="ComboBoxItem">
-                                        <Setter Property="Padding" Value="0,0,4,0" />
-                                    </Style>
-                                </ComboBox.Resources>
-                                <ComboBox.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid
-                                        Columns="{Binding VisibleCharaStylesColumnCount.Value}" />
-                                    </ItemsPanelTemplate>
-                                </ComboBox.ItemsPanel>
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <DockPanel>
-                                            <Image
-                                                DataContext="{Binding VoiceroidId}"
-                                                Style="{StaticResource VoiceroidIdImage}"
-                                                Margin="0,0,4,0"
-                                                DockPanel.Dock="Left" />
-                                            <StackPanel
-                                                Orientation="Vertical"
-                                                VerticalAlignment="Center">
-                                                <TextBlock
-                                                    Text="{Binding VoiceroidName, Mode=OneWay}"
-                                                    FontWeight="Bold" />
-                                                <TextBlock
-                                                    Text="※キャラ不確定時のみ"
-                                                    FontSize="11"
-                                                    Margin="0,2,0,0">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter
-                                                                Property="Visibility"
-                                                                Value="Collapsed" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger
-                                                                    Binding="{Binding
-                                                                        Path=HasMultiVoiceroidCharacters}"
-                                                                    Value="True">
-                                                                    <Setter
-                                                                        Property="Visibility"
-                                                                        Value="Visible" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </DockPanel>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>-->
+                            <!-- プレビューウィンドウのスタイル設定 -->
                             <Border
                                 BorderBrush="Silver"
                                 BorderThickness="1"
@@ -357,15 +274,15 @@
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="8"/>
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
 
                                     <Label
                                         Grid.Row="0" Grid.Column="0"
-                                        Content="AviUtl横幅:"
+                                        Content="AviUtl横幅："
                                         Target="{Binding ElementName=AviUtl_WindowWidth}"/>
-                                    <tk:IntegerUpDown        
+                                    <tk:IntegerUpDown
                                         Grid.Row="0" Grid.Column="2"
                                         HorizontalAlignment="Left"
                                         x:Name="AviUtl_WindowWidth"
@@ -375,10 +292,9 @@
                                         Minimum="1"
                                         Maximum="9999"
                                         Width="56" />
-
                                     <Label
                                         Grid.Row="2" Grid.Column="0"
-                                        Content="プレビュー横幅:"
+                                        Content="プレビュー横幅："
                                         Target="{Binding ElementName=Preview_WindowWidth}"/>
                                     <tk:IntegerUpDown
                                         Grid.Row="2" Grid.Column="2"
@@ -390,14 +306,12 @@
                                         Minimum="1"
                                         Maximum="9999"
                                         Width="56" />
-
                                     <Label
                                         Grid.Row="4" Grid.Column="0"
-                                        Content="AviUtl余白幅:"/>
+                                        Content="AviUtl余白幅："/>
                                     <StackPanel
                                         Grid.Row="4" Grid.Column="2"
                                         Orientation="Horizontal">
-
                                         <Label
                                             Content="左:"
                                             Target="{Binding ElementName=Text_MarginLeft}"/>
@@ -428,6 +342,7 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
+                            <!-- プレビューテキストのスタイル設定 -->
                             <Border
                                 BorderBrush="Silver"
                                 BorderThickness="1"
@@ -435,10 +350,6 @@
                                 Padding="8">
                                 <StackPanel>
                                     <StackPanel>
-
-                                        <!--<v:MovableValueControl DataContext="{Binding PreviewX}" Margin="0,0,0,0" />-->
-                                        <!--<v:MovableValueControl DataContext="{Binding PreviewY}" Margin="0,4,0,0" />-->
-                                        <!--<v:MovableValueControl DataContext="{Binding PreviewZ}" Margin="0,4,0,0" />-->
                                         <v:MovableValueControl
                                             DataContext="{Binding PreviewScale}"
                                             Margin="0,0,0,0" />
@@ -461,26 +372,24 @@
                                         </Grid.ColumnDefinitions>
 
                                         <Label
-                                                Grid.Row="0" Grid.Column="0"
-                                                Content="フォント："
-                                                />
+                                            Grid.Row="0" Grid.Column="0"
+                                            Content="フォント："/>
                                         <StackPanel
-                                                Grid.Row="0" Grid.Column="2"
-                                                Orientation="Horizontal">
+                                            Grid.Row="0" Grid.Column="2"
+                                            Orientation="Horizontal">
                                             <ComboBox
-                                                    x:Name="Text_FontFamilyName"
-                                                    ItemsSource="{Binding FontFamilyNames}"
-                                                    SelectedItem="{Binding PreviewText.Value.FontFamilyName}"
-                                                    Width="130"/>
+                                                x:Name="Text_FontFamilyName"
+                                                ItemsSource="{Binding FontFamilyNames}"
+                                                SelectedItem="{Binding PreviewText.Value.FontFamilyName}"
+                                                Width="130"/>
                                             <tk:DropDownButton
-                                                    Padding="6,3"
-                                                    Margin="4,0,0,0">
+                                                Padding="6,3"
+                                                Margin="4,0,0,0">
                                                 <tk:DropDownButton.DropDownContent>
                                                     <tk:ColorCanvas
-                                                            SelectedColor="{Binding PreviewText.Value.FontColor}"
-                                                            UsingAlphaChannel="False" />
+                                                        SelectedColor="{Binding PreviewText.Value.FontColor}"
+                                                        UsingAlphaChannel="False" />
                                                 </tk:DropDownButton.DropDownContent>
-
                                                 <StackPanel Orientation="Horizontal" MinWidth="86">
                                                     <Rectangle
                                                             Stroke="Gray"
@@ -496,66 +405,48 @@
                                             </tk:DropDownButton>
                                         </StackPanel>
                                         <Label
-                                                Grid.Row="2" Grid.Column="0"
-                                                Content="配置(_G):"
-                                                Target="{Binding ElementName=Text_TextAlignment}"/>
+                                            Grid.Row="2" Grid.Column="0"
+                                            Content="配置(_G):"
+                                            Target="{Binding ElementName=Text_TextAlignment}"/>
                                         <StackPanel 
-                                                Grid.Row="2" Grid.Column="2"
-                                                Orientation="Horizontal">
+                                            Grid.Row="2" Grid.Column="2"
+                                            Orientation="Horizontal">
                                             <ComboBox
-                                                    x:Name="Text_TextAlignment"
-                                                    ItemsSource="{Binding
-                                                        Source={StaticResource textAlignments}}"
-                                                    SelectedItem="{Binding PreviewText.Value.TextAlignment}"
-                                                    Width="104">
+                                                x:Name="Text_TextAlignment"
+                                                ItemsSource="{Binding Source={StaticResource textAlignments}}"
+                                                SelectedItem="{Binding PreviewText.Value.TextAlignment}"
+                                                Width="104">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
                                                         <TextBlock
-                                                                Text="{Binding
-                                                                    Converter={StaticResource
-                                                                        ResourceKey=enumDisplayConverter}}" />
+                                                            Text="{Binding
+                                                                Converter={StaticResource
+                                                                ResourceKey=enumDisplayConverter}}" />
                                                     </DataTemplate>
                                                 </ComboBox.ItemTemplate>
                                             </ComboBox>
                                         </StackPanel>
-
                                         <Label
-                                                Grid.Row="4" Grid.Column="0"
-                                                Content="字間(_T):"
-                                                Target="{Binding ElementName=Text_LetterSpace}"/>
+                                            Grid.Row="4" Grid.Column="0"
+                                            Content="字間(_T):"
+                                            Target="{Binding ElementName=Text_LetterSpace}"/>
                                         <StackPanel 
-                                                Orientation="Horizontal"
-                                                Grid.Row="4" Grid.Column="2"
-                                                >
+                                            Orientation="Horizontal"
+                                            Grid.Row="4" Grid.Column="2">
                                             <tk:IntegerUpDown
-                                                    x:Name="Text_LetterSpace"
-                                                    Value="{Binding
-                                                        Path=PreviewText.Value.LetterSpace,
-                                                        UpdateSourceTrigger=PropertyChanged}"
-                                                    Minimum="-100"
-                                                    Maximum="100"
-                                                    Width="56"/>
-                                            <!--<Label
-                                                    Content="行間(_R):"
-                                                    Target="{Binding ElementName=Text_LineSpace}"
-                                                    Margin="8,0,0,0" />
-                                                <tk:IntegerUpDown
-                                                    x:Name="Text_LineSpace"
-                                                    Value="{Binding
-                                                        Path=PreviewText.Value.LineSpace,
-                                                        UpdateSourceTrigger=PropertyChanged}"
-                                                    Minimum="-100"
-                                                    Maximum="100"
-                                                    MinWidth="56"
-                                                    Margin="4,0,0,0" />-->
+                                                x:Name="Text_LetterSpace"
+                                                Value="{Binding
+                                                    Path=PreviewText.Value.LetterSpace,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                                Minimum="-100"
+                                                Maximum="100"
+                                                Width="56"/>
                                         </StackPanel>
                                     </Grid>
-
-
                                 </StackPanel>
                             </Border>
-
                         </StackPanel>
+                        <!-- /TRToys'拡張 -->
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>

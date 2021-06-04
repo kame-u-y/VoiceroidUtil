@@ -120,103 +120,28 @@ namespace VoiceroidUtil.ViewModel
                     this.CanModify,
                     this.IsExoFileMakingCommandVisible);
 
-
-
-            //var charaStyles = this.MakeInnerReadOnlyPropertyOf(config, c => c.PreviewCharaStyles);
-            //this.VisibleCharaStyles = 
-            //    Observable
-            //        .CombineLatest(
-            //            config.ObserveInnerProperty(c => c.VoiceroidVisibilities),
-            //            charaStyles.Select(s => s.Count()).DistinctUntilChanged(),
-            //            (vv, _) => vv.SelectVisibleOf(charaStyles.Value))
-            //        .ToReadOnlyReactiveProperty()
-            //        .AddTo(this.CompositeDisposable);
-
+            // TRToys'拡張
+            // プレビューの設定
             this.PreviewStyleValue =
                 this.MakeInnerPropertyOf(config, c => c.PreviewStyleValue);
 
+            // プレビュー字幕テキストのフォント関連の設定
+            this.PreviewText =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyleValue, c => c.Text);
+            // プレビュー字幕テキストの表示関連の設定
+            this.PreviewRender =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyleValue, c => c.Render);
 
-            //this.IsSelectCharaStyleCommandExecutable =
-            //    this.VisibleCharaStyles
-            //        .Select(vcs => vcs.Count > 2)
-            //        .ToReadOnlyReactiveProperty()
-            //        .AddTo(this.CompositeDisposable);
+            // プレビュー設定「拡大率」のMovableValueViewModel
+            this.PreviewScale =
+                this.MakeMovableValueViewModel(this.PreviewRender, r => r.Scale);
+            // プレビュー設定項目「サイズ」のMovableValueViewModel
+            this.PreviewFontSize =
+                this.MakeMovableValueViewModel(this.PreviewText, t => t.FontSize);
 
-            //this.SelectCharaStyleCommandTip =
-            //    this.VisibleCharaStyles
-            //        .Select(_ => this.MakeSelectCharaStyleCommandTip())
-            //        .ToReadOnlyReactiveProperty()
-            //        .AddTo(this.CompositeDisposable);
-
-            //this.VisibleCharaStylesColumnCount =
-            //    this.VisibleCharaStyles
-            //        .Select(vp => Math.Min(Math.Max(1, (vp.Count + 5) / 6), 3))
-            //        .ToReadOnlyReactiveProperty()
-            //        .AddTo(this.CompositeDisposable);
-
-            this.PreviewText = this.MakeInnerReadOnlyPropertyOf(this.PreviewStyleValue, c => c.Text);
-            this.PreviewRender = this.MakeInnerReadOnlyPropertyOf(this.PreviewStyleValue, c => c.Render);
-
-            //this.SetupUIConfig(uiConfig);
-
-            //this.PreviewX = this.MakeMovableValueViewModel(this.PreviewRender, r => r.X);
-            //this.PreviewY = this.MakeMovableValueViewModel(this.PreviewRender, r => r.Y);
-            //this.PreviewZ = this.MakeMovableValueViewModel(this.PreviewRender, r => r.Z);
-            this.PreviewScale = this.MakeMovableValueViewModel(this.PreviewRender, r => r.Scale);
-            this.PreviewFontSize = this.MakeMovableValueViewModel(this.PreviewText, t => t.FontSize);
-
-            //this.PreviewMarginLeft = this.MakeInnerPropertyOf(this.PreviewStyleValue, c => c.MarginLeft);
-            //this.PreviewMarginRight = this.MakeInnerPropertyOf(this.PreviewStyleValue, c => c.MarginRight);
-            
+            // フォントファミリ名列挙
+            this.FontFamilyNames = new FontFamilyNameEnumerable();
         }
-
-        public IReactiveProperty<PreviewStyle> PreviewStyleValue { get; }
-
-        public IEnumerable<string> FontFamilyNames { get; } = new FontFamilyNameEnumerable();
-
-        //public IReadOnlyReactiveProperty<string> SelectedFontFamilyName { get; }
-
-        //public IReadOnlyReactiveProperty<Color> FontColor { get; }
-
-        public IReadOnlyReactiveProperty<RenderComponent> PreviewRender { get; }
-        public IReadOnlyReactiveProperty<TextComponent> PreviewText { get; }
-        //public MovableValueViewModel PreviewX { get;  set; }
-        //public MovableValueViewModel PreviewY { get;  set; }
-        //public MovableValueViewModel PreviewZ { get;  set; }
-        public MovableValueViewModel PreviewScale { get;  set; }
-        public MovableValueViewModel PreviewFontSize { get;  set; }
-
-        //public IReactiveProperty<double> PreviewMarginLeft { get; }
-        //public IReactiveProperty<double> PreviewMarginRight { get; }
-        
-
-        private MovableValueViewModel MakeMovableValueViewModel<T, TConstants>(
-            IReadOnlyReactiveProperty<T> holder,
-            Expression<Func<T, MovableValue<TConstants>>> selector,
-            string name = null)
-            where T : INotifyPropertyChanged
-            where TConstants : IMovableValueConstants, new()
-        {
-            Debug.Assert(holder != null);
-            Debug.Assert(selector != null);
-
-
-            // 値取得
-            var value = this.MakeInnerPropertyOf(holder, selector, this.CanModify);
-            Debug.WriteLine(value);
-
-            // 名前取得
-            var info = ((MemberExpression)selector.Body).Member;
-            name =
-                name ??
-                info.GetCustomAttribute<ExoFileItemAttribute>(true)?.Name ??
-                info.Name;
-            return
-                new MovableValueViewModel(this.CanModify, value, name)
-                    .AddTo(this.CompositeDisposable);
-        }
-
-
 
         /// <summary>
         /// 選択中タブインデックスを取得する。
@@ -451,6 +376,64 @@ namespace VoiceroidUtil.ViewModel
 
             // 設定更新
             this.UpdateSaveDirectoryPath(path);
+        }
+
+
+        /// <summary>
+        /// TRToys'拡張：プレビューの設定を取得する。
+        /// </summary>
+        public IReactiveProperty<PreviewStyle> PreviewStyleValue { get; }
+
+        /// <summary>
+        /// TRToys'拡張：プレビュー字幕テキストのフォント関連の設定を取得する。
+        /// </summary>
+        public IReadOnlyReactiveProperty<RenderComponent> PreviewRender { get; }
+
+        /// <summary>
+        /// TRToys'拡張：プレビュー字幕テキストの表示関連の設定を取得する。
+        /// </summary>
+        public IReadOnlyReactiveProperty<TextComponent> PreviewText { get; }
+
+        /// <summary>
+        /// TRToys'拡張：プレビュー設定「拡大率」のMovableValueViewModelを取得・設定する。
+        /// </summary>
+        public MovableValueViewModel PreviewScale { get; set; }
+
+        /// <summary>
+        /// TRToys'拡張：プレビュー設定「サイズ」のMovableValueViewModelを取得・設定する。
+        /// </summary>
+        public MovableValueViewModel PreviewFontSize { get; set; }
+
+        /// <summary>
+        /// TRToys'拡張：フォントファミリ名列挙を取得する。
+        /// </summary>
+        public IEnumerable<string> FontFamilyNames { get; }
+
+
+        private MovableValueViewModel MakeMovableValueViewModel<T, TConstants>(
+            IReadOnlyReactiveProperty<T> holder,
+            Expression<Func<T, MovableValue<TConstants>>> selector,
+            string name = null)
+            where T : INotifyPropertyChanged
+            where TConstants : IMovableValueConstants, new()
+        {
+            Debug.Assert(holder != null);
+            Debug.Assert(selector != null);
+
+
+            // 値取得
+            var value = this.MakeInnerPropertyOf(holder, selector, this.CanModify);
+            Debug.WriteLine(value);
+
+            // 名前取得
+            var info = ((MemberExpression)selector.Body).Member;
+            name =
+                name ??
+                info.GetCustomAttribute<ExoFileItemAttribute>(true)?.Name ??
+                info.Name;
+            return
+                new MovableValueViewModel(this.CanModify, value, name)
+                    .AddTo(this.CompositeDisposable);
         }
 
         /// <summary>
