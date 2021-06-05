@@ -191,7 +191,7 @@ namespace VoiceroidUtil.ViewModel
                 new ObservableCollection<PreviewTextStore>();
             
             // TRToys'拡張：テキスト入力のたびにプレビューを更新
-            this.TalkText.Subscribe(v => CreatePreviewGlyphs()).AddTo(this.CompositeDisposable);
+            this.TalkText.Subscribe(v => UpdatePreview()).AddTo(this.CompositeDisposable);
 
             // TRToys'拡張：一つ前のプレビューシーンに戻るコマンド
             this.BackSceneCommand =
@@ -199,19 +199,15 @@ namespace VoiceroidUtil.ViewModel
                     () =>
                     {
                         if (!this.IsMultiScenePreview.Value) return;
-                        if (this.DisplayPreviewSceneNum <= 0)
-                        {
-                            this.DisplayPreviewSceneNum = 0;
-                            return;
-                        }
                         
                         this.DisplayPreviewSceneNum--;
-                        if (this.DisplayPreviewSceneNum == 0) 
+                        if (this.DisplayPreviewSceneNum < 0)
                         {
-                            this.IsFirstScene.Value = true;
+                            this.DisplayPreviewSceneNum = 0;
                         }
+                        this.IsFirstScene.Value = this.DisplayPreviewSceneNum == 0;
                         this.IsLastScene.Value = false;
-                        CreatePreviewGlyphs();
+                        UpdatePreview();
                     });
 
             // TRToys'拡張：一つ後のプレビューシーンに進むコマンド
@@ -220,19 +216,15 @@ namespace VoiceroidUtil.ViewModel
                     () =>
                     {
                         if (!this.IsMultiScenePreview.Value) return;
-                        if (this.DisplayPreviewSceneNum >= this.PreviewSceneLength - 1)
-                        {
-                            this.DisplayPreviewSceneNum = this.PreviewSceneLength - 1;
-                            return;
-                        }
 
                         this.DisplayPreviewSceneNum++;
-                        if (this.DisplayPreviewSceneNum == this.PreviewSceneLength - 1)
+                        if (this.DisplayPreviewSceneNum > this.PreviewSceneLength - 1)
                         {
-                            this.IsLastScene.Value = true;
+                            this.DisplayPreviewSceneNum = this.PreviewSceneLength - 1;
                         }
                         this.IsFirstScene.Value = false;
-                        CreatePreviewGlyphs();
+                        this.IsLastScene.Value = this.DisplayPreviewSceneNum == this.PreviewSceneLength - 1;
+                        UpdatePreview();
                     });
             
             // アイドル状態設定先
@@ -540,58 +532,44 @@ namespace VoiceroidUtil.ViewModel
         public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
 
         /// <summary>
-        /// TRToys'拡張：プレビューの字幕を生成する。
+        /// TRToys'拡張：プレビューの更新。PreviewTextListを再生成する。
+        /// Glyphsは改行ができないので、ItemsControlを利用して、
+        /// PreviewTextListをソースとして複数のGlyphsを縦に並べる。
         /// </summary>
-        private void CreatePreviewGlyphs()
+        private void UpdatePreview()
         {
+            // 拡張機能利用時のみ処理
+            if (!this.PreviewStyleValue.Value.IsTextSplitting) return;
 
-            if (!this.PreviewStyleValue.Value.IsTextSplitting)
-            {
-                return;
-            }
-
-            if (this.PreviewTextList != null)
-            {
-                this.PreviewTextList.Clear();
-            }
+            this.PreviewTextList.Clear();
             
             if (TalkText.Value.Length <= 0) return;
 
-            string[] sceneSplitter = { 
-                this.PreviewStyleValue.Value.FileSplitString, 
-                this.PreviewStyleValue.Value.FileSplitString + this.PreviewStyleValue.Value.LineFeedString };
+            // 設定された文字列によりシーン分割
+            string[] sceneSplitter = { this.PreviewStyleValue.Value.FileSplitString };
             string[] PreviewScenes = 
-                TalkText.Value.Split(
-                    sceneSplitter, 
-                    System.StringSplitOptions.RemoveEmptyEntries);
+                TalkText.Value.Split(sceneSplitter, System.StringSplitOptions.RemoveEmptyEntries);
+            
             this.PreviewSceneLength = PreviewScenes.Length;
             this.IsMultiScenePreview.Value = PreviewScenes.Length > 1;
-            if (this.DisplayPreviewSceneNum != 0 && this.DisplayPreviewSceneNum >= this.PreviewSceneLength)
-            {
-                this.DisplayPreviewSceneNum = this.PreviewSceneLength - 1;
-            }
-            if (this.DisplayPreviewSceneNum < this.PreviewSceneLength - 1)
-            {
-                this.IsLastScene.Value = false;
-            }
-            int sceneNum = this.IsMultiScenePreview.Value
-                ? this.DisplayPreviewSceneNum
-                : 0;
 
-            if (PreviewSceneLength == 0) return;
+            if (PreviewScenes.Length == 0) return;
 
-            string[] lineSplitter = { 
-                this.PreviewStyleValue.Value.LineFeedString,
-                this.PreviewStyleValue.Value.LineFeedString + this.PreviewStyleValue.Value.FileSplitString};
+            if (this.DisplayPreviewSceneNum > PreviewScenes.Length - 1)
+            {
+                this.DisplayPreviewSceneNum = PreviewScenes.Length - 1;
+            }
+            this.IsFirstScene.Value = (this.DisplayPreviewSceneNum == 0);
+            this.IsLastScene.Value = (this.DisplayPreviewSceneNum == PreviewScenes.Length - 1);
+
+            // 設定された文字列により改行
+            string[] lineSplitter = { this.PreviewStyleValue.Value.LineFeedString };
             string[] PreviewLines = 
-                PreviewScenes[sceneNum].Split(
-                    lineSplitter,
-                    System.StringSplitOptions.RemoveEmptyEntries);
-
+                PreviewScenes[this.DisplayPreviewSceneNum]
+                    .Split(lineSplitter, System.StringSplitOptions.RemoveEmptyEntries);
+            
             for (int i = 0; i < PreviewLines.Length; i++)
             {
-                if (PreviewLines[i].Length <= 0) continue;
-
                 this.PreviewTextList.Add(
                     new PreviewTextStore(PreviewLines[i], this.PreviewStyleValue.Value));
             }
