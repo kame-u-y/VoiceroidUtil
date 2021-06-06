@@ -350,10 +350,10 @@
                                 Padding="8">
                                 <StackPanel>
                                     <StackPanel>
-                                        <v:MovableValueControl
+                                        <v:PreviewMovableValueControl
                                             DataContext="{Binding PreviewScale}"
                                             Margin="0,0,0,0" />
-                                        <v:MovableValueControl
+                                        <v:PreviewMovableValueControl
                                             DataContext="{Binding PreviewFontSize}"
                                             Margin="0,4,0,0" />
                                     </StackPanel>
