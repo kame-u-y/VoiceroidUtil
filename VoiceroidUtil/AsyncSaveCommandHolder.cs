@@ -1107,7 +1107,8 @@ namespace VoiceroidUtil
                 }
 
                 // 音声用テキスト作成
-                voiceText = talkTextReplaceConfig?.VoiceReplaceItems.Replace(text) ?? text;
+                voiceText = appConfig.PreviewStyleValue.RemovePreviewStrings(text);
+                voiceText = talkTextReplaceConfig?.VoiceReplaceItems.Replace(voiceText) ?? text;
                 if (!process.CanSaveBlankText && string.IsNullOrWhiteSpace(voiceText))
                 {
                     return

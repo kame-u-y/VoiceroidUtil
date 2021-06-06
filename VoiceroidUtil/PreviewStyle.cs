@@ -16,7 +16,7 @@ namespace VoiceroidUtil
     [DataContract(Namespace = "")]
     public class PreviewStyle : BindableConfigBase
     {
-        
+
         /// <summary>
         /// コンストラクタ。
         /// </summary>
@@ -54,6 +54,7 @@ namespace VoiceroidUtil
         }
         private string lineFeedString = "/-";
 
+
         /// <summary>
         /// プレビューシーン・テキストファイル分割用の文字列を取得または設定する。
         /// </summary>
@@ -64,6 +65,18 @@ namespace VoiceroidUtil
             set => this.SetProperty(ref this.fileSplitString, value);
         }
         private string fileSplitString = "/--";
+
+        public string RemovePreviewStrings(string text)
+        {
+            if (this.LineFeedString.Contains(this.FileSplitString))
+            {
+                return text.Replace(this.LineFeedString, "").Replace(FileSplitString, "");
+            }
+            else
+            {
+                return text.Replace(this.FileSplitString, "").Replace(LineFeedString, "");
+            }
+        }
 
         /// <summary>
         /// 改行・分割用文字列の文字列を音声再生時に「、」へ変換する

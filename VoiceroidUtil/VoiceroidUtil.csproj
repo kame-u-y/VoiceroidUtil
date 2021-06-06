@@ -161,7 +161,6 @@
     <Compile Include="ViewModel\ConfigViewModelBase.cs" />
     <Compile Include="ViewModel\ExoCharaStyleViewModel.cs" />
     <Compile Include="ViewModel\ExoConfigViewModel.cs" />
-    <Compile Include="ViewModel\MovableValueLeftOnlyViewModel.cs" />
     <Compile Include="ViewModel\MovableValueViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\TalkTextReplaceConfigViewModel.cs" />
@@ -192,14 +191,14 @@
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\MovableValueLeftOnlyControl.xaml.cs">
-      <DependentUpon>MovableValueLeftOnlyControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\MovableValueControl.xaml.cs">
       <DependentUpon>MovableValueControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\MovableValueMoveModeControl.xaml.cs">
       <DependentUpon>MovableValueMoveModeControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\PreviewMovableValueControl.xaml.cs">
+      <DependentUpon>PreviewMovableValueControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\TalkTextReplaceConfigView.xaml.cs">
       <DependentUpon>TalkTextReplaceConfigView.xaml</DependentUpon>
@@ -274,15 +273,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\MovableValueLeftOnlyControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="View\MovableValueControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\MovableValueMoveModeControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\PreviewMovableValueControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

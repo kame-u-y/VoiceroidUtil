@@ -325,7 +325,9 @@ namespace VoiceroidUtil.ViewModel
                     .ObserveOnUIDispatcher(),
                     () => this.SelectedProcess.Value,
                     () => talkTextReplaceConfig.Value.VoiceReplaceItems,
-                    () => replacePreviewStrings(this.TalkText.Value),
+                    () => appConfig.Value.PreviewStyleValue.IsTextSplitting 
+                        ? appConfig.Value.PreviewStyleValue.RemovePreviewStrings(this.TalkText.Value) 
+                        : this.TalkText.Value,
                     () => appConfig.Value.UseTargetText);
             this.PlayStopCommand = playStopCommandHolder.Command;
             playStopCommandHolder.Result
