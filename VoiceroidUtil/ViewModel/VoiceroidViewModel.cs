@@ -195,13 +195,10 @@ namespace VoiceroidUtil.ViewModel
                 new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
 
             // TRToys'拡張：テキスト入力のたびにプレビューを更新
-            
-            void UpdatePreview()
+            int GetStartId(int caretId)
             {
-                Debug.WriteLine("リンゴ".LastIndexOf("リンゴ", 1));
-
                 string talkText = this.TalkText.Value;
-                int caretId = this.TalkTextSelectionStart.Value;
+                //int caretId = this.TalkTextSelectionStart.Value;
                 string splitStr = this.PreviewStyleValue.Value.FileSplitString;
 
                 var startId = 0;
@@ -210,6 +207,7 @@ namespace VoiceroidUtil.ViewModel
                     if (caretId >= splitStr.Length)
                     {
                         startId = talkText.LastIndexOf(splitStr, caretId - 2);
+
                         if (startId == -1)
                         {
                             startId = 0;
@@ -218,12 +216,20 @@ namespace VoiceroidUtil.ViewModel
                         {
                             startId = startId + splitStr.Length;
                         }
-                    } 
+                    }
                     else
                     {
                         startId = 0;
                     }
                 }
+                return startId;
+            }
+
+            int GetEndId(int caretId)
+            {
+                string talkText = this.TalkText.Value;
+                //int caretId = this.TalkTextSelectionStart.Value;
+                string splitStr = this.PreviewStyleValue.Value.FileSplitString;
 
                 var endId = 0;
                 if (talkText.Length > 0)
@@ -245,6 +251,13 @@ namespace VoiceroidUtil.ViewModel
                         }
                     }
                 }
+                return endId;
+            }
+
+            void UpdatePreview()
+            {
+                var startId = GetStartId(this.TalkTextSelectionStart.Value);
+                var endId = GetEndId(this.TalkTextSelectionStart.Value);
                 Debug.WriteLine("s:" + startId + ",e:" + endId);
                 this.UpdatePreview(startId, endId);
             }
@@ -267,23 +280,10 @@ namespace VoiceroidUtil.ViewModel
                     {
                         if (!this.IsMultiScenePreview.Value) return;
 
-                        //this.DisplayPreviewSceneNum--;
-                        //if (this.DisplayPreviewSceneNum < 0)
-                        //{
-                        //    this.DisplayPreviewSceneNum = 0;
-                        //}
-                        //this.TalkTextSelectionStart.Value = 3;
-                        //this.IsFirstScene.Value = this.DisplayPreviewSceneNum == 0;
-                        //this.IsLastScene.Value = false;
-                        int currentStartId = this.TalkText.Value.LastIndexOf(
-                            this.PreviewStyleValue.Value.FileSplitString,
-                            this.TalkTextSelectionStart.Value - this.PreviewStyleValue.Value.FileSplitString.Length);
-                        int nextStartId = (currentStartId != -1 || currentStartId != 0)
-                            ? this.TalkText.Value.LastIndexOf(
-                                this.PreviewStyleValue.Value.FileSplitString,
-                                currentStartId - 1) + this.PreviewStyleValue.Value.FileSplitString.Length
-                            : 0;
-                        this.UpdatePreview(nextStartId, currentStartId);
+                        var currentStartId = GetStartId(this.TalkTextSelectionStart.Value);
+                        var backStartId = GetStartId(currentStartId - 1);
+                        var backEndId = GetEndId(currentStartId - 1);
+                        this.TalkTextSelectionStart.Value = backStartId + 1;
                     });
 
             // TRToys'拡張：一つ後のプレビューシーンに進むコマンド
@@ -293,22 +293,10 @@ namespace VoiceroidUtil.ViewModel
                     {
                         if (!this.IsMultiScenePreview.Value) return;
 
-                        //this.DisplayPreviewSceneNum++;
-                        //if (this.DisplayPreviewSceneNum > this.PreviewSceneLength - 1)
-                        //{
-                        //    this.DisplayPreviewSceneNum = this.PreviewSceneLength - 1;
-                        //}
-                        //this.IsFirstScene.Value = false;
-                        //this.IsLastScene.Value = this.DisplayPreviewSceneNum == this.PreviewSceneLength - 1;
-                        int currentEndId = this.TalkText.Value.IndexOf(
-                            this.PreviewStyleValue.Value.FileSplitString,
-                            this.TalkTextSelectionStart.Value - this.PreviewStyleValue.Value.FileSplitString.Length);
-                        int nextEndId = (currentEndId != -1 || currentEndId != this.TalkText.Value.Length - 1)
-                            ? this.TalkText.Value.LastIndexOf(
-                                this.PreviewStyleValue.Value.FileSplitString,
-                                currentEndId + 1)
-                            : this.TalkText.Value.Length - 1;
-                        this.UpdatePreview(currentEndId + this.PreviewStyleValue.Value.FileSplitString.Length, nextEndId);
+                        var currentEndId = GetEndId(this.TalkTextSelectionStart.Value);
+                        var nextStartId = GetStartId(currentEndId + this.PreviewStyleValue.Value.FileSplitString.Length);
+                        var nextEndId = GetEndId(currentEndId + this.PreviewStyleValue.Value.FileSplitString.Length);
+                        this.TalkTextSelectionStart.Value = nextEndId + this.PreviewStyleValue.Value.FileSplitString.Length + 1;
                     });
 
 
@@ -532,12 +520,14 @@ namespace VoiceroidUtil.ViewModel
             //Debug.WriteLine("caret:"+this.TalkTextSelectionStart.Value);
             //this.DisplayPreviewSceneNum = this.getCaretScene(PreviewScenes);
 
+            this.IsMultiScenePreview.Value = true;
             this.IsFirstScene.Value = startId == 0;
-            this.IsLastScene.Value = endId == this.TalkText.Value.Length - 1;
+            this.IsLastScene.Value = endId == this.TalkText.Value.Length;
 
             Debug.WriteLine("startId:" + startId);
             Debug.WriteLine("endId:" + endId);
             string PreviewScene = this.TalkText.Value.Substring(startId, endId - startId);
+
 
             // 設定された文字列により改行
             string[] lineSplitter = { this.PreviewStyleValue.Value.LineFeedString };

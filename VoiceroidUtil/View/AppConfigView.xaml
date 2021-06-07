@@ -240,11 +240,11 @@
                                     Mode=OneWay}"
                                 Width="30"/>
                         </Grid>
-                        <CheckBox
+                        <!--<CheckBox
                             Content="再生時、改行・分割用文字列を「、」に変換"
                             IsChecked="{Binding PreviewStyleValue.Value.IsPreviewReplacingToComma}"
                             IsEnabled="{Binding PreviewStyleValue.Value.IsTextSplitting}"
-                            Margin="20,4,0,0" />
+                            Margin="20,4,0,0" />-->
                         <StackPanel>
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
