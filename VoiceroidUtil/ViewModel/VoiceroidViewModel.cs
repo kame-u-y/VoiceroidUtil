@@ -204,29 +204,12 @@ namespace VoiceroidUtil.ViewModel
                 int caretId = this.TalkTextSelectionStart.Value;
                 string splitStr = this.PreviewStyleValue.Value.FileSplitString;
 
-                //var startId = (caretId >= splitStr.Length-1) 
-                //    ? talkText.LastIndexOf(
-                //        splitStr,
-                //        caretId - 1)
-                //    : 0;
-                //var startId = (talkText.Length > 0)
-                //    ? talkText.LastIndexOf(splitStr, caretId - 1)
-                //    : 0;
-                //if (startId == -1)
-                //{
-                //    startId = 0;
-                //}
-                //else
-                //{
-                //    startId = startId + splitStr.Length;
-                //}
-                //startId = (startId != -1 && startId != 0) ? startId + splitStr.Length : 0;
                 var startId = 0;
                 if (talkText.Length > 0)
                 {
                     if (caretId >= splitStr.Length)
                     {
-                        startId = talkText.LastIndexOf(splitStr, caretId - 1);
+                        startId = talkText.LastIndexOf(splitStr, caretId - 2);
                         if (startId == -1)
                         {
                             startId = 0;
@@ -242,28 +225,15 @@ namespace VoiceroidUtil.ViewModel
                     }
                 }
 
-
-                //var endId = (caretId >= splitStr.Length-1) 
-                //    ? talkText.IndexOf(
-                //        splitStr,
-                //        caretId - (splitStr.Length-1))
-                //    : talkText.IndexOf(
-                //        splitStr,
-                //        caretId);
-                //endId = (endId != -1) ? endId : talkText.Length;
                 var endId = 0;
                 if (talkText.Length > 0)
                 {
                     if (caretId >= splitStr.Length)
                     {
-                        endId = talkText.IndexOf(splitStr, caretId - (splitStr.Length - 1)); //確定
+                        endId = talkText.IndexOf(splitStr, caretId - splitStr.Length);
                         if (endId == -1)
                         {
                             endId = talkText.Length;
-                        }
-                        else
-                        {
-                            //endId = endId;
                         }
                     }
                     else
@@ -272,10 +242,6 @@ namespace VoiceroidUtil.ViewModel
                         if (endId == -1)
                         {
                             endId = talkText.Length;
-                        }
-                        else
-                        {
-                            //endId = endId;
                         }
                     }
                 }
