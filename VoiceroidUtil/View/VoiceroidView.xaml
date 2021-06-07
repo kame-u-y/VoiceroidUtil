@@ -222,44 +222,43 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid 
-                                                        Margin="{
-                                                            Binding 
-                                                                Path=DataContext.PreviewStyleValue.Value.Text.PreviewLineSpace,
-                                                                RelativeSource={
-                                                                    RelativeSource FindAncestor, 
-                                                                    AncestorType={x:Type UserControl}}}">
+                                                    Margin="{
+                                                        Binding 
+                                                            Path=DataContext.PreviewStyleValue.Value.Text.PreviewLineSpace,
+                                                            RelativeSource={
+                                                                RelativeSource FindAncestor, 
+                                                                AncestorType={x:Type UserControl}}}">
                                                     <!-- 1行ごとのGlyphs字幕 -->
                                                     <Glyphs
-                                                            UnicodeString="{Binding Text}"
+                                                        UnicodeString="{Binding Text}"
                                                     
-                                                            HorizontalAlignment="{
-                                                                Binding 
-                                                                    Path=DataContext.PreviewStyleValue.Value.Text.Horizontal,
-                                                                    RelativeSource={
-                                                                        RelativeSource FindAncestor, 
-                                                                        AncestorType={x:Type UserControl}}}"
-                                                            FontUri="{
-                                                                Binding 
-                                                                    Path=DataContext.PreviewStyleValue.Value.Text.PreviewFontUri,
-                                                                    RelativeSource={
-                                                                        RelativeSource FindAncestor, 
-                                                                        AncestorType={x:Type UserControl}}}"
-                                                            Fill="{
-                                                                Binding 
-                                                                    Path=DataContext.PreviewStyleValue.Value.Text.PreviewFontColor,
-                                                                    RelativeSource={
-                                                                        RelativeSource FindAncestor, 
-                                                                        AncestorType={x:Type UserControl}}}"
-                                                            FontRenderingEmSize="{
-                                                                Binding 
-                                                                    Path=DataContext.PreviewStyleValue.Value.PreviewFontSize,
-                                                                    RelativeSource={
-                                                                        RelativeSource FindAncestor, 
-                                                                        AncestorType={x:Type UserControl}}}"
+                                                        HorizontalAlignment="{
+                                                            Binding 
+                                                                Path=DataContext.PreviewStyleValue.Value.Text.Horizontal,
+                                                                RelativeSource={
+                                                                    RelativeSource FindAncestor, 
+                                                                    AncestorType={x:Type UserControl}}}"
+                                                        FontUri="{
+                                                            Binding 
+                                                                Path=DataContext.PreviewStyleValue.Value.Text.PreviewFontUri,
+                                                                RelativeSource={
+                                                                    RelativeSource FindAncestor, 
+                                                                    AncestorType={x:Type UserControl}}}"
+                                                        Fill="{
+                                                            Binding 
+                                                                Path=DataContext.PreviewStyleValue.Value.Text.PreviewFontColor,
+                                                                RelativeSource={
+                                                                    RelativeSource FindAncestor, 
+                                                                    AncestorType={x:Type UserControl}}}"
+                                                        FontRenderingEmSize="{
+                                                            Binding 
+                                                                Path=DataContext.PreviewStyleValue.Value.PreviewFontSize,
+                                                                RelativeSource={
+                                                                    RelativeSource FindAncestor, 
+                                                                    AncestorType={x:Type UserControl}}}"
+                                                        Indices="{Binding Indices}"
                                                         />
-                                                            <!--StyleSimulations="BoldSimulation"-->
-
-                                                    <!--Indices="{Binding Indices}"-->
+                                                        <!--StyleSimulations="BoldSimulation"-->
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>

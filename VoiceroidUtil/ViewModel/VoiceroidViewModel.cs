@@ -631,17 +631,31 @@ namespace VoiceroidUtil.ViewModel
 
         public int PrevTalkTextLength { get; set; }
 
-        public class PreviewTextStore
+        public class PreviewTextStore: BindableBase
         {
-            public string Text { get; set; }
-            public string Indices { get; set; }
+            public string Text { 
+                get => this.text; 
+                set => SetProperty(ref text, value);
+            }
+            private string text;
+
+            public string Indices {
+                get => this.indices;
+                set => SetProperty(ref indices, value);
+            }
+            private string indices;
             
             private string getIndices(string text, PreviewStyle style)
             {
+                var typeface = new GlyphTypeface(style.Text.PreviewFontUri);
                 var indices = "";
-                for (int i = 0; i < text.Length - 1; i++)
+                for (int i = 0; i < text.Length-1; i++)
                 {
-                    var val = style != null ? style.Text.LetterSpace + 60 : 60;
+                    var charaIndex = typeface.CharacterToGlyphMap[text[i]];
+                    var charaWidth = (typeface.AdvanceWidths[charaIndex] 
+                        * (double)style.Text.FontSize.Begin 
+                        + (double)style.Text.LetterSpace);
+                    var val = charaWidth;
                     indices += $",{val};";
                 }
                 return indices;
