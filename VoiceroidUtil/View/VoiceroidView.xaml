@@ -124,7 +124,9 @@
                 Margin="0,2,0,0"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Auto"
-                >
+                BindableSelectionStart="{
+                    Binding TalkTextSelectionStart.Value,
+                    Mode=TwoWay}">
                 <v:ImeWatermarkTextBox.Style>
                     <Style
                         TargetType="v:ImeWatermarkTextBox"
@@ -216,18 +218,18 @@
                                     VerticalAlignment="{Binding PreviewStyleValue.Value.Text.Vertical}"
                                     Margin="0,5,0,5">
                                     <StackPanel>
-                                        <ItemsControl ItemsSource="{Binding PreviewTextList}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid 
+                                    <ItemsControl ItemsSource="{Binding PreviewTextList}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid 
                                                         Margin="{
                                                             Binding 
                                                                 Path=DataContext.PreviewStyleValue.Value.Text.PreviewLineSpace,
                                                                 RelativeSource={
                                                                     RelativeSource FindAncestor, 
                                                                     AncestorType={x:Type UserControl}}}">
-                                                        <!-- 1行ごとのGlyphs字幕 -->
-                                                        <Glyphs
+                                                    <!-- 1行ごとのGlyphs字幕 -->
+                                                    <Glyphs
                                                             UnicodeString="{Binding Text}"
                                                     
                                                             HorizontalAlignment="{
@@ -256,12 +258,12 @@
                                                                         AncestorType={x:Type UserControl}}}"
                                                             StyleSimulations="BoldSimulation"/>
 
-                                                        <!--Indices="{Binding Indices}"-->
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
+                                                    <!--Indices="{Binding Indices}"-->
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                                 </ScrollViewer>
                             <Grid Grid.Column="2" Background="#dddddd"/>
                         </Grid>

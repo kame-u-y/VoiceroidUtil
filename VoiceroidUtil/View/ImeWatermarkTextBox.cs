@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
 using Xceed.Wpf.Toolkit;
 
 namespace VoiceroidUtil.View
@@ -25,6 +27,49 @@ namespace VoiceroidUtil.View
         /// </summary>
         public ImeWatermarkTextBox()
         {
+            this.SelectionChanged += this.OnSelectionChanged;
+        }
+
+
+        private static void OnBindableSelectionStartChanged(
+            DependencyObject dependencyObject,
+            DependencyPropertyChangedEventArgs args)
+        {
+            var textBox = dependencyObject as ImeWatermarkTextBox;
+
+            if (!textBox.changeFromUI)
+            {
+                textBox.SelectionStart = (int)args.NewValue;
+            }
+            else
+            {
+                textBox.changeFromUI = false;
+            }
+        }
+
+        public static readonly DependencyProperty BindableSelectionStartProperty =
+            DependencyProperty.Register(
+                "BindableSelectionStart",
+                typeof(int),
+                typeof(ImeWatermarkTextBox),
+                new PropertyMetadata(OnBindableSelectionStartChanged));
+
+        public int BindableSelectionStart
+        {
+            get => (int)this.GetValue(BindableSelectionStartProperty);
+            set => this.SetValue(BindableSelectionStartProperty, value);
+        }
+
+        private bool changeFromUI;
+
+        private void OnSelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (this.BindableSelectionStart != this.SelectionStart)
+            {
+                this.changeFromUI = true;
+                this.BindableSelectionStart = this.SelectionStart;
+            }
+
         }
 
         /// <summary>

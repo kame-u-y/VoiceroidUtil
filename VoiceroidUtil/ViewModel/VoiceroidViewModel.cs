@@ -176,7 +176,7 @@ namespace VoiceroidUtil.ViewModel
                 this.MakeInnerPropertyOf(appConfig, c => c.IsTabAccepted);
 
             // TRToys'拡張
-            this.PreviewStyleValue = 
+            this.PreviewStyleValue =
                 this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyleValue);
 
             this.IsMultiScenePreview =
@@ -187,11 +187,112 @@ namespace VoiceroidUtil.ViewModel
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
             this.PreviewSceneLength = 0;
             this.DisplayPreviewSceneNum = 0;
+            this.PrevTalkTextLength = 0;
             this.PreviewTextList =
                 new ObservableCollection<PreviewTextStore>();
-            
+
+            this.TalkTextSelectionStart =
+                new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
+
             // TRToys'拡張：テキスト入力のたびにプレビューを更新
-            this.TalkText.Subscribe(v => UpdatePreview()).AddTo(this.CompositeDisposable);
+            
+            void UpdatePreview()
+            {
+                Debug.WriteLine("リンゴ".LastIndexOf("リンゴ", 1));
+
+                string talkText = this.TalkText.Value;
+                int caretId = this.TalkTextSelectionStart.Value;
+                string splitStr = this.PreviewStyleValue.Value.FileSplitString;
+
+                //var startId = (caretId >= splitStr.Length-1) 
+                //    ? talkText.LastIndexOf(
+                //        splitStr,
+                //        caretId - 1)
+                //    : 0;
+                //var startId = (talkText.Length > 0)
+                //    ? talkText.LastIndexOf(splitStr, caretId - 1)
+                //    : 0;
+                //if (startId == -1)
+                //{
+                //    startId = 0;
+                //}
+                //else
+                //{
+                //    startId = startId + splitStr.Length;
+                //}
+                //startId = (startId != -1 && startId != 0) ? startId + splitStr.Length : 0;
+                var startId = 0;
+                if (talkText.Length > 0)
+                {
+                    if (caretId >= splitStr.Length)
+                    {
+                        startId = talkText.LastIndexOf(splitStr, caretId - 1);
+                        if (startId == -1)
+                        {
+                            startId = 0;
+                        }
+                        else
+                        {
+                            startId = startId + splitStr.Length;
+                        }
+                    } 
+                    else
+                    {
+                        startId = 0;
+                    }
+                }
+
+
+                //var endId = (caretId >= splitStr.Length-1) 
+                //    ? talkText.IndexOf(
+                //        splitStr,
+                //        caretId - (splitStr.Length-1))
+                //    : talkText.IndexOf(
+                //        splitStr,
+                //        caretId);
+                //endId = (endId != -1) ? endId : talkText.Length;
+                var endId = 0;
+                if (talkText.Length > 0)
+                {
+                    if (caretId >= splitStr.Length)
+                    {
+                        endId = talkText.IndexOf(splitStr, caretId - (splitStr.Length - 1)); //確定
+                        if (endId == -1)
+                        {
+                            endId = talkText.Length;
+                        }
+                        else
+                        {
+                            //endId = endId;
+                        }
+                    }
+                    else
+                    {
+                        endId = talkText.IndexOf(splitStr, 0);
+                        if (endId == -1)
+                        {
+                            endId = talkText.Length;
+                        }
+                        else
+                        {
+                            //endId = endId;
+                        }
+                    }
+                }
+                Debug.WriteLine("s:" + startId + ",e:" + endId);
+                this.UpdatePreview(startId, endId);
+            }
+
+            void TalkTextHandle()
+            {
+                if (this.PrevTalkTextLength == this.TalkText.Value.Length)
+                {
+                    UpdatePreview();
+                }
+                this.PrevTalkTextLength = this.TalkText.Value.Length;
+            }
+            this.TalkText.Subscribe(v => TalkTextHandle()).AddTo(this.CompositeDisposable);
+            this.TalkTextSelectionStart.Subscribe(v => UpdatePreview()).AddTo(this.CompositeDisposable);
 
             // TRToys'拡張：一つ前のプレビューシーンに戻るコマンド
             this.BackSceneCommand =
@@ -199,15 +300,24 @@ namespace VoiceroidUtil.ViewModel
                     () =>
                     {
                         if (!this.IsMultiScenePreview.Value) return;
-                        
-                        this.DisplayPreviewSceneNum--;
-                        if (this.DisplayPreviewSceneNum < 0)
-                        {
-                            this.DisplayPreviewSceneNum = 0;
-                        }
-                        this.IsFirstScene.Value = this.DisplayPreviewSceneNum == 0;
-                        this.IsLastScene.Value = false;
-                        UpdatePreview();
+
+                        //this.DisplayPreviewSceneNum--;
+                        //if (this.DisplayPreviewSceneNum < 0)
+                        //{
+                        //    this.DisplayPreviewSceneNum = 0;
+                        //}
+                        //this.TalkTextSelectionStart.Value = 3;
+                        //this.IsFirstScene.Value = this.DisplayPreviewSceneNum == 0;
+                        //this.IsLastScene.Value = false;
+                        int currentStartId = this.TalkText.Value.LastIndexOf(
+                            this.PreviewStyleValue.Value.FileSplitString,
+                            this.TalkTextSelectionStart.Value - this.PreviewStyleValue.Value.FileSplitString.Length);
+                        int nextStartId = (currentStartId != -1 || currentStartId != 0)
+                            ? this.TalkText.Value.LastIndexOf(
+                                this.PreviewStyleValue.Value.FileSplitString,
+                                currentStartId - 1) + this.PreviewStyleValue.Value.FileSplitString.Length
+                            : 0;
+                        this.UpdatePreview(nextStartId, currentStartId);
                     });
 
             // TRToys'拡張：一つ後のプレビューシーンに進むコマンド
@@ -217,15 +327,25 @@ namespace VoiceroidUtil.ViewModel
                     {
                         if (!this.IsMultiScenePreview.Value) return;
 
-                        this.DisplayPreviewSceneNum++;
-                        if (this.DisplayPreviewSceneNum > this.PreviewSceneLength - 1)
-                        {
-                            this.DisplayPreviewSceneNum = this.PreviewSceneLength - 1;
-                        }
-                        this.IsFirstScene.Value = false;
-                        this.IsLastScene.Value = this.DisplayPreviewSceneNum == this.PreviewSceneLength - 1;
-                        UpdatePreview();
+                        //this.DisplayPreviewSceneNum++;
+                        //if (this.DisplayPreviewSceneNum > this.PreviewSceneLength - 1)
+                        //{
+                        //    this.DisplayPreviewSceneNum = this.PreviewSceneLength - 1;
+                        //}
+                        //this.IsFirstScene.Value = false;
+                        //this.IsLastScene.Value = this.DisplayPreviewSceneNum == this.PreviewSceneLength - 1;
+                        int currentEndId = this.TalkText.Value.IndexOf(
+                            this.PreviewStyleValue.Value.FileSplitString,
+                            this.TalkTextSelectionStart.Value - this.PreviewStyleValue.Value.FileSplitString.Length);
+                        int nextEndId = (currentEndId != -1 || currentEndId != this.TalkText.Value.Length - 1)
+                            ? this.TalkText.Value.LastIndexOf(
+                                this.PreviewStyleValue.Value.FileSplitString,
+                                currentEndId + 1)
+                            : this.TalkText.Value.Length - 1;
+                        this.UpdatePreview(currentEndId + this.PreviewStyleValue.Value.FileSplitString.Length, nextEndId);
                     });
+
+
             
             // アイドル状態設定先
             var idle = new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
@@ -417,6 +537,54 @@ namespace VoiceroidUtil.ViewModel
                 .AddTo(this.CompositeDisposable);
         }
 
+        private void UpdatePreview(int startId, int endId)
+        {
+            // 拡張機能利用時のみ処理
+            if (!this.PreviewStyleValue.Value.IsTextSplitting) return;
+
+            this.PreviewTextList.Clear();
+
+            if (TalkText.Value.Length <= 0) return;
+
+            //// 設定された文字列によりシーン分割
+            //string[] sceneSplitter = { this.PreviewStyleValue.Value.FileSplitString };
+            //string[] PreviewScenes = 
+            //    TalkText.Value.Split(sceneSplitter, System.StringSplitOptions.RemoveEmptyEntries);
+
+            //this.PreviewSceneLength = PreviewScenes.Length;
+            //this.IsMultiScenePreview.Value = PreviewScenes.Length > 1;
+
+            //if (PreviewScenes.Length == 0) return;
+
+            //if (this.DisplayPreviewSceneNum > PreviewScenes.Length - 1)
+            //{
+            //    this.DisplayPreviewSceneNum = PreviewScenes.Length - 1;
+            //}
+            //this.IsFirstScene.Value = (this.DisplayPreviewSceneNum == 0);
+            //this.IsLastScene.Value = (this.DisplayPreviewSceneNum == PreviewScenes.Length - 1);
+
+            //Debug.WriteLine("caret:"+this.TalkTextSelectionStart.Value);
+            //this.DisplayPreviewSceneNum = this.getCaretScene(PreviewScenes);
+
+            this.IsFirstScene.Value = startId == 0;
+            this.IsLastScene.Value = endId == this.TalkText.Value.Length - 1;
+
+            Debug.WriteLine("startId:" + startId);
+            Debug.WriteLine("endId:" + endId);
+            string PreviewScene = this.TalkText.Value.Substring(startId, endId - startId);
+
+            // 設定された文字列により改行
+            string[] lineSplitter = { this.PreviewStyleValue.Value.LineFeedString };
+            string[] PreviewLines =
+                PreviewScene.Split(lineSplitter, System.StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < PreviewLines.Length; i++)
+            {
+                this.PreviewTextList.Add(
+                    new PreviewTextStore(PreviewLines[i], this.PreviewStyleValue.Value));
+            }
+        }
+
         /// <summary>
         /// 表示状態のVOICEROIDプロセスコレクションを取得する。
         /// </summary>
@@ -505,6 +673,8 @@ namespace VoiceroidUtil.ViewModel
         /// </summary>
         public int DisplayPreviewSceneNum { get; set; }
 
+        public int PrevTalkTextLength { get; set; }
+
         public class PreviewTextStore
         {
             public string Text { get; set; }
@@ -538,44 +708,27 @@ namespace VoiceroidUtil.ViewModel
         /// Glyphsは改行ができないので、ItemsControlを利用して、
         /// PreviewTextListをソースとして複数のGlyphsを縦に並べる。
         /// </summary>
-        private void UpdatePreview()
-        {
-            // 拡張機能利用時のみ処理
-            if (!this.PreviewStyleValue.Value.IsTextSplitting) return;
+        
+        //private int getCaretScene(string[] scenes)
+        //{
+        //    int length = 0;
+        //    for (int i=0; i<scenes.Length; i++)
+        //    {
+        //        length += scenes[i].Length;
+        //        if (length < this.TalkText.Value.Length)
+        //        {
+        //            length += this.PreviewStyleValue.Value.FileSplitString.Length;
+        //        }
+        //        Debug.WriteLine("length"+i+":"+length);
+        //        if (length > this.TalkTextSelectionStart.Value)
+        //        {
+        //            return i;
+        //        }
+        //    }
+        //    return scenes.Length-1;
+        //}
 
-            this.PreviewTextList.Clear();
-            
-            if (TalkText.Value.Length <= 0) return;
-
-            // 設定された文字列によりシーン分割
-            string[] sceneSplitter = { this.PreviewStyleValue.Value.FileSplitString };
-            string[] PreviewScenes = 
-                TalkText.Value.Split(sceneSplitter, System.StringSplitOptions.RemoveEmptyEntries);
-            
-            this.PreviewSceneLength = PreviewScenes.Length;
-            this.IsMultiScenePreview.Value = PreviewScenes.Length > 1;
-
-            if (PreviewScenes.Length == 0) return;
-
-            if (this.DisplayPreviewSceneNum > PreviewScenes.Length - 1)
-            {
-                this.DisplayPreviewSceneNum = PreviewScenes.Length - 1;
-            }
-            this.IsFirstScene.Value = (this.DisplayPreviewSceneNum == 0);
-            this.IsLastScene.Value = (this.DisplayPreviewSceneNum == PreviewScenes.Length - 1);
-
-            // 設定された文字列により改行
-            string[] lineSplitter = { this.PreviewStyleValue.Value.LineFeedString };
-            string[] PreviewLines = 
-                PreviewScenes[this.DisplayPreviewSceneNum]
-                    .Split(lineSplitter, System.StringSplitOptions.RemoveEmptyEntries);
-            
-            for (int i = 0; i < PreviewLines.Length; i++)
-            {
-                this.PreviewTextList.Add(
-                    new PreviewTextStore(PreviewLines[i], this.PreviewStyleValue.Value));
-            }
-        }
+       
 
         /// <summary>
         /// TRToys'拡張：一つ前のプレビューシーンに戻るコマンド
@@ -586,7 +739,9 @@ namespace VoiceroidUtil.ViewModel
         /// TRToys'拡張：一つ後のプレビューシーンに進むコマンド
         /// </summary>
         public ICommand NextSceneCommand { get; }
-        
+
+        public IReactiveProperty<int> TalkTextSelectionStart { get; }
+
 
         /// <summary>
         /// トークテキストの最大許容文字数を取得する。
