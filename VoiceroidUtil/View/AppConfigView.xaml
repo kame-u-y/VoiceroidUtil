@@ -11,6 +11,7 @@
     xmlns:local="clr-namespace:VoiceroidUtil"
     xmlns:v="clr-namespace:VoiceroidUtil.View"
     xmlns:vm="clr-namespace:VoiceroidUtil.ViewModel"
+    xmlns:trt="clr-namespace:VoiceroidUtil.TRToys"
     x:Class="VoiceroidUtil.View.AppConfigView"
     mc:Ignorable="d"
     d:DesignWidth="400"
@@ -413,7 +414,7 @@
                                             Orientation="Horizontal">
                                             <ComboBox
                                                 x:Name="Text_TextAlignment"
-                                                ItemsSource="{Binding Source={StaticResource textAlignments}}"
+                                                ItemsSource="{Binding Source={trt:PreviewEnumList {x:Type trt:PreviewTextAlignment}}}"
                                                 SelectedItem="{Binding PreviewText.Value.TextAlignment}"
                                                 Width="104">
                                                 <ComboBox.ItemTemplate>

@@ -12,7 +12,8 @@ using Microsoft.Win32;
 using RucheHome.AviUtl.ExEdit;
 using RucheHome.Text;
 using RucheHome.Util.Extensions.String;
-using TextAlignment = RucheHome.AviUtl.ExEdit.TextAlignment;
+//using TextAlignment = RucheHome.AviUtl.ExEdit.TextAlignment;
+using PreviewTextAlignment = VoiceroidUtil.TRToys.PreviewTextAlignment;
 
 namespace VoiceroidUtil.TRToys
 {
@@ -403,29 +404,29 @@ namespace VoiceroidUtil.TRToys
         /// テキスト配置種別を取得または設定する。
         /// </summary>
         [ExoFileItem(ExoFileItemNameOfTextAlignment, Order = 12)]
-        public TextAlignment TextAlignment
+        public PreviewTextAlignment TextAlignment
         {
             get => this.textAlignment;
             set =>
                 this.SetProperty(
                     ref this.textAlignment,
                     Enum.IsDefined(value.GetType(), value) ?
-                        value : TextAlignment.TopLeft);
+                        value : PreviewTextAlignment.TopLeft);
         }
-        private TextAlignment textAlignment = TextAlignment.TopLeft;
+        private PreviewTextAlignment textAlignment = PreviewTextAlignment.TopLeft;
 
         /// <summary>
         /// TextAlignment プロパティのシリアライズ用ラッパプロパティ。
         /// </summary>
-        [DataMember(Name = nameof(TextAlignment))]
+        [DataMember(Name = nameof(PreviewTextAlignment))]
         [SuppressMessage("CodeQuality", "IDE0051")]
         private string TextAlignmentString
         {
             get => this.TextAlignment.ToString();
             set =>
                 this.TextAlignment =
-                    Enum.TryParse(value, out TextAlignment deco) ?
-                        deco : TextAlignment.TopLeft;
+                    Enum.TryParse(value, out PreviewTextAlignment deco) ?
+                        deco : PreviewTextAlignment.TopLeft;
         }
 
         /// <summary>
@@ -539,18 +540,18 @@ namespace VoiceroidUtil.TRToys
         }
         private string text = "";
 
-        private bool isTopAlignment(TextAlignment alignment)
-            => alignment == TextAlignment.TopLeft
-            || alignment == TextAlignment.TopCenter
-            || alignment == TextAlignment.TopRight;
-        private bool isMiddleAlignment(TextAlignment alignment)
-            => alignment == TextAlignment.MiddleLeft
-            || alignment == TextAlignment.MiddleCenter
-            || alignment == TextAlignment.MiddleRight;
-        private bool isBottomAlignment(TextAlignment alignment)
-            => alignment == TextAlignment.BottomLeft
-            || alignment == TextAlignment.BottomCenter
-            || alignment == TextAlignment.BottomRight;
+        private bool isTopAlignment(PreviewTextAlignment alignment)
+            => alignment == PreviewTextAlignment.TopLeft
+            || alignment == PreviewTextAlignment.TopCenter
+            || alignment == PreviewTextAlignment.TopRight;
+        private bool isMiddleAlignment(PreviewTextAlignment alignment)
+            => alignment == PreviewTextAlignment.MiddleLeft
+            || alignment == PreviewTextAlignment.MiddleCenter
+            || alignment == PreviewTextAlignment.MiddleRight;
+        private bool isBottomAlignment(PreviewTextAlignment alignment)
+            => alignment == PreviewTextAlignment.BottomLeft
+            || alignment == PreviewTextAlignment.BottomCenter
+            || alignment == PreviewTextAlignment.BottomRight;
         
         private Thickness getPreviewLineSpace()
         {
@@ -587,18 +588,18 @@ namespace VoiceroidUtil.TRToys
             get => getVertical();
         }
 
-        private bool isLeftAlignment(TextAlignment alignment)
-                => alignment == TextAlignment.TopLeft
-                || alignment == TextAlignment.MiddleLeft
-                || alignment == TextAlignment.BottomLeft;
-        private bool isCenterAlignment(TextAlignment alignment)
-            => alignment == TextAlignment.TopCenter
-            || alignment == TextAlignment.MiddleCenter
-            || alignment == TextAlignment.BottomCenter;
-        private bool isRightAlignment(TextAlignment alignment)
-            => alignment == TextAlignment.TopRight
-            || alignment == TextAlignment.MiddleRight
-            || alignment == TextAlignment.BottomRight;
+        private bool isLeftAlignment(PreviewTextAlignment alignment)
+                => alignment == PreviewTextAlignment.TopLeft
+                || alignment == PreviewTextAlignment.MiddleLeft
+                || alignment == PreviewTextAlignment.BottomLeft;
+        private bool isCenterAlignment(PreviewTextAlignment alignment)
+            => alignment == PreviewTextAlignment.TopCenter
+            || alignment == PreviewTextAlignment.MiddleCenter
+            || alignment == PreviewTextAlignment.BottomCenter;
+        private bool isRightAlignment(PreviewTextAlignment alignment)
+            => alignment == PreviewTextAlignment.TopRight
+            || alignment == PreviewTextAlignment.MiddleRight
+            || alignment == PreviewTextAlignment.BottomRight;
 
         private HorizontalAlignment getHorizontal()
         {
