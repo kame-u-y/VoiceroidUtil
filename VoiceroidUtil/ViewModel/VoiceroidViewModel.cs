@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -500,26 +501,6 @@ namespace VoiceroidUtil.ViewModel
 
             if (TalkText.Value.Length <= 0) return;
 
-            //// 設定された文字列によりシーン分割
-            //string[] sceneSplitter = { this.PreviewStyleValue.Value.FileSplitString };
-            //string[] PreviewScenes = 
-            //    TalkText.Value.Split(sceneSplitter, System.StringSplitOptions.RemoveEmptyEntries);
-
-            //this.PreviewSceneLength = PreviewScenes.Length;
-            //this.IsMultiScenePreview.Value = PreviewScenes.Length > 1;
-
-            //if (PreviewScenes.Length == 0) return;
-
-            //if (this.DisplayPreviewSceneNum > PreviewScenes.Length - 1)
-            //{
-            //    this.DisplayPreviewSceneNum = PreviewScenes.Length - 1;
-            //}
-            //this.IsFirstScene.Value = (this.DisplayPreviewSceneNum == 0);
-            //this.IsLastScene.Value = (this.DisplayPreviewSceneNum == PreviewScenes.Length - 1);
-
-            //Debug.WriteLine("caret:"+this.TalkTextSelectionStart.Value);
-            //this.DisplayPreviewSceneNum = this.getCaretScene(PreviewScenes);
-
             this.IsMultiScenePreview.Value = true;
             this.IsFirstScene.Value = startId == 0;
             this.IsLastScene.Value = endId == this.TalkText.Value.Length;
@@ -539,6 +520,20 @@ namespace VoiceroidUtil.ViewModel
                 this.PreviewTextList.Add(
                     new PreviewTextStore(PreviewLines[i], this.PreviewStyleValue.Value));
             }
+            
+            //var fontPath =
+            //    Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+            ////var installed = (new InstalledFontCollection());
+            //var files = Directory.GetFiles(fontPath);
+            
+            ////Debug.WriteLine();
+            //foreach (string f in files)
+            //{
+            //    Debug.WriteLine("------");
+            //    Debug.WriteLine(f);
+            //    var fontFamily = new FontFamily(f);
+            //    Debug.WriteLine(fontFamily.Source);
+            //}
         }
 
         /// <summary>
@@ -663,6 +658,7 @@ namespace VoiceroidUtil.ViewModel
             
             public PreviewTextStore(string text, PreviewStyle style)
             {
+                text = text.Replace(Environment.NewLine, "");
                 this.Text = text;
                 this.Indices = getIndices(text, style);
             }

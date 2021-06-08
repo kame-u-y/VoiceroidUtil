@@ -12,6 +12,7 @@ using Microsoft.Win32;
 using RucheHome.AviUtl.ExEdit;
 using RucheHome.Text;
 using RucheHome.Util.Extensions.String;
+using WaterTrans.TypeLoader;
 //using TextAlignment = RucheHome.AviUtl.ExEdit.TextAlignment;
 using PreviewTextAlignment = VoiceroidUtil.TRToys.PreviewTextAlignment;
 
@@ -324,49 +325,147 @@ namespace VoiceroidUtil.TRToys
         /// <summary>
         /// フォントファミリー名とフォントUriとが対応する辞書
         /// </summary>
-        static Dictionary<string, string> FontPathDictionary
+        static IDictionary<string, Uri> FontPathDictionary
         {
             get
             {
                 return fontPathDictionary;
             }
         }
-        static Dictionary<string, string> fontPathDictionary =
-            SearchFontNamePathPair(new CultureInfo[] { CultureInfo.CurrentCulture, new CultureInfo("en-US") });
-        static Dictionary<string, string> SearchFontNamePathPair(IEnumerable<CultureInfo> cultures)
+        static IDictionary<string, Uri> fontPathDictionary =
+            SearchFontNamePathPair(new[] { CultureInfo.CurrentUICulture });
+        static IDictionary<string, Uri> SearchFontNamePathPair(IEnumerable<CultureInfo> cultures)
         {
-            Dictionary<string, string> ret = new Dictionary<string, string>();
+            IDictionary<string, Uri> dic = new SortedDictionary<string, Uri>();
+
+            string UserFontDir = 
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+                + @"\AppData\Local\Microsoft\Windows\Fonts\";
+            Console.WriteLine(UserFontDir);
+
+
             string FontDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
 
-            RegistryKey regKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts", false);
-            string[] FontFiles = regKey.GetValueNames().Select(p => (string)regKey.GetValue(p)).ToArray();
+            var uris = 
+                Directory.GetFiles(FontDir, "*.ttf")
+                    .Concat(Directory.GetFiles(FontDir, "*.otf"))
+                    .Concat(Directory.GetFiles(UserFontDir, "*.ttf"))
+                    .Concat(Directory.GetFiles(UserFontDir, "*.otf")).Select(p => new Uri(p))
+                    .Concat(
+                        Directory.GetFiles(FontDir, "*.ttc")
+                            .Concat(Directory.GetFiles(UserFontDir, "*.ttc")
+                    ).SelectMany(p => 
+                    {
+                        using (var fs = new FileStream(p, FileMode.Open, FileAccess.Read))
+                        {
 
-            foreach (string file in FontFiles)
+                            return Enumerable.Range(0, TypefaceInfo.GetCollectionCount(fs))
+                                .Select(i => new UriBuilder("file", "", -1, p, "#" + i).Uri);
+                        }
+                    }
+                    ));
+            
+
+            foreach (Uri uri in uris)
             {
+                
                 try
                 {
-                    string path = FontDir + System.IO.Path.DirectorySeparatorChar + file;
-                    GlyphTypeface typeface = new GlyphTypeface(new Uri(path));
+                    GlyphTypeface gtf = new GlyphTypeface(uri);
+                    //Console.WriteLine("-----");
+                    //foreach (string fn in gtf.FamilyNames.Values)
+                    //{
+                    //    Console.WriteLine(fn);
+                    //}
+                    //Console.WriteLine(uri);
+                    //Console.WriteLine("**");
+                    //if (cultures.Where(p => gtf.FamilyNames.ContainsKey(p)).Count() > 0)
+                    //{
 
-                    foreach (CultureInfo culture in cultures)
+                    //Console.WriteLine(uri);
+                    //Console.WriteLine("FontFamliy");
+                    //foreach (string familyname in gtf.FamilyNames.Values)
+                    //{
+                    //    Console.WriteLine("---"+familyname);
+                    //}
+
+                    //Console.WriteLine(uri);
+                    //Console.WriteLine(!dic.ContainsKey(FamilyName));
+
+                    //Console.WriteLine("FontFace");
+                    //foreach (string FaceName in gtf.FaceNames.Values)
+                    //{
+                    //    Console.WriteLine("===" + FaceName);
+                    //}
+
+                    var cultureEnUS = new CultureInfo("en-US");
+                    //Console.WriteLine(gtf.FaceNames[cultureEnUS]);
+
+                    //foreach (string FamilyName in gtf.FamilyNames.Values)
+                    //{
+                    //    Console.WriteLine(FamilyName);
+                    //    //if (FamilyName.Contains("Bahnschrift")
+                    //    //       || FamilyName.Contains("Ricty")
+                    //    //       || FamilyName.Contains("教科書体")
+                    //    //       || FamilyName.Contains("Unispace"))
+                    //    //{
+                    //    Console.WriteLine(gtf.FaceNames[cultureEnUS]);
+                    //    //    Console.WriteLine(uri);
+                    //    //    Console.WriteLine($"{FamilyName}");
+
+                    //    //    Console.WriteLine("-----------");
+                    //    //}
+                    //}
+
+
+
+
+                    if (
+                        (gtf.FaceNames[cultureEnUS].Contains("Bold")
+                            && !gtf.FamilyNames.Values.Contains("Unispace")
+                            && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 N-B")
+                            && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NP-B")
+                            && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NK-B"))
+                        || gtf.FaceNames[cultureEnUS].Contains("Italic") 
+                        || gtf.FaceNames[cultureEnUS].Contains("Bold Italic"))
                     {
-                        string FamilyName = typeface.FamilyNames[culture];
-
-                        if (!string.IsNullOrEmpty(FamilyName) && !ret.ContainsKey(FamilyName))
+                        continue;
+                    }
+                    //Console.WriteLine(gtf.FaceNames[cultureEnUS]);
+                    foreach (string FamilyName in gtf.FamilyNames.Values)
+                    {
+                        var faceName = gtf.FaceNames[cultureEnUS]
+                            .Replace("Regular", "")
+                            .Replace(" Bold", "")
+                            .Replace(" Italic", "");
+                        
+                        var fontName = $"{FamilyName}{faceName}";
+                        if (!dic.ContainsKey(fontName))
                         {
-                            ret.Add(FamilyName, path);
+                            dic.Add(fontName, uri);
                         }
                     }
                 }
-                catch (FileFormatException) { }
-                catch (NotSupportedException) { }
+                catch (NullReferenceException) { }
             }
-            return ret;
+
+            return dic;
         }
 
         public Uri PreviewFontUri
         {
-            get => new Uri(FontPathDictionary[this.FontFamilyName]);
+            get
+            {
+                try
+                {
+                    return FontPathDictionary[this.FontFamilyName];
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    return FontPathDictionary["MS Gothic"];
+                }
+            }
         }
 
         /// <summary>
