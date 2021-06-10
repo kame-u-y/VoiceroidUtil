@@ -647,10 +647,14 @@ namespace VoiceroidUtil.ViewModel
                 for (int i = 0; i < text.Length-1; i++)
                 {
                     var charaIndex = typeface.CharacterToGlyphMap[text[i]];
-                    var charaWidth = (typeface.AdvanceWidths[charaIndex] 
-                        * (double)style.Text.FontSize.Begin 
-                        + (double)style.Text.LetterSpace);
-                    var val = charaWidth;
+                    var fontSize = (double)style.Text.FontSize.Begin;
+                    //var scale = 
+                    //    ((double)style.Render.Scale.Begin / 100.0) 
+                    //    * ((double)style.PreviewWindowWidth / (double)style.AviUtlWindowWidth);
+                    var charaWidth = typeface.AdvanceWidths[charaIndex];
+                    //var val = charaWidth * fontSize + style.Text.LetterSpace + (100-fontSize)*charaWidth;
+                    var val = 100 * charaWidth + style.Text.LetterSpace*100/fontSize;
+                    //Console.WriteLine(val);
                     indices += $",{val};";
                 }
                 return indices;
