@@ -338,13 +338,10 @@ namespace VoiceroidUtil.TRToys
         {
             IDictionary<string, Uri> dic = new SortedDictionary<string, Uri>();
 
+            string FontDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
             string UserFontDir = 
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
                 + @"\AppData\Local\Microsoft\Windows\Fonts\";
-            Console.WriteLine(UserFontDir);
-
-
-            string FontDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
 
             var uris = 
                 Directory.GetFiles(FontDir, "*.ttf")
@@ -358,80 +355,29 @@ namespace VoiceroidUtil.TRToys
                     {
                         using (var fs = new FileStream(p, FileMode.Open, FileAccess.Read))
                         {
-
                             return Enumerable.Range(0, TypefaceInfo.GetCollectionCount(fs))
                                 .Select(i => new UriBuilder("file", "", -1, p, "#" + i).Uri);
                         }
-                    }
-                    ));
+                    }));
             
 
             foreach (Uri uri in uris)
             {
-                
                 try
                 {
                     GlyphTypeface gtf = new GlyphTypeface(uri);
-                    //Console.WriteLine("-----");
-                    //foreach (string fn in gtf.FamilyNames.Values)
-                    //{
-                    //    Console.WriteLine(fn);
-                    //}
-                    //Console.WriteLine(uri);
-                    //Console.WriteLine("**");
-                    //if (cultures.Where(p => gtf.FamilyNames.ContainsKey(p)).Count() > 0)
-                    //{
-
-                    //Console.WriteLine(uri);
-                    //Console.WriteLine("FontFamliy");
-                    //foreach (string familyname in gtf.FamilyNames.Values)
-                    //{
-                    //    Console.WriteLine("---"+familyname);
-                    //}
-
-                    //Console.WriteLine(uri);
-                    //Console.WriteLine(!dic.ContainsKey(FamilyName));
-
-                    //Console.WriteLine("FontFace");
-                    //foreach (string FaceName in gtf.FaceNames.Values)
-                    //{
-                    //    Console.WriteLine("===" + FaceName);
-                    //}
-
                     var cultureEnUS = new CultureInfo("en-US");
-                    //Console.WriteLine(gtf.FaceNames[cultureEnUS]);
-
-                    //foreach (string FamilyName in gtf.FamilyNames.Values)
-                    //{
-                    //    Console.WriteLine(FamilyName);
-                    //    //if (FamilyName.Contains("Bahnschrift")
-                    //    //       || FamilyName.Contains("Ricty")
-                    //    //       || FamilyName.Contains("教科書体")
-                    //    //       || FamilyName.Contains("Unispace"))
-                    //    //{
-                    //    Console.WriteLine(gtf.FaceNames[cultureEnUS]);
-                    //    //    Console.WriteLine(uri);
-                    //    //    Console.WriteLine($"{FamilyName}");
-
-                    //    //    Console.WriteLine("-----------");
-                    //    //}
-                    //}
-
-
-
-
-                    if (
-                        (gtf.FaceNames[cultureEnUS].Contains("Bold")
+                    if ((gtf.FaceNames[cultureEnUS].Contains("Bold")
                             && !gtf.FamilyNames.Values.Contains("Unispace")
                             && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 N-B")
                             && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NP-B")
-                            && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NK-B"))
+                            && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NK-B")
+                            )
                         || gtf.FaceNames[cultureEnUS].Contains("Italic") 
                         || gtf.FaceNames[cultureEnUS].Contains("Bold Italic"))
                     {
                         continue;
                     }
-                    //Console.WriteLine(gtf.FaceNames[cultureEnUS]);
                     foreach (string FamilyName in gtf.FamilyNames.Values)
                     {
                         var faceName = gtf.FaceNames[cultureEnUS]
@@ -439,7 +385,9 @@ namespace VoiceroidUtil.TRToys
                             .Replace(" Bold", "")
                             .Replace(" Italic", "");
                         
-                        var fontName = $"{FamilyName}{faceName}";
+                        var fontName = faceName != "" 
+                            ? $"{FamilyName} {faceName}"
+                            : $"{FamilyName}";
                         if (!dic.ContainsKey(fontName))
                         {
                             dic.Add(fontName, uri);
