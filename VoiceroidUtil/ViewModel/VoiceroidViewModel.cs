@@ -189,6 +189,7 @@ namespace VoiceroidUtil.ViewModel
             this.PreviewSceneLength = 0;
             this.DisplayPreviewSceneNum = 0;
             this.PrevTalkTextLength = 0;
+            this.PrePreviewScene = "";
             this.PreviewTextList =
                 new ObservableCollection<PreviewTextStore>();
 
@@ -497,7 +498,6 @@ namespace VoiceroidUtil.ViewModel
             // 拡張機能利用時のみ処理
             if (!this.PreviewStyleValue.Value.IsTextSplitting) return;
 
-            this.PreviewTextList.Clear();
 
             if (TalkText.Value.Length <= 0) return;
 
@@ -509,7 +509,11 @@ namespace VoiceroidUtil.ViewModel
             Debug.WriteLine("endId:" + endId);
             string PreviewScene = this.TalkText.Value.Substring(startId, endId - startId);
 
+            if (PreviewScene == PrePreviewScene) return;
 
+            this.PrePreviewScene = PreviewScene;
+            this.PreviewTextList.Clear();
+            
             // 設定された文字列により改行
             string[] lineSplitter = { this.PreviewStyleValue.Value.LineFeedString };
             string[] PreviewLines =
@@ -625,6 +629,8 @@ namespace VoiceroidUtil.ViewModel
         public int DisplayPreviewSceneNum { get; set; }
 
         public int PrevTalkTextLength { get; set; }
+
+        public string PrePreviewScene { get; set; }
 
         public class PreviewTextStore: BindableBase
         {
