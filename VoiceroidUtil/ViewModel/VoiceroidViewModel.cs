@@ -639,14 +639,20 @@ namespace VoiceroidUtil.ViewModel
                 set => SetProperty(ref indices, value);
             }
             private string indices;
-            
+
+            public Collection<char> UnregisterdLetters = new Collection<char>();
+            char TempLetter = 'A';
+
             private string getIndices(string text, PreviewStyle style)
             {
                 var typeface = new GlyphTypeface(style.Text.PreviewFontUri);
                 var indices = "";
                 for (int i = 0; i < text.Length-1; i++)
                 {
-                    var charaIndex = typeface.CharacterToGlyphMap[text[i]];
+                    ushort charaIndex = typeface.CharacterToGlyphMap.ContainsKey(text[i])
+                        ? typeface.CharacterToGlyphMap[text[i]]
+                        : typeface.CharacterToGlyphMap[TempLetter];
+
                     var fontSize = (double)style.Text.FontSize.Begin;
                     //var scale = 
                     //    ((double)style.Render.Scale.Begin / 100.0) 
@@ -662,7 +668,7 @@ namespace VoiceroidUtil.ViewModel
             
             public PreviewTextStore(string text, PreviewStyle style)
             {
-                text = text.Replace(Environment.NewLine, "");
+                text = text.Replace(Environment.NewLine, ";");
                 this.Text = text;
                 this.Indices = getIndices(text, style);
             }
