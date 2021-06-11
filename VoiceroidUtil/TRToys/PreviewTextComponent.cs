@@ -359,43 +359,135 @@ namespace VoiceroidUtil.TRToys
                                 .Select(i => new UriBuilder("file", "", -1, p, "#" + i).Uri);
                         }
                     }));
-            
 
+
+            IDictionary<string, Dictionary<string, Uri>> list = new Dictionary<string, Dictionary<string, Uri>>(); 
             foreach (Uri uri in uris)
             {
                 try
                 {
                     GlyphTypeface gtf = new GlyphTypeface(uri);
                     var cultureEnUS = new CultureInfo("en-US");
-                    if ((gtf.FaceNames[cultureEnUS].Contains("Bold")
-                            && !gtf.FamilyNames.Values.Contains("Unispace")
-                            && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 N-B")
-                            && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NP-B")
-                            && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NK-B")
-                            )
-                        || gtf.FaceNames[cultureEnUS].Contains("Italic") 
-                        || gtf.FaceNames[cultureEnUS].Contains("Bold Italic"))
-                    {
-                        continue;
-                    }
+
+                    //Console.WriteLine("===");
+                    //Console.WriteLine(uri);
+                    //Console.WriteLine(gtf.FaceNames[cultureEnUS]);
+
                     foreach (string FamilyName in gtf.FamilyNames.Values)
                     {
+                        //Console.WriteLine(FamilyName);
                         var faceName = gtf.FaceNames[cultureEnUS]
-                            .Replace("Regular", "")
-                            .Replace(" Bold", "")
-                            .Replace(" Italic", "");
-                        
-                        var fontName = faceName != "" 
+                                .Replace("Regular", "")
+                                .Replace(" Bold", "")
+                                .Replace(" Italic", "");
+
+                        if (faceName == "Bold")
+                        {
+                            faceName = faceName.Replace("Bold", "");
+                        }
+                        else if (faceName == "Italic")
+                        {
+                            faceName = faceName.Replace("Italic", "");
+                        }
+                        else if (faceName == "Bold Italic")
+                        {
+                            faceName = faceName.Replace("Bold Italic", "");
+                        }
+
+                        var fontName = faceName != ""
                             ? $"{FamilyName} {faceName}"
                             : $"{FamilyName}";
-                        if (!dic.ContainsKey(fontName))
+                        if (!list.ContainsKey(fontName))
                         {
-                            dic.Add(fontName, uri);
+                            list.Add(fontName, new Dictionary<string, Uri>());
                         }
+                        list[fontName].Add(gtf.FaceNames[cultureEnUS], uri);
                     }
                 }
-                catch (NullReferenceException) { }
+                catch
+                {
+
+                }
             }
+
+            foreach (string k in list.Keys)
+            {
+                //Console.WriteLine("======");
+                //Console.WriteLine("=="+k+"==");
+                //foreach (string s in list[k].Keys)
+                //{
+                //    Console.WriteLine(s);
+                    
+                //}
+
+                if (list[k].Keys.Count==1 && list[k].ContainsKey("Bold"))
+                {
+                    dic.Add(k, list[k]["Bold"]);
+                } 
+                else if (list[k].Keys.Count == 1 && list[k].ContainsKey("Italic"))
+                {
+                    dic.Add(k, list[k]["Italic"]);
+                }
+                else if (list[k].Keys.Count == 1 && list[k].ContainsKey("Bold Italic"))
+                {
+                    dic.Add(k, list[k]["Bold Italic"]);
+                }
+                else if (list[k].ContainsKey("Regular"))
+                {
+                    dic.Add(k, list[k]["Regular"]);
+                }
+                else
+                {
+                    var faceName = k.Substring(k.LastIndexOf(" ")+1);
+                    dic.Add(k, list[k][faceName]);
+                }
+
+            }
+
+            foreach(string name in dic.Keys)
+            {
+                Console.WriteLine(name + ":" + dic[name]);
+            }
+
+
+            //foreach (Uri uri in uris)
+            //{
+            //    try
+            //    {
+            //        GlyphTypeface gtf = new GlyphTypeface(uri);
+            //        var cultureEnUS = new CultureInfo("en-US");
+
+
+            //        if ((gtf.FaceNames[cultureEnUS].Contains("Bold")
+            //                && !gtf.FamilyNames.Values.Contains("Unispace")
+            //                && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 N-B")
+            //                && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NP-B")
+            //                && !gtf.FamilyNames.Values.Contains("UD デジタル 教科書体 NK-B")
+            //                )
+            //            || gtf.FaceNames[cultureEnUS].Contains("Italic") 
+            //            || gtf.FaceNames[cultureEnUS].Contains("Bold Italic"))
+            //        {
+            //            continue;
+            //        }
+            //        foreach (string FamilyName in gtf.FamilyNames.Values)
+            //        {
+            //            // 「*** Bold」「*** Italic」というFaceNameを「***」のみに
+            //            var faceName = gtf.FaceNames[cultureEnUS]
+            //                .Replace("Regular", "")
+            //                .Replace(" Bold", "")
+            //                .Replace(" Italic", "");
+                        
+            //            var fontName = faceName != "" 
+            //                ? $"{FamilyName} {faceName}"
+            //                : $"{FamilyName}";
+            //            if (!dic.ContainsKey(fontName))
+            //            {
+            //                dic.Add(fontName, uri);
+            //            }
+            //        }
+            //    }
+            //    catch (NullReferenceException) { }
+            //}
 
             return dic;
         }
