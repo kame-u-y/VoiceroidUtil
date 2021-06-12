@@ -216,7 +216,7 @@ namespace VoiceroidUtil.ViewModel
                         }
                         else
                         {
-                            startId = startId + splitStr.Length;
+                            startId += splitStr.Length;
                         }
                     }
                     else
@@ -376,13 +376,13 @@ namespace VoiceroidUtil.ViewModel
                     processSaving.Inverse(),
                     processDialogShowing.Inverse());
 
-            // TRT's拡張
-            Func<string, string> replacePreviewStrings = (string text)
-                => this.PreviewStyleValue.Value.IsPreviewReplacingToComma
-                ? text.Replace(this.PreviewStyleValue.Value.FileSplitString, "、")
-                      .Replace(this.PreviewStyleValue.Value.LineFeedString, "、")
-                : text.Replace(this.PreviewStyleValue.Value.FileSplitString, "")
-                      .Replace(this.PreviewStyleValue.Value.LineFeedString, "");
+            //// TRT's拡張
+            //Func<string, string> replacePreviewStrings = (string text)
+            //    => this.PreviewStyleValue.Value.IsPreviewReplacingToComma
+            //    ? text.Replace(this.PreviewStyleValue.Value.FileSplitString, "、")
+            //          .Replace(this.PreviewStyleValue.Value.LineFeedString, "、")
+            //    : text.Replace(this.PreviewStyleValue.Value.FileSplitString, "")
+            //          .Replace(this.PreviewStyleValue.Value.LineFeedString, "");
 
             // 再生/停止コマンド
             var playStopCommandHolder =
@@ -647,9 +647,9 @@ namespace VoiceroidUtil.ViewModel
             private string indices;
 
             public Collection<char> UnregisterdLetters = new Collection<char>();
-            char TempLetter = 'A';
+            readonly char TempLetter = 'A';
 
-            private string getIndices(string text, PreviewStyle style)
+            private string GetIndices(string text, PreviewStyle style)
             {
                 var typeface = new GlyphTypeface(style.Text.PreviewFontUri);
                 var indices = "";
@@ -676,7 +676,7 @@ namespace VoiceroidUtil.ViewModel
             {
                 text = text.Replace(Environment.NewLine, ";");
                 this.Text = text;
-                this.Indices = getIndices(text, style);
+                this.Indices = GetIndices(text, style);
             }
         }
 

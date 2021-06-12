@@ -29,8 +29,6 @@
                 <ResourceDictionary
                     Source="/VoiceroidUtil;component/resources/TabStyles.xaml" />
                 <ResourceDictionary
-                    Source="/VoiceroidUtil;component/resources/VoiceroidStyles.xaml" />
-                <ResourceDictionary
                     Source="/VoiceroidUtil;component/resources/Converters.xaml" />
                 <ResourceDictionary>
                     <ObjectDataProvider

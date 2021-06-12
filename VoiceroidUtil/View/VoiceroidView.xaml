@@ -258,6 +258,7 @@
                                                                     AncestorType={x:Type UserControl}}}"
                                                         Indices="{Binding Indices}"
                                                         />
+                                                            <!--Converter={StaticResource colorToBrushConverter}}"-->
                                                         <!--StyleSimulations="BoldSimulation"-->
                                                 </Grid>
                                             </DataTemplate>

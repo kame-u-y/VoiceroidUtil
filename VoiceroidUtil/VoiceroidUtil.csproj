@@ -161,6 +161,7 @@
     <Compile Include="TalkTextReplaceItem.cs" />
     <Compile Include="TalkTextReplaceItemCollection.cs" />
     <Compile Include="TalkTextReplacePreset.cs" />
+    <Compile Include="TRToys\ColorToBrushConverter.cs" />
     <Compile Include="TRToys\PreviewEnumListExtension.cs" />
     <Compile Include="TRToys\PreviewMovableValue.cs" />
     <Compile Include="TRToys\PreviewRenderComponent.cs" />

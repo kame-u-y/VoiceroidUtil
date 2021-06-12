@@ -138,7 +138,10 @@ namespace RucheHome.Voiceroid
                 {
                     return AutomationElement.FromHandle(handle);
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
                 return null;
             }
 
@@ -159,7 +162,9 @@ namespace RucheHome.Voiceroid
                             TreeScope.Children,
                             condition ?? Condition.TrueCondition);
                 }
-                catch { }
+                catch(Exception e) {
+                    Console.WriteLine(e);
+                }
                 return null;
             }
 

@@ -26,6 +26,7 @@ namespace VoiceroidUtil
             // イベントハンドラ追加のためにプロパティ経由で設定
             this.Render = new PreviewRenderComponent(() => this.SetPreviewFontSize());
             this.Text = new PreviewTextComponent(() => this.SetPreviewFontSize());
+            Console.WriteLine("はげなす");
         }
 
         /// <summary>
@@ -37,6 +38,7 @@ namespace VoiceroidUtil
             get => this.textSplitting;
             set
             {
+                Console.WriteLine("splitting is changed: " + value);
                 this.SetProperty(ref this.textSplitting, value);
                 this.SetPreviewFontSize();
             }
@@ -104,7 +106,7 @@ namespace VoiceroidUtil
         }
         private PreviewRenderComponent render = null;
 
-        /// <summary>
+        /// <summary> 
         /// テキストコンポーネントを取得または設定する。
         /// </summary>
         [DataMember]
@@ -220,9 +222,15 @@ namespace VoiceroidUtil
 
         private void SetPreviewFontSize()
         {
-            this.PreviewFontSize = this.Text.FontSize.Begin
-                * ((decimal)this.PreviewWindowWidth / (decimal)this.AviUtlWindowWidth)
-                * Render.Scale.Begin / (decimal)100.0;
+            if (this.Text != null && this.Render != null)
+            {
+                Console.WriteLine("hoge");
+                this.PreviewFontSize = 
+                    this.Text.FontSize.Begin
+                    * ((decimal)this.PreviewWindowWidth / (decimal)this.AviUtlWindowWidth)
+                    * Render.Scale.Begin / (decimal)100.0;
+
+            }
         }
         public decimal PreviewFontSize
         {
@@ -236,6 +244,6 @@ namespace VoiceroidUtil
     /// </summary>
     [OnDeserializing]
         private void OnDeserializing(StreamingContext context) =>
-            this.ResetDataMembers(VoiceroidId.YukariEx);
+            this.ResetDataMembers();
     }
 }

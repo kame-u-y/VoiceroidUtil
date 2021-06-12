@@ -285,7 +285,7 @@ namespace VoiceroidUtil
             get => this.previewStyleValue;
             set => this.SetProperty(ref this.previewStyleValue, value);
         }
-        private PreviewStyle previewStyleValue;
+        private PreviewStyle previewStyleValue = null;
 
         /// <summary>
         /// デシリアライズの直前に呼び出される。
