@@ -4,30 +4,19 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.Serialization;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
-using Microsoft.Win32;
 using RucheHome.AviUtl.ExEdit;
-using RucheHome.Text;
+using RucheHome.Util;
 using RucheHome.Util.Extensions.String;
 using WaterTrans.TypeLoader;
-//using TextAlignment = RucheHome.AviUtl.ExEdit.TextAlignment;
-using PreviewTextAlignment = VoiceroidUtil.TRToys.PreviewTextAlignment;
 
 namespace VoiceroidUtil.TRToys
 {
     [DataContract(Namespace = "")]
-    public class PreviewTextComponent : ComponentBase, ICloneable
+    public class PreviewTextComponent : BindableConfigBase
     {
-        
-        /// <summary>
-        /// コンポーネント名。
-        /// </summary>
-        public static readonly string ThisComponentName = @"テキスト";
-
         /// <summary>
         /// 規定のフォントファミリ名。
         /// </summary>
@@ -39,56 +28,18 @@ namespace VoiceroidUtil.TRToys
         public static readonly int TextLengthLimit = 1024 - 1;
 
         /// <summary>
-        /// 拡張編集オブジェクトファイルのアイテムコレクションに
-        /// コンポーネント名が含まれているか否かを取得する。
-        /// </summary>
-        /// <param name="items">アイテムコレクション。</param>
-        /// <returns>含まれているならば true 。そうでなければ false 。</returns>
-        public static bool HasComponentName(IniFileItemCollection items) =>
-            HasComponentNameCore(items, ThisComponentName);
-
-        /// <summary>
-        /// 拡張編集オブジェクトファイルのアイテムコレクションから
-        /// コンポーネントを作成する。
-        /// </summary>
-        /// <param name="items">アイテムコレクション。</param>
-        /// <returns>コンポーネント。</returns>
-        //public static PreviewTextComponent FromExoFileItems(IniFileItemCollection items) =>
-        //    FromExoFileItemsCore(items, () => new PreviewTextComponent());
-
-        /// <summary>
         /// コンストラクタ。
         /// </summary>
         public PreviewTextComponent() : base()
         {
+            this.FontSize = new PreviewMovableValue<FontSizeConst>();
         }
 
         public PreviewTextComponent(Action action) : base()
         {
             // イベントハンドラ追加のためにプロパティ経由で設定
             this.FontSize = new PreviewMovableValue<FontSizeConst>(action);
-
-            //this.SetPreviewFontSize = setPreviewFontSize;
         }
-
-        /// <summary>
-        /// コピーコンストラクタ。
-        /// </summary>
-        /// <param name="src">コピー元。</param>
-        public PreviewTextComponent(PreviewTextComponent src) : base()
-        {
-            if (src == null)
-            {
-                throw new ArgumentNullException(nameof(src));
-            }
-
-            src.CopyToCore(this);
-        }
-
-        /// <summary>
-        /// コンポーネント名を取得する。
-        /// </summary>
-        public override string ComponentName => ThisComponentName;
 
         /// <summary>
         /// フォントサイズを取得または設定する。
@@ -106,9 +57,6 @@ namespace VoiceroidUtil.TRToys
         }
         private PreviewMovableValue<FontSizeConst> fontSize = null;
 
-
-
-
         /// <summary>
         /// フォント色を取得または設定する。
         /// </summary>
@@ -121,24 +69,14 @@ namespace VoiceroidUtil.TRToys
                 this.SetProperty(
                     ref this.fontColor,
                     Color.FromRgb(value.R, value.G, value.B));
-                //this.PreviewFontColor = new SolidColorBrush(this.fontColor);
             }
         }
         private Color fontColor = Colors.Black;
-
-        //[DataMember]
-        //public SolidColorBrush PreviewFontColor
-        //{
-        //    get => this.previewFontColor;
-        //    private set => this.SetProperty(ref this.previewFontColor, value);
-        //}
-        //private SolidColorBrush previewFontColor = new SolidColorBrush(Colors.Black);
 
         public SolidColorBrush PreviewFontColor
         {
             get => new SolidColorBrush(this.FontColor);
         }
-
 
         /// <summary>
         /// フォントファミリ名を取得または設定する。
@@ -204,14 +142,8 @@ namespace VoiceroidUtil.TRToys
                 {
                     GlyphTypeface gtf = new GlyphTypeface(uri);
                     var cultureEnUS = new CultureInfo("en-US");
-
-                    //Console.WriteLine("===");
-                    //Console.WriteLine(uri);
-                    //Console.WriteLine(gtf.FaceNames[cultureEnUS]);
-
                     foreach (string familyName in gtf.FamilyNames.Values)
                     {
-                        //Console.WriteLine(familyName);
                         var faceName = gtf.FaceNames[cultureEnUS]
                                 .Replace(" Bold", string.Empty)
                                 .Replace(" Italic", string.Empty);
@@ -250,14 +182,6 @@ namespace VoiceroidUtil.TRToys
             // 最終的な辞書の作成
             foreach (string fontName in nameFaceToPath.Keys)
             {
-                //Console.WriteLine("======");
-                //Console.WriteLine("=="+fontName+"==");
-                //foreach (string s in nameFaceToPath[fontName].Keys)
-                //{
-                //    Console.WriteLine(s);
-                    
-                //}
-
                 if (nameFaceToPath[fontName].Keys.Count==1 && nameFaceToPath[fontName].ContainsKey("Bold"))
                 {
                     dic.Add(fontName, nameFaceToPath[fontName]["Bold"]);
@@ -281,11 +205,6 @@ namespace VoiceroidUtil.TRToys
                 }
             }
 
-            //foreach(string name in dic.Keys)
-            //{
-            //    Console.WriteLine(name + ":" + dic[name]);
-            //}
-
             return dic;
         }
 
@@ -295,8 +214,9 @@ namespace VoiceroidUtil.TRToys
             {
                 try
                 {
-                    Console.WriteLine("font uri");
-                    return FontPathDictionary[this.FontFamilyName];
+                    return FontPathDictionary.ContainsKey(this.FontFamilyName)
+                        ? FontPathDictionary[this.FontFamilyName]
+                        : FontPathDictionary["MS Gothic"];
                 }
                 catch (Exception e)
                 {
@@ -464,26 +384,10 @@ namespace VoiceroidUtil.TRToys
         }
 
         /// <summary>
-        /// このコンポーネントのクローンを作成する。
-        /// </summary>
-        /// <returns>クローン。</returns>
-        public PreviewTextComponent Clone() => new PreviewTextComponent(this);
-
-        /// <summary>
         /// デシリアライズの直前に呼び出される。
         /// </summary>
         [OnDeserializing]
         private void OnDeserializing(StreamingContext context) => this.ResetDataMembers();
-
-        #region ICloneable の明示的実装
-
-        /// <summary>
-        /// このオブジェクトのクローンを作成する。
-        /// </summary>
-        /// <returns>クローン。</returns>
-        object ICloneable.Clone() => this.Clone();
-
-        #endregion
 
         #region PreviewMovableValue{TConstants} ジェネリッククラス用の定数情報構造体群
 
@@ -503,6 +407,5 @@ namespace VoiceroidUtil.TRToys
         }
 
         #endregion
-
     }
 }

@@ -1107,7 +1107,7 @@ namespace VoiceroidUtil
                 }
 
                 // 音声用テキスト作成
-                voiceText = appConfig.PreviewStyleValue.RemovePreviewStrings(text);
+                voiceText = appConfig.PreviewStyle.RemovePreviewStrings(text);
                 voiceText = talkTextReplaceConfig?.VoiceReplaceItems.Replace(voiceText) ?? text;
                 if (!process.CanSaveBlankText && string.IsNullOrWhiteSpace(voiceText))
                 {
@@ -1230,12 +1230,12 @@ namespace VoiceroidUtil
 
             // テキストファイル保存
             string[] fileSplitStrings = { 
-                appConfig.PreviewStyleValue.FileSplitString, 
-                appConfig.PreviewStyleValue.FileSplitString + appConfig.PreviewStyleValue.LineFeedString };
+                appConfig.PreviewStyle.FileSplitString, 
+                appConfig.PreviewStyle.FileSplitString + appConfig.PreviewStyle.LineFeedString };
             string[] splitFileTexts = fileText.Split(fileSplitStrings, System.StringSplitOptions.RemoveEmptyEntries);
             if (appConfig.IsTextFileForceMaking)
             {
-                if (appConfig.PreviewStyleValue.IsTextSplitting)
+                if (appConfig.PreviewStyle.IsTextSplitting)
                 {
                     // TRToys'拡張：ファイルを分割してそれぞれ保存
                     var noExtFilePath = string.Format(
@@ -1244,7 +1244,7 @@ namespace VoiceroidUtil
                         Path.GetFileNameWithoutExtension(filePath));
                     for (int i=0; i<splitFileTexts.Length; i++)
                     {
-                        splitFileTexts[i] = splitFileTexts[i].Replace(appConfig.PreviewStyleValue.LineFeedString, "\n");
+                        splitFileTexts[i] = splitFileTexts[i].Replace(appConfig.PreviewStyle.LineFeedString, "\n");
                         if (!(await WriteTextFile($"{noExtFilePath}_{i}.txt", splitFileTexts[i], appConfig.IsTextFileUtf8)))
                         {
                             return
@@ -1276,8 +1276,8 @@ namespace VoiceroidUtil
                 if (!(await WriteTextFile(
                     txtPath, 
                     fileText
-                        .Replace(appConfig.PreviewStyleValue.FileSplitString,"")
-                        .Replace(appConfig.PreviewStyleValue.LineFeedString,""), 
+                        .Replace(appConfig.PreviewStyle.FileSplitString,"")
+                        .Replace(appConfig.PreviewStyle.LineFeedString,""), 
                     appConfig.IsTextFileUtf8)))
                 {
                     return MakeResult(
@@ -1298,7 +1298,7 @@ namespace VoiceroidUtil
 
 
             // .exo ファイル関連処理
-            var exoResult = appConfig.PreviewStyleValue.IsTextSplitting
+            var exoResult = appConfig.PreviewStyle.IsTextSplitting
                 ? await DoOperateMultiTextExo(
                     filePath,
                     voiceroidId,

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
 using RucheHome.Util;
+using VoiceroidUtil.TRToys;
 
 namespace VoiceroidUtil
 {
@@ -31,7 +32,7 @@ namespace VoiceroidUtil
             this.YmmCharaRelations = new YmmCharaRelationSet();
             this.AviUtlDropLayers = new AviUtlDropLayerSet();
 
-            this.PreviewStyleValue = new PreviewStyle();
+            this.PreviewStyle = new PreviewStyle();
         }
 
         /// <summary>
@@ -280,7 +281,7 @@ namespace VoiceroidUtil
 
 
         [DataMember]
-        public PreviewStyle PreviewStyleValue
+        public PreviewStyle PreviewStyle
         {
             get => this.previewStyleValue;
             set => 

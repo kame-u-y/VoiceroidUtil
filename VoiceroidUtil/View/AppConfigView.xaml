@@ -204,7 +204,7 @@
                         <!-- TRToys'拡張：追加設定 -->
                         <CheckBox
                             Content="TRT's拡張：指定文字列により、字幕の改行・分割処理を行う"
-                            IsChecked="{Binding PreviewStyleValue.Value.IsTextSplitting}"
+                            IsChecked="{Binding PreviewStyle.Value.IsTextSplitting}"
                             Margin="0,4,0,0" />
                         <Grid Margin="20,4,0,0">
                             <Grid.RowDefinitions>
@@ -223,9 +223,9 @@
                                 Content="改行用文字列："/>
                             <TextBox
                                 Grid.Row="0" Grid.Column="2"
-                                Text="{Binding PreviewStyleValue.Value.LineFeedString}"
+                                Text="{Binding PreviewStyle.Value.LineFeedString}"
                                 IsEnabled="{Binding 
-                                    Path=PreviewStyleValue.Value.IsTextSplitting, 
+                                    Path=PreviewStyle.Value.IsTextSplitting, 
                                     Mode=OneWay}"
                                 Width="30"/>
                             <Label 
@@ -233,16 +233,16 @@
                                 Content="ファイル分割用文字列："/>
                             <TextBox
                                 Grid.Row="2" Grid.Column="2"
-                                Text="{Binding PreviewStyleValue.Value.FileSplitString}"
+                                Text="{Binding PreviewStyle.Value.FileSplitString}"
                                 IsEnabled="{Binding 
-                                    Path=PreviewStyleValue.Value.IsTextSplitting, 
+                                    Path=PreviewStyle.Value.IsTextSplitting, 
                                     Mode=OneWay}"
                                 Width="30"/>
                         </Grid>
                         <!--<CheckBox
                             Content="再生時、改行・分割用文字列を「、」に変換"
-                            IsChecked="{Binding PreviewStyleValue.Value.IsPreviewReplacingToComma}"
-                            IsEnabled="{Binding PreviewStyleValue.Value.IsTextSplitting}"
+                            IsChecked="{Binding PreviewStyle.Value.IsPreviewReplacingToComma}"
+                            IsEnabled="{Binding PreviewStyle.Value.IsTextSplitting}"
                             Margin="20,4,0,0" />-->
                         <StackPanel>
                             <StackPanel.Style>
@@ -250,7 +250,7 @@
                                     <Setter Property="Visibility" Value="Visible"/>
                                     <Style.Triggers>
                                         <DataTrigger
-                                            Binding="{Binding PreviewStyleValue.Value.IsTextSplitting}"
+                                            Binding="{Binding PreviewStyle.Value.IsTextSplitting}"
                                             Value="False">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                         </DataTrigger>
@@ -286,7 +286,7 @@
                                         HorizontalAlignment="Left"
                                         x:Name="AviUtl_WindowWidth"
                                         Value="{Binding
-                                            Path=PreviewStyleValue.Value.AviUtlWindowWidth,
+                                            Path=PreviewStyle.Value.AviUtlWindowWidth,
                                             UpdateSourceTrigger=PropertyChanged}"
                                         Minimum="1"
                                         Maximum="9999"
@@ -300,7 +300,7 @@
                                         HorizontalAlignment="Left"
                                         x:Name="Preview_WindowWidth"
                                         Value="{Binding
-                                            Path=PreviewStyleValue.Value.PreviewWindowWidth,
+                                            Path=PreviewStyle.Value.PreviewWindowWidth,
                                             UpdateSourceTrigger=PropertyChanged}"
                                         Minimum="1"
                                         Maximum="9999"
@@ -317,11 +317,11 @@
                                         <tk:IntegerUpDown
                                             x:Name="Text_MarginLeft"
                                             Value="{Binding
-                                                Path=PreviewStyleValue.Value.AviUtlLeftMargin,
+                                                Path=PreviewStyle.Value.AviUtlLeftMargin,
                                                 UpdateSourceTrigger=PropertyChanged}"
                                             Increment="1"
                                             Minimum="0"
-                                            Maximum="{Binding PreviewStyleValue.Value.AviUtlWindowWidth}"
+                                            Maximum="{Binding PreviewStyle.Value.AviUtlWindowWidth}"
                                             Width="56"
                                             Margin="4,0,0,0" />
                                         <Label
@@ -331,11 +331,11 @@
                                         <tk:IntegerUpDown
                                             x:Name="Text_MarginRight"
                                             Value="{Binding
-                                                Path=PreviewStyleValue.Value.AviUtlRightMargin,
+                                                Path=PreviewStyle.Value.AviUtlRightMargin,
                                                 UpdateSourceTrigger=PropertyChanged}"
                                             Increment="1"
                                             Minimum="0"
-                                            Maximum="{Binding PreviewStyleValue.Value.AviUtlWindowWidth}"
+                                            Maximum="{Binding PreviewStyle.Value.AviUtlWindowWidth}"
                                             Width="56"
                                             Margin="4,0,0,0" />
                                     </StackPanel>
@@ -405,7 +405,7 @@
                                         </StackPanel>
                                         <Label
                                             Grid.Row="2" Grid.Column="0"
-                                            Content="配置(_G):"
+                                            Content="配置："
                                             Target="{Binding ElementName=Text_TextAlignment}"/>
                                         <StackPanel 
                                             Grid.Row="2" Grid.Column="2"
@@ -427,7 +427,7 @@
                                         </StackPanel>
                                         <Label
                                             Grid.Row="4" Grid.Column="0"
-                                            Content="字間(_T):"
+                                            Content="字間："
                                             Target="{Binding ElementName=Text_LetterSpace}"/>
                                         <StackPanel 
                                             Orientation="Horizontal"

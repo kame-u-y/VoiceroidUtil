@@ -8,6 +8,6 @@
     <ru:EnumValueDisplayConverter x:Key="enumDisplayConverter" />
     <ru:BooleanVisibilityConverter x:Key="boolVisibilityConverter" />
     <ru:MultiCommandConverter x:Key="multiCommandConverter" />
-    <ru:BoolToEnumConverter x:Key="boolToEnumConverter" />
+    <trt:BoolToEnumConverter x:Key="boolToEnumConverter" />
 </ResourceDictionary>
     <!--<trt:ColorToBrushConverter x:Key="colorToBrushConverter"/>-->

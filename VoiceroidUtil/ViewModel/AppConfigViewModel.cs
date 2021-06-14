@@ -123,15 +123,15 @@ namespace VoiceroidUtil.ViewModel
 
             // TRToys'拡張
             // プレビューの設定
-            this.PreviewStyleValue =
-                this.MakeInnerPropertyOf(config, c => c.PreviewStyleValue);
+            this.PreviewStyle =
+                this.MakeInnerPropertyOf(config, c => c.PreviewStyle);
 
             // プレビュー字幕テキストのフォント関連の設定
             this.PreviewText =
-                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyleValue, c => c.Text);
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.Text);
             // プレビュー字幕テキストの表示関連の設定
             this.PreviewRender =
-                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyleValue, c => c.Render);
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.Render);
 
             // プレビュー設定「拡大率」のMovableValueViewModel
             this.PreviewScale =
@@ -383,7 +383,7 @@ namespace VoiceroidUtil.ViewModel
         /// <summary>
         /// TRToys'拡張：プレビューの設定を取得する。
         /// </summary>
-        public IReactiveProperty<PreviewStyle> PreviewStyleValue { get; }
+        public IReactiveProperty<PreviewStyle> PreviewStyle { get; }
 
         /// <summary>
         /// TRToys'拡張：プレビュー字幕テキストのフォント関連の設定を取得する。

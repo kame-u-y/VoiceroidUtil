@@ -8,7 +8,7 @@ using RucheHome.Util;
 using RucheHome.Voiceroid;
 using VoiceroidUtil.TRToys;
 
-namespace VoiceroidUtil
+namespace VoiceroidUtil.TRToys
 {
     /// <summary>
     /// TRToys'拡張：プレビュー用の設定・スタイルを保持するクラス。
@@ -26,7 +26,7 @@ namespace VoiceroidUtil
             // イベントハンドラ追加のためにプロパティ経由で設定
             this.Render = new PreviewRenderComponent(() => this.SetPreviewFontSize());
             this.Text = new PreviewTextComponent(() => this.SetPreviewFontSize());
-            Console.WriteLine("はげなす");
+            Console.WriteLine("あげなす");
         }
 
         /// <summary>

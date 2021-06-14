@@ -1,26 +1,14 @@
 ﻿using RucheHome.AviUtl.ExEdit;
-using RucheHome.Text;
+using RucheHome.Util;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VoiceroidUtil.TRToys
 {
     [DataContract(Namespace = "")]
-    public class PreviewRenderComponent : ComponentBase, ICloneable
+    public class PreviewRenderComponent : BindableConfigBase
     {
-       
-        /// <summary>
-        /// コンポーネント名。
-        /// </summary>
-        public static readonly string ThisComponentName = @"標準描画";
-
         /// <summary>
         /// コンストラクタ。
         /// </summary>
@@ -37,26 +25,6 @@ namespace VoiceroidUtil.TRToys
         }
 
         /// <summary>
-        /// コピーコンストラクタ。
-        /// </summary>
-        /// <param name="src">コピー元。</param>
-        public PreviewRenderComponent(PreviewRenderComponent src) : base()
-        {
-            if (src == null)
-            {
-                throw new ArgumentNullException(nameof(src));
-            }
-
-            src.CopyToCore(this);
-        }
-
-        /// <summary>
-        /// コンポーネント名を取得する。
-        /// </summary>
-        public override string ComponentName => ThisComponentName;
-
-
-        /// <summary>
         /// 拡大率を取得または設定する。
         /// </summary>
         [DataMember]
@@ -71,28 +39,10 @@ namespace VoiceroidUtil.TRToys
         private PreviewMovableValue<ScaleConst> scale = null;
 
         /// <summary>
-        /// このコンポーネントのクローンを作成する。
-        /// </summary>
-        /// <returns>クローン。</returns>
-        public PreviewRenderComponent Clone() => new PreviewRenderComponent(this);
-
-        
-
-        /// <summary>
         /// デシリアライズの直前に呼び出される。
         /// </summary>
         [OnDeserializing]
         private void OnDeserializing(StreamingContext context) => this.ResetDataMembers();
-
-        #region ICloneable の明示的実装
-
-        /// <summary>
-        /// このオブジェクトのクローンを作成する。
-        /// </summary>
-        /// <returns>クローン。</returns>
-        object ICloneable.Clone() => this.Clone();
-
-        #endregion
 
         #region PreviewMovableValue{TConstants} ジェネリッククラス用の定数情報構造体群
 

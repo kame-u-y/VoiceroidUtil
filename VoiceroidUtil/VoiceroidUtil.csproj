@@ -131,8 +131,9 @@
     <Compile Include="AviUtlDropLayerSet.cs" />
     <Compile Include="ConfigManager.cs" />
     <Compile Include="ErrorLogFileTraceListener.cs" />
-    <Compile Include="PreviewCharaStyleSet.cs" />
-    <Compile Include="PreviewStyle.cs" />
+    <Compile Include="TRToys\BoolToEnumConverter.cs" />
+    <Compile Include="TRToys\PreviewEnumListExtension.cs" />
+    <Compile Include="TRToys\PreviewStyle.cs" />
     <Compile Include="ExoCharaStyle.cs" />
     <Compile Include="ExoCharaStyleSet.cs" />
     <Compile Include="ExoCommonConfig.cs" />
@@ -162,7 +163,6 @@
     <Compile Include="TalkTextReplaceItemCollection.cs" />
     <Compile Include="TalkTextReplacePreset.cs" />
     <Compile Include="TRToys\ColorToBrushConverter.cs" />
-    <Compile Include="TRToys\PreviewEnumListExtension.cs" />
     <Compile Include="TRToys\PreviewMovableValue.cs" />
     <Compile Include="TRToys\PreviewRenderComponent.cs" />
     <Compile Include="TRToys\PreviewTextAlignment.cs" />
