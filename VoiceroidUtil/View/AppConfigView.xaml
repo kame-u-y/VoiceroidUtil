@@ -201,7 +201,7 @@
                             FontSize="11"
                             Margin="20,0,0,0" />
 
-                        <!-- TRToys'拡張：追加設定 -->
+                        <!-- TRT's拡張：追加設定 -->
                         <CheckBox
                             Content="TRT's拡張：指定文字列により、字幕の改行・分割処理を行う"
                             IsChecked="{Binding PreviewStyle.Value.IsTextSplitting}"
@@ -452,7 +452,7 @@
                                 </StackPanel>
                             </Border>
                         </StackPanel>
-                        <!-- /TRToys'拡張 -->
+                        <!-- /TRT's拡張 -->
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>

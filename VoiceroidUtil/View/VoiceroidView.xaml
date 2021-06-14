@@ -163,7 +163,7 @@
                         DropCommand="{Binding DropTalkTextFileCommand}" />
                 </i:Interaction.Behaviors>
             </v:ImeWatermarkTextBox>
-            <!-- TRToys'拡張：プレビューウィンドウ -->
+            <!-- TRT's拡張：プレビューウィンドウ -->
                 <!--Background="#fafafa"-->
             <Border
                 BorderBrush="Silver"
@@ -333,7 +333,7 @@
                     </Grid>
                 </Grid>
             </Border>
-            <!-- /TRToys'拡張 -->
+            <!-- /TRT's拡張 -->
         </Grid>
 
         <!-- Row 2 -->

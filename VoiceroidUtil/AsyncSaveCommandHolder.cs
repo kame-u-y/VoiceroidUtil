@@ -427,7 +427,7 @@ namespace VoiceroidUtil
         }
 
         /// <summary>
-        /// TRToys'拡張：設定を基に複数のテキストを含むAviUtl拡張編集ファイル関連の処理を行う。
+        /// TRT's拡張：設定を基に複数のテキストを含むAviUtl拡張編集ファイル関連の処理を行う。
         /// </summary>
         /// <param name="filePath">WAVEファイルパス。</param>
         /// <param name="voiceroidId">VOICEROID識別ID。</param>
@@ -607,7 +607,7 @@ namespace VoiceroidUtil
         }
 
         /// <summary>
-        /// TRToys'拡張：設定を基に複数をテキストを含むAviUtl拡張編集ファイルの保存処理を行う。
+        /// TRT's拡張：設定を基に複数をテキストを含むAviUtl拡張編集ファイルの保存処理を行う。
         /// </summary>
         /// <param name="exoFilePath">AviUtl拡張編集ファイルパス。</param>
         /// <param name="waveFilePath">WAVEファイルパス。</param>
@@ -1237,7 +1237,7 @@ namespace VoiceroidUtil
             {
                 if (appConfig.PreviewStyle.IsTextSplitting)
                 {
-                    // TRToys'拡張：ファイルを分割してそれぞれ保存
+                    // TRT's拡張：ファイルを分割してそれぞれ保存
                     var noExtFilePath = string.Format(
                         "{0}\\{1}",
                         Path.GetDirectoryName(filePath),
@@ -1257,7 +1257,7 @@ namespace VoiceroidUtil
                         }
                     }
 
-                    // TRToys'拡張：再編集用の生テキストファイルを保存
+                    // TRT's拡張：再編集用の生テキストファイルを保存
                     var previewTxtPath = string.Format(
                         "{0}\\PreviewRawText\\{1}",
                         Path.GetDirectoryName(filePath),

@@ -121,7 +121,7 @@ namespace VoiceroidUtil.ViewModel
                     this.CanModify,
                     this.IsExoFileMakingCommandVisible);
 
-            // TRToys'拡張
+            // TRT's拡張
             // プレビューの設定
             this.PreviewStyle =
                 this.MakeInnerPropertyOf(config, c => c.PreviewStyle);
@@ -381,32 +381,32 @@ namespace VoiceroidUtil.ViewModel
 
 
         /// <summary>
-        /// TRToys'拡張：プレビューの設定を取得する。
+        /// TRT's拡張：プレビューの設定を取得する。
         /// </summary>
         public IReactiveProperty<PreviewStyle> PreviewStyle { get; }
 
         /// <summary>
-        /// TRToys'拡張：プレビュー字幕テキストのフォント関連の設定を取得する。
+        /// TRT's拡張：プレビュー字幕テキストのフォント関連の設定を取得する。
         /// </summary>
         public IReadOnlyReactiveProperty<PreviewRenderComponent> PreviewRender { get; }
 
         /// <summary>
-        /// TRToys'拡張：プレビュー字幕テキストの表示関連の設定を取得する。
+        /// TRT's拡張：プレビュー字幕テキストの表示関連の設定を取得する。
         /// </summary>
         public IReadOnlyReactiveProperty<PreviewTextComponent> PreviewText { get; }
 
         /// <summary>
-        /// TRToys'拡張：プレビュー設定「拡大率」のMovableValueViewModelを取得・設定する。
+        /// TRT's拡張：プレビュー設定「拡大率」のMovableValueViewModelを取得・設定する。
         /// </summary>
         public MovableValueViewModel PreviewScale { get; set; }
 
         /// <summary>
-        /// TRToys'拡張：プレビュー設定「サイズ」のMovableValueViewModelを取得・設定する。
+        /// TRT's拡張：プレビュー設定「サイズ」のMovableValueViewModelを取得・設定する。
         /// </summary>
         public MovableValueViewModel PreviewFontSize { get; set; }
 
         /// <summary>
-        /// TRToys'拡張：フォントファミリ名列挙を取得する。
+        /// TRT's拡張：フォントファミリ名列挙を取得する。
         /// </summary>
         public IEnumerable<string> FontFamilyNames { get; }
 

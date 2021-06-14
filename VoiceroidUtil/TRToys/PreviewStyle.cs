@@ -11,7 +11,7 @@ using VoiceroidUtil.TRToys;
 namespace VoiceroidUtil.TRToys
 {
     /// <summary>
-    /// TRToys'拡張：プレビュー用の設定・スタイルを保持するクラス。
+    /// TRT's拡張：プレビュー用の設定・スタイルを保持するクラス。
     /// </summary>
     [DataContract(Namespace = "")]
     public class PreviewStyle : BindableConfigBase
@@ -30,7 +30,7 @@ namespace VoiceroidUtil.TRToys
         }
 
         /// <summary>
-        /// TRToys'拡張：字幕テキストに対して改行・分割処理を適用するか否かを取得または設定する。
+        /// TRT's拡張：字幕テキストに対して改行・分割処理を適用するか否かを取得または設定する。
         /// </summary>
         [DataMember]
         public bool IsTextSplitting

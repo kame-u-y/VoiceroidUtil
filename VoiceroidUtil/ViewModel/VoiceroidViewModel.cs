@@ -177,7 +177,7 @@ namespace VoiceroidUtil.ViewModel
             this.IsTalkTextTabAccepted =
                 this.MakeInnerPropertyOf(appConfig, c => c.IsTabAccepted);
 
-            // TRToys'拡張
+            // TRT's拡張
             this.PreviewStyle =
                 this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyle);
 
@@ -219,7 +219,7 @@ namespace VoiceroidUtil.ViewModel
             this.TalkText.Subscribe(v => TalkTextHandle()).AddTo(this.CompositeDisposable);
             this.TalkTextSelectionStart.Subscribe(v => CallUpdatePreview.Invoke()).AddTo(this.CompositeDisposable);
 
-            // TRToys'拡張：一つ前のプレビューシーンに戻るコマンド
+            // TRT's拡張：一つ前のプレビューシーンに戻るコマンド
             this.BackSceneCommand =
                 this.MakeCommand(
                     () =>
@@ -232,7 +232,7 @@ namespace VoiceroidUtil.ViewModel
                         this.TalkTextSelectionStart.Value = backStartId + 1;
                     });
 
-            // TRToys'拡張：一つ後のプレビューシーンに進むコマンド
+            // TRT's拡張：一つ後のプレビューシーンに進むコマンド
             this.NextSceneCommand =
                 this.MakeCommand(
                     () =>
@@ -485,38 +485,38 @@ namespace VoiceroidUtil.ViewModel
         public IReactiveProperty<string> TalkText { get; }
         
         /// <summary>
-        /// TRToys'拡張：プレビュー用の設定を取得する。
+        /// TRT's拡張：プレビュー用の設定を取得する。
         /// </summary>
         public IReactiveProperty<PreviewStyle> PreviewStyle { get; set; }
 
         /// <summary>
-        /// TRToys'拡張：字幕テキストに対する改行・分割処理を適用するかの設定を取得する。
+        /// TRT's拡張：字幕テキストに対する改行・分割処理を適用するかの設定を取得する。
         /// </summary>
         public IReadOnlyReactiveProperty<bool> IsTextSplitting { get; }
 
         /// <summary>
-        /// TRToys'拡張：入力テキストの折り返しするかの設定を取得する。
+        /// TRT's拡張：入力テキストの折り返しするかの設定を取得する。
         /// </summary>
         public IReadOnlyReactiveProperty<bool> IsTextWrapping { get; }
 
         /// <summary>
-        /// TRToys'拡張：IsTextSplittingとIsTextWrappingから折り返しの設定値を取得する
+        /// TRT's拡張：IsTextSplittingとIsTextWrappingから折り返しの設定値を取得する
         /// </summary>
         public IReadOnlyReactiveProperty<TextWrapping> TextWrapValue { get; }
 
         /// <summary>
-        /// TRToys'拡張：プレビューが複数シーンであるかを取得・設定する。
+        /// TRT's拡張：プレビューが複数シーンであるかを取得・設定する。
         /// </summary>
         public IReactiveProperty<bool> IsMultiScenePreview { get; set; }
         
         /// <summary>
-        /// TRToys'拡張：現在表示プレビューが最初のシーンであるかを取得・設定する。
+        /// TRT's拡張：現在表示プレビューが最初のシーンであるかを取得・設定する。
         /// Style.Triggerに利用。Converterを検討する必要あり
         /// </summary>
         public IReactiveProperty<bool> IsFirstScene { get; set; }
 
         /// <summary>
-        /// TRToys'拡張：現在表示プレビューが最後のシーンであるかを取得・設定する。
+        /// TRT's拡張：現在表示プレビューが最後のシーンであるかを取得・設定する。
         /// Style.Triggerに利用。Converterを検討する必要あり
         /// </summary>
         public IReactiveProperty<bool> IsLastScene { get; set; }
@@ -675,18 +675,18 @@ namespace VoiceroidUtil.ViewModel
         }
 
         /// <summary>
-        /// TRToys'拡張：現在表示シーンの字幕テキストを構成する行ごとのデータリスト
+        /// TRT's拡張：現在表示シーンの字幕テキストを構成する行ごとのデータリスト
         /// </summary>
         public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
 
 
         /// <summary>
-        /// TRToys'拡張：一つ前のプレビューシーンに戻るコマンド
+        /// TRT's拡張：一つ前のプレビューシーンに戻るコマンド
         /// </summary>
         public ICommand BackSceneCommand { get; }
         
         /// <summary>
-        /// TRToys'拡張：一つ後のプレビューシーンに進むコマンド
+        /// TRT's拡張：一つ後のプレビューシーンに進むコマンド
         /// </summary>
         public ICommand NextSceneCommand { get; }
 
