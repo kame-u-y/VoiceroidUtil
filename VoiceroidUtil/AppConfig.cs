@@ -283,7 +283,10 @@ namespace VoiceroidUtil
         public PreviewStyle PreviewStyleValue
         {
             get => this.previewStyleValue;
-            set => this.SetProperty(ref this.previewStyleValue, value);
+            set => 
+                this.SetPropertyWithPropertyChangedChain(
+                    ref this.previewStyleValue, 
+                    value ?? new PreviewStyle());
         }
         private PreviewStyle previewStyleValue = null;
 

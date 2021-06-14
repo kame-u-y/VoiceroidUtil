@@ -261,6 +261,7 @@ namespace VoiceroidUtil
                 var c = this.AppConfig.Value;
                 c.SynchronizationContext = context;
                 c.YmmCharaRelations.SynchronizationContext = context;
+                c.PreviewStyleValue.SynchronizationContext = context;
             }
             {
                 var c = this.UIConfig.Value;

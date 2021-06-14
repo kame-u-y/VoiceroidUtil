@@ -59,6 +59,10 @@ namespace VoiceroidUtil.TRToys
         /// <summary>
         /// コンストラクタ。
         /// </summary>
+        public PreviewTextComponent() : base()
+        {
+        }
+
         public PreviewTextComponent(Action action) : base()
         {
             // イベントハンドラ追加のためにプロパティ経由で設定
@@ -117,18 +121,23 @@ namespace VoiceroidUtil.TRToys
                 this.SetProperty(
                     ref this.fontColor,
                     Color.FromRgb(value.R, value.G, value.B));
-                this.PreviewFontColor = new SolidColorBrush(this.fontColor);
+                //this.PreviewFontColor = new SolidColorBrush(this.fontColor);
             }
         }
         private Color fontColor = Colors.Black;
 
-        [DataMember]
+        //[DataMember]
+        //public SolidColorBrush PreviewFontColor
+        //{
+        //    get => this.previewFontColor;
+        //    private set => this.SetProperty(ref this.previewFontColor, value);
+        //}
+        //private SolidColorBrush previewFontColor = new SolidColorBrush(Colors.Black);
+
         public SolidColorBrush PreviewFontColor
         {
-            get => this.previewFontColor;
-            private set => this.SetProperty(ref this.previewFontColor, value);
+            get => new SolidColorBrush(this.FontColor);
         }
-        private SolidColorBrush previewFontColor = new SolidColorBrush(Colors.Black);
 
 
         /// <summary>
@@ -175,6 +184,7 @@ namespace VoiceroidUtil.TRToys
                     .Concat(
                         Directory.GetFiles(FontDir, "*.ttc")
                             .Concat(Directory.GetFiles(UserFontDir, "*.ttc")
+
                     ).SelectMany(p => 
                     {
                         using (var fs = new FileStream(p, FileMode.Open, FileAccess.Read))

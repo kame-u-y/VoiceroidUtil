@@ -3,9 +3,10 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
+using RucheHome.AviUtl.ExEdit;
 using RucheHome.Util;
 
-namespace RucheHome.AviUtl.ExEdit
+namespace VoiceroidUtil.TRToys
 {
     /// <summary>
     /// 移動可能な数値を表すジェネリッククラス。
