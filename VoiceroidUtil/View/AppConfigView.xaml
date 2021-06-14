@@ -239,6 +239,13 @@
                                     Mode=OneWay}"
                                 Width="30"/>
                         </Grid>
+                        <CheckBox
+                            Content="入力テキストの行を右端で折り返す"
+                            IsChecked="{Binding PreviewStyle.Value.IsTextWrapping}"
+                            IsEnabled="{Binding
+                                Path=PreviewStyle.Value.IsTextSplitting,
+                                Mode=OneWay}"
+                            Margin="20,4,0,0"/>
                         <!--<CheckBox
                             Content="再生時、改行・分割用文字列を「、」に変換"
                             IsChecked="{Binding PreviewStyle.Value.IsPreviewReplacingToComma}"

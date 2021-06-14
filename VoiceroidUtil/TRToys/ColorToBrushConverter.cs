@@ -29,7 +29,7 @@ namespace VoiceroidUtil.TRToys
             object parameter,
             CultureInfo culture)
         => (value is Color c) ?
-                new SolidColorBrush(c) : DependencyProperty.UnsetValue;
+            new SolidColorBrush(c) : DependencyProperty.UnsetValue;
 
 
         /// <summary>
@@ -46,6 +46,6 @@ namespace VoiceroidUtil.TRToys
             object parameter,
             CultureInfo culture)
         => (value is SolidColorBrush sc) ?
-                sc.Color : DependencyProperty.UnsetValue;
+            sc.Color : DependencyProperty.UnsetValue;
     }
 }

@@ -124,8 +124,9 @@
                 Margin="0,2,0,0"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Auto"
-                BindableSelectionStart="{
-                    Binding TalkTextSelectionStart.Value,
+                TextWrapping="{Binding TextWrapValue.Value}"
+                BindableSelectionStart="{Binding 
+                    Path=TalkTextSelectionStart.Value,
                     Mode=TwoWay}">
                 <v:ImeWatermarkTextBox.Style>
                     <Style

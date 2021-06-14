@@ -181,6 +181,16 @@ namespace VoiceroidUtil.ViewModel
             this.PreviewStyle =
                 this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyle);
 
+            this.IsTextSplitting =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.IsTextSplitting);
+            this.IsTextWrapping =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.IsTextWrapping);
+            this.TextWrapValue =
+                this.IsTextSplitting.CombineLatest(
+                    this.IsTextWrapping,
+                    (s, w) => (s && w ? TextWrapping.Wrap : TextWrapping.NoWrap))
+                .ToReadOnlyReactiveProperty();
+            
             this.IsMultiScenePreview =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
             this.IsFirstScene =
@@ -475,9 +485,24 @@ namespace VoiceroidUtil.ViewModel
         public IReactiveProperty<string> TalkText { get; }
         
         /// <summary>
-        /// プレビュー用の設定を取得する。
+        /// TRToys'拡張：プレビュー用の設定を取得する。
         /// </summary>
         public IReactiveProperty<PreviewStyle> PreviewStyle { get; set; }
+
+        /// <summary>
+        /// TRToys'拡張：字幕テキストに対する改行・分割処理を適用するかの設定を取得する。
+        /// </summary>
+        public IReadOnlyReactiveProperty<bool> IsTextSplitting { get; }
+
+        /// <summary>
+        /// TRToys'拡張：入力テキストの折り返しするかの設定を取得する。
+        /// </summary>
+        public IReadOnlyReactiveProperty<bool> IsTextWrapping { get; }
+
+        /// <summary>
+        /// TRToys'拡張：IsTextSplittingとIsTextWrappingから折り返しの設定値を取得する
+        /// </summary>
+        public IReadOnlyReactiveProperty<TextWrapping> TextWrapValue { get; }
 
         /// <summary>
         /// TRToys'拡張：プレビューが複数シーンであるかを取得・設定する。

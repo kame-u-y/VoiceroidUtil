@@ -78,7 +78,6 @@
     <Compile Include="Windows\Mvvm\Commands\RelayCommand.cs" />
     <Compile Include="Windows\Mvvm\Converters\BooleanInverter.cs" />
     <Compile Include="Windows\Mvvm\Converters\BooleanVisibilityConverter.cs" />
-    <Compile Include="Windows\Mvvm\Converters\BoolToEnumConverter.cs" />
     <Compile Include="Windows\Mvvm\Converters\EnumValueDisplayConverter.cs" />
     <Compile Include="Windows\Mvvm\Converters\MultiCommandConverter.cs" />
     <Compile Include="Windows\Mvvm\Converters\MultiEnumerableEachConverter.cs" />

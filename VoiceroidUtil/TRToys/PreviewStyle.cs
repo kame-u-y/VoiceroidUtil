@@ -30,7 +30,7 @@ namespace VoiceroidUtil.TRToys
         }
 
         /// <summary>
-        /// TRToys'拡張：字幕テキストに対して改行or分割処理を適用するか否かを取得または設定する。
+        /// TRToys'拡張：字幕テキストに対して改行・分割処理を適用するか否かを取得または設定する。
         /// </summary>
         [DataMember]
         public bool IsTextSplitting
@@ -79,18 +79,14 @@ namespace VoiceroidUtil.TRToys
                 return text.Replace(this.FileSplitString, "").Replace(LineFeedString, "");
             }
         }
-
-        /// <summary>
-        /// 改行・分割用文字列の文字列を音声再生時に「、」へ変換する
-        /// </summary>
+        
         [DataMember]
-        public bool IsPreviewReplacingToComma
+        public bool IsTextWrapping
         {
-            get => this.isPreviewReplacingToComma;
-            set => this.SetProperty(ref this.isPreviewReplacingToComma, value);
+            get => this.isTextWrapping;
+            set => this.SetProperty(ref this.isTextWrapping, value);
         }
-        private bool isPreviewReplacingToComma = false;
-
+        private bool isTextWrapping = true;
 
         /// <summary>
         /// 標準描画コンポーネントを取得または設定する。

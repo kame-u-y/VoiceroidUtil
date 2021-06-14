@@ -131,7 +131,6 @@
     <Compile Include="AviUtlDropLayerSet.cs" />
     <Compile Include="ConfigManager.cs" />
     <Compile Include="ErrorLogFileTraceListener.cs" />
-    <Compile Include="TRToys\BoolToEnumConverter.cs" />
     <Compile Include="TRToys\PreviewEnumListExtension.cs" />
     <Compile Include="TRToys\PreviewStyle.cs" />
     <Compile Include="ExoCharaStyle.cs" />
