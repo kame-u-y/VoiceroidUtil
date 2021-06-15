@@ -461,6 +461,11 @@ namespace VoiceroidUtil
                     gcmzResult = UpdateExoCommonConfigByAviUtl(ref common);
                 }
 
+                // それぞれのテキストを指定文字列により改行処理
+                for (int i = 0; i < textList.Length; i++) {
+                    textList[i] = textList[i].Replace(appConfig.PreviewStyle.LineFeedString, "\n");
+                }
+                
                 // ファイル保存
                 var exo =
                     await DoOperateMultiTextExoSave(
@@ -1181,6 +1186,7 @@ namespace VoiceroidUtil
                         voiceroid2Like ? @"一度再生を行ってみてください。" : null);
             }
 
+            Console.WriteLine("揚げなす");
             // WAVEファイル保存
             var result = await process.Save(filePath);
             if (!result.IsSucceeded)
@@ -1233,9 +1239,10 @@ namespace VoiceroidUtil
                 appConfig.PreviewStyle.FileSplitString, 
                 appConfig.PreviewStyle.FileSplitString + appConfig.PreviewStyle.LineFeedString };
             string[] splitFileTexts = fileText.Split(fileSplitStrings, System.StringSplitOptions.RemoveEmptyEntries);
+            Console.WriteLine(splitFileTexts.Length);
             if (appConfig.IsTextFileForceMaking)
             {
-                if (appConfig.PreviewStyle.IsTextSplitting)
+                if (appConfig.PreviewStyle.IsTextSplitting && splitFileTexts.Length > 1)
                 {
                     // TRT's拡張：ファイルを分割してそれぞれ保存
                     var noExtFilePath = string.Format(
@@ -1244,8 +1251,8 @@ namespace VoiceroidUtil
                         Path.GetFileNameWithoutExtension(filePath));
                     for (int i=0; i<splitFileTexts.Length; i++)
                     {
-                        splitFileTexts[i] = splitFileTexts[i].Replace(appConfig.PreviewStyle.LineFeedString, "\n");
-                        if (!(await WriteTextFile($"{noExtFilePath}_{i}.txt", splitFileTexts[i], appConfig.IsTextFileUtf8)))
+                        var splitText = splitFileTexts[i].Replace(appConfig.PreviewStyle.LineFeedString, "\n");
+                        if (!(await WriteTextFile($"{noExtFilePath}_{i}.txt", splitText, appConfig.IsTextFileUtf8)))
                         {
                             return
                                 MakeResult(
@@ -1255,21 +1262,6 @@ namespace VoiceroidUtil
                                     AppStatusType.Fail,
                                     @"テキストファイルを保存できませんでした。");
                         }
-                    }
-
-                    // TRT's拡張：再編集用の生テキストファイルを保存
-                    var previewTxtPath = string.Format(
-                        "{0}\\PreviewRawText\\{1}",
-                        Path.GetDirectoryName(filePath),
-                        Path.GetFileName(Path.ChangeExtension(filePath, @".txt")));
-                    if (!(await WriteTextFile(previewTxtPath, fileText, appConfig.IsTextFileUtf8)))
-                    {
-                        return MakeResult(
-                            parameter,
-                            AppStatusType.Success,
-                            statusText,
-                            AppStatusType.Fail,
-                            @"再編集用生テキストファイルを保存できませんでした。");
                     }
                 } 
                 var txtPath = Path.ChangeExtension(filePath, @".txt");
@@ -1286,6 +1278,39 @@ namespace VoiceroidUtil
                         statusText,
                         AppStatusType.Fail,
                         @"テキストファイルを保存できませんでした。");
+                }
+            }
+
+            if (appConfig.PreviewStyle.IsTextSplitting && appConfig.PreviewStyle.IsRawTextSaving)
+            {
+                // TRT's拡張：再編集用の生テキストファイルを保存
+                var dirName = "改行分割_再編集用";
+
+                try
+                {
+                    Directory.CreateDirectory($"{Path.GetDirectoryName(filePath)}\\{dirName}");
+                }
+                catch
+                {
+                    return
+                        MakeResult(
+                            parameter,
+                            AppStatusType.Fail,
+                            @"再編集用ディレクトリが作成できませんでした。");
+                }
+                var previewTxtPath = string.Format(
+                    "{0}\\{1}\\{2}",
+                    Path.GetDirectoryName(filePath),
+                    dirName,
+                    Path.GetFileName(Path.ChangeExtension(filePath, @".txt")));
+                if (!(await WriteTextFile(previewTxtPath, fileText, appConfig.IsTextFileUtf8)))
+                {
+                    return MakeResult(
+                        parameter,
+                        AppStatusType.Success,
+                        statusText,
+                        AppStatusType.Fail,
+                        @"再編集用テキストファイルを保存できませんでした。");
                 }
             }
             

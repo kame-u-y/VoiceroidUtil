@@ -45,6 +45,22 @@ namespace VoiceroidUtil.TRToys
         }
         private bool textSplitting = false;
 
+        [DataMember]
+        public bool IsTextWrapping
+        {
+            get => this.isTextWrapping;
+            set => this.SetProperty(ref this.isTextWrapping, value);
+        }
+        private bool isTextWrapping = true;
+
+        [DataMember]
+        public bool IsRawTextSaving
+        {
+            get => this.isRawTextSaving;
+            set => this.SetProperty(ref this.isRawTextSaving, value);
+        }
+        private bool isRawTextSaving = false;
+
         /// <summary>
         /// 改行用の文字列を取得または設定する。
         /// </summary>
@@ -80,14 +96,6 @@ namespace VoiceroidUtil.TRToys
             }
         }
         
-        [DataMember]
-        public bool IsTextWrapping
-        {
-            get => this.isTextWrapping;
-            set => this.SetProperty(ref this.isTextWrapping, value);
-        }
-        private bool isTextWrapping = true;
-
         /// <summary>
         /// 標準描画コンポーネントを取得または設定する。
         /// </summary>

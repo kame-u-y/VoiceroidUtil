@@ -246,11 +246,13 @@
                                 Path=PreviewStyle.Value.IsTextSplitting,
                                 Mode=OneWay}"
                             Margin="20,4,0,0"/>
-                        <!--<CheckBox
-                            Content="再生時、改行・分割用文字列を「、」に変換"
-                            IsChecked="{Binding PreviewStyle.Value.IsPreviewReplacingToComma}"
-                            IsEnabled="{Binding PreviewStyle.Value.IsTextSplitting}"
-                            Margin="20,4,0,0" />-->
+                        <CheckBox
+                            Content="再編集用テキストを保存する（保存先に「改行分割_再編集用」ディレクトリを生成）"
+                            IsChecked="{Binding PreviewStyle.Value.IsRawTextSaving}"
+                            IsEnabled="{Binding 
+                                Path=PreviewStyle.Value.IsTextSplitting,
+                                Mode=OneWay}"
+                            Margin="20,4,0,0"/>
                         <StackPanel>
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
