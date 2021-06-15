@@ -17,6 +17,15 @@ namespace VoiceroidUtil.TRToys
     [DataContract(Namespace = "")]
     public class PreviewTextComponent : BindableConfigBase
     {
+        #region アイテム名定数群
+
+        /// <summary>
+        /// フォントサイズを保持する拡張編集オブジェクトファイルアイテムの名前。
+        /// </summary>
+        public const string ExoFileItemNameOfFontSize = @"サイズ";
+
+        #endregion
+
         /// <summary>
         /// 規定のフォントファミリ名。
         /// </summary>
@@ -44,6 +53,7 @@ namespace VoiceroidUtil.TRToys
         /// <summary>
         /// フォントサイズを取得または設定する。
         /// </summary>
+        [ExoFileItem(ExoFileItemNameOfFontSize, Order = 1)]
         [DataMember]
         public PreviewMovableValue<FontSizeConst> FontSize
         {

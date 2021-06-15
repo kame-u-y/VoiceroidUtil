@@ -9,6 +9,16 @@ namespace VoiceroidUtil.TRToys
     [DataContract(Namespace = "")]
     public class PreviewRenderComponent : BindableConfigBase
     {
+
+        #region アイテム名定数群
+
+        /// <summary>
+        /// 拡大率を保持する拡張編集オブジェクトファイルアイテムの名前。
+        /// </summary>
+        public const string ExoFileItemNameOfScale = @"拡大率";
+
+        #endregion
+
         /// <summary>
         /// コンストラクタ。
         /// </summary>
@@ -27,6 +37,7 @@ namespace VoiceroidUtil.TRToys
         /// <summary>
         /// 拡大率を取得または設定する。
         /// </summary>
+        [ExoFileItem(ExoFileItemNameOfScale, Order = 4)]
         [DataMember]
         public PreviewMovableValue<ScaleConst> Scale
         {
