@@ -190,6 +190,21 @@ namespace VoiceroidUtil.ViewModel
                     this.IsTextWrapping,
                     (s, w) => (s && w ? TextWrapping.Wrap : TextWrapping.NoWrap))
                 .ToReadOnlyReactiveProperty();
+
+            this.PreviewLeftMargin =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.PreviewLeftMargin);
+            this.PreviewRightMargin =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.PreviewRightMargin);
+            this.PreviewText =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.Text);
+            this.PreviewHorizontal =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.Horizontal);
+            this.PreviewTextMargin =
+                this.PreviewLeftMargin.CombineLatest(
+                    this.PreviewRightMargin, this.PreviewHorizontal,
+                    (l, r, h) => GetPreviewTextMargin(l, r, h))
+                .ToReadOnlyReactiveProperty();
+
             
             this.IsMultiScenePreview =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
@@ -505,6 +520,26 @@ namespace VoiceroidUtil.ViewModel
         public IReadOnlyReactiveProperty<TextWrapping> TextWrapValue { get; }
 
         /// <summary>
+        /// TRT's拡張：プレビューの左右余白とテキスト配置より、テキストMarginを計算する
+        /// </summary>
+        public IReadOnlyReactiveProperty<double> PreviewLeftMargin { get; }
+        public IReadOnlyReactiveProperty<double> PreviewRightMargin { get; }
+        public IReadOnlyReactiveProperty<HorizontalAlignment> PreviewHorizontal { get; }
+        public IReadOnlyReactiveProperty<PreviewTextComponent> PreviewText { get; }
+        Thickness GetPreviewTextMargin(double leftMargin, double rightMargin, HorizontalAlignment horizontal)
+        {
+            var verticalMargin = 5;
+            var horizontalMargin = 2;
+            if (horizontal == HorizontalAlignment.Left)
+                return new Thickness(leftMargin + horizontalMargin, verticalMargin, 0, verticalMargin);
+            else if (horizontal == HorizontalAlignment.Center)
+                return new Thickness(0, verticalMargin, 0, verticalMargin);
+            else
+                return new Thickness(0, verticalMargin, rightMargin + horizontalMargin, verticalMargin);
+        }
+        public IReadOnlyReactiveProperty<Thickness> PreviewTextMargin { get; }
+
+        /// <summary>
         /// TRT's拡張：プレビューが複数シーンであるかを取得・設定する。
         /// </summary>
         public IReactiveProperty<bool> IsMultiScenePreview { get; set; }
@@ -678,6 +713,8 @@ namespace VoiceroidUtil.ViewModel
         /// TRT's拡張：現在表示シーンの字幕テキストを構成する行ごとのデータリスト
         /// </summary>
         public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
+
+        
 
 
         /// <summary>

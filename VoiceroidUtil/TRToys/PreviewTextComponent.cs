@@ -243,11 +243,14 @@ namespace VoiceroidUtil.TRToys
         public PreviewTextAlignment TextAlignment
         {
             get => this.textAlignment;
-            set =>
+            set
+            {
                 this.SetProperty(
                     ref this.textAlignment,
                     Enum.IsDefined(value.GetType(), value) ?
                         value : PreviewTextAlignment.TopLeft);
+                this.Horizontal = GetHorizontal();
+            }
         }
         private PreviewTextAlignment textAlignment = PreviewTextAlignment.TopLeft;
 
@@ -330,7 +333,7 @@ namespace VoiceroidUtil.TRToys
         
         private Thickness GetPreviewLineSpace()
         {
-            var val = 2;
+            var val = 0;
             if (IsTopAlignment(this.TextAlignment))
                 return new Thickness(0, 0, 0, val);
             else if (IsMiddleAlignment(this.TextAlignment))
@@ -390,8 +393,10 @@ namespace VoiceroidUtil.TRToys
 
         public HorizontalAlignment Horizontal
         {
-            get => GetHorizontal();
+            get => this.horizontal;
+            set => SetProperty(ref horizontal, value);
         }
+        private HorizontalAlignment horizontal = HorizontalAlignment.Center;
 
         /// <summary>
         /// デシリアライズの直前に呼び出される。

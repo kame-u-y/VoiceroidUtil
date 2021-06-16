@@ -217,6 +217,7 @@ namespace VoiceroidUtil.TRToys
         }
         private double previewRightMargin = 300.0 * 200.0 / 1920.0;
 
+
         /// <summary>
         /// AviUtlに対するプレビューの横幅倍率をもとに、プレビュー上の字幕の右余白幅を設定する。
         /// </summary>
@@ -243,10 +244,10 @@ namespace VoiceroidUtil.TRToys
         }
         private decimal previewFontSize = 100;
 
-    /// <summary>
-    /// デシリアライズの直前に呼び出される。
-    /// </summary>
-    [OnDeserializing]
+        /// <summary>
+        /// デシリアライズの直前に呼び出される。
+        /// </summary>
+        [OnDeserializing]
         private void OnDeserializing(StreamingContext context) =>
             this.ResetDataMembers();
     }

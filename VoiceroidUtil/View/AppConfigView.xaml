@@ -203,7 +203,7 @@
 
                         <!-- TRT's拡張：追加設定 -->
                         <CheckBox
-                            Content="TRT's拡張：指定文字列により、字幕の改行・分割処理を行う"
+                            Content="TRT's拡張：指定文字列により、字幕の改行・ファイル分割処理を行う（.exo作成がオンの時）"
                             IsChecked="{Binding PreviewStyle.Value.IsTextSplitting}"
                             Margin="0,4,0,0" />
                         <Grid Margin="20,4,0,0">
@@ -224,20 +224,22 @@
                             <TextBox
                                 Grid.Row="0" Grid.Column="2"
                                 Text="{Binding PreviewStyle.Value.LineFeedString}"
-                                IsEnabled="{Binding 
+                                IsEnabled="False"
+                                Width="20"/>
+                                <!--IsEnabled="{Binding 
                                     Path=PreviewStyle.Value.IsTextSplitting, 
-                                    Mode=OneWay}"
-                                Width="30"/>
+                                    Mode=OneWay}"-->
                             <Label 
                                 Grid.Row="2" Grid.Column="0"
                                 Content="ファイル分割用文字列："/>
                             <TextBox
                                 Grid.Row="2" Grid.Column="2"
                                 Text="{Binding PreviewStyle.Value.FileSplitString}"
-                                IsEnabled="{Binding 
+                                IsEnabled="False"
+                                Width="20"/>
+                                <!--IsEnabled="{Binding 
                                     Path=PreviewStyle.Value.IsTextSplitting, 
-                                    Mode=OneWay}"
-                                Width="30"/>
+                                    Mode=OneWay}"-->
                         </Grid>
                         <CheckBox
                             Content="入力テキストの行を右端で折り返す"

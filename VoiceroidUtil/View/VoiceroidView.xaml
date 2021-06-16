@@ -212,11 +212,16 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Grid Grid.Column="0" Background="#dddddd"/>
+                            <Grid Grid.Column="2" Background="#dddddd"/>
+                        </Grid>
+                        <Grid 
+                            Grid.Row="1"
+                            Width="{Binding PreviewStyle.Value.PreviewWindowWidth}">
                                 <ScrollViewer 
                                     VerticalScrollBarVisibility="Hidden"
                                     Grid.Column="1"
                                     VerticalAlignment="{Binding PreviewStyle.Value.Text.Vertical}"
-                                    Margin="0,5,0,5">
+                                    Margin="{Binding PreviewTextMargin.Value}">
                                     <StackPanel>
                                     <ItemsControl ItemsSource="{Binding PreviewTextList}">
                                         <ItemsControl.ItemTemplate>
@@ -265,8 +270,7 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </StackPanel>
-                                </ScrollViewer>
-                            <Grid Grid.Column="2" Background="#dddddd"/>
+                            </ScrollViewer>
                         </Grid>
                     </Grid>
                     <!-- 前のプレビューシーンに戻るボタン-->
