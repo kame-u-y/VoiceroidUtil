@@ -225,14 +225,35 @@ namespace VoiceroidUtil.ViewModel
                     this.GetPreviewSceneEnd(this.TalkTextSelectionStart.Value));
             void TalkTextHandle()
             {
+                // SelectionStartが発火されない時にプレビューを更新
+                Console.WriteLine("talktext");
                 if (this.PrevTalkTextLength == this.TalkText.Value.Length)
                 {
+                    Console.WriteLine("TalkText Update");
                     CallUpdatePreview.Invoke();
                 }
                 this.PrevTalkTextLength = this.TalkText.Value.Length;
             }
+            void SelectionStartHandle()
+            {
+                Console.WriteLine("selection:"+TalkTextSelectionStart.Value);
+                Console.WriteLine("text: " + this.TalkText.Value);
+                if (this.AfterInsertSelectionStart != -1 
+                    && this.AfterInsertSelectionStart != this.TalkTextSelectionStart.Value)
+                {
+                    var start = this.AfterInsertSelectionStart;
+                    this.AfterInsertSelectionStart = -1;
+                    this.TalkTextSelectionStart.Value = start;
+                    Console.WriteLine("selection onemore");
+                    return;
+                }
+                this.AfterInsertSelectionStart = -1;
+
+                Console.WriteLine("SelectionStart Update");
+                CallUpdatePreview.Invoke();
+            }
             this.TalkText.Subscribe(v => TalkTextHandle()).AddTo(this.CompositeDisposable);
-            this.TalkTextSelectionStart.Subscribe(v => CallUpdatePreview.Invoke()).AddTo(this.CompositeDisposable);
+            this.TalkTextSelectionStart.Subscribe(v => SelectionStartHandle()).AddTo(this.CompositeDisposable);
 
             // TRT's拡張：一つ前のプレビューシーンに戻るコマンド
             this.BackSceneCommand =
@@ -259,6 +280,63 @@ namespace VoiceroidUtil.ViewModel
                         var nextEndId = this.GetPreviewSceneEnd(currentEndId + this.PreviewStyle.Value.FileSplitString.Length);
                         this.TalkTextSelectionStart.Value = nextEndId + this.PreviewStyle.Value.FileSplitString.Length + 1;
                     });
+
+            this.InsertSplitCommand =
+                this.MakeCommand(
+                    () =>
+                    {
+                        Console.WriteLine("insert");
+                        var currentCaret = this.TalkTextSelectionStart.Value;
+                        var lfStr = this.PreviewStyle.Value.LineFeedString;
+                        var fsStr = this.PreviewStyle.Value.FileSplitString;
+
+                        if (currentCaret >= lfStr.Length
+                            && this.TalkText.Value.Substring(currentCaret - lfStr.Length, lfStr.Length) == lfStr)
+                        {
+                            this.AfterInsertSelectionStart = currentCaret + (fsStr.Length - lfStr.Length);
+                            this.TalkText.Value =
+                                this.TalkText.Value
+                                    .Remove(currentCaret - lfStr.Length, lfStr.Length)
+                                    .Insert(currentCaret - lfStr.Length, fsStr);
+                        }
+                        else if (currentCaret >= fsStr.Length
+                            && this.TalkText.Value.Substring(currentCaret - fsStr.Length, fsStr.Length) == fsStr)
+                        {
+                            if (currentCaret == fsStr.Length)
+                            {
+                                this.AfterInsertSelectionStart = currentCaret - fsStr.Length;
+                                this.TalkText.Value =
+                                    this.TalkText.Value
+                                        .Remove(currentCaret - fsStr.Length, fsStr.Length);                            }
+                            else
+                            {
+                                this.AfterInsertSelectionStart = currentCaret - fsStr.Length;
+                                this.TalkText.Value =
+                                    this.TalkText.Value
+                                        .Remove(currentCaret - fsStr.Length, fsStr.Length);
+                            }
+                        }
+                        else
+                        {
+                            if (currentCaret == 0)
+                            {
+                                this.AfterInsertSelectionStart = currentCaret + lfStr.Length;
+                                ////this.TalkTextSelectionStart.Value = currentCaret + lfStr.Length;
+                                //return;
+                            } else
+                            {
+                                this.AfterInsertSelectionStart = currentCaret + lfStr.Length;
+                            }
+                            this.TalkText.Value = this.TalkText.Value.Insert(currentCaret, lfStr);
+                            if (currentCaret == 0)
+                            {
+                                this.TalkTextSelectionStart.Value = currentCaret + lfStr.Length;
+                            }
+                        }
+                        Console.WriteLine("insert:" + this.TalkTextSelectionStart.Value);
+                        //CallUpdatePreview();
+                    }
+                );
             
             // アイドル状態設定先
             var idle = new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
@@ -636,11 +714,15 @@ namespace VoiceroidUtil.ViewModel
         {
             // 拡張機能利用時のみ処理
             if (!this.PreviewStyle.Value.IsTextSplitting) return;
-            if (TalkText.Value.Length <= 0) return;
 
             this.IsMultiScenePreview.Value = true;
             this.IsFirstScene.Value = startId == 0;
             this.IsLastScene.Value = endId == this.TalkText.Value.Length;
+            if (TalkText.Value.Length <= 0)
+            {
+                this.PreviewTextList.Clear();
+                return;
+            }
 
             string previewScene = this.TalkText.Value.Substring(startId, endId - startId);
 
@@ -714,7 +796,8 @@ namespace VoiceroidUtil.ViewModel
         /// </summary>
         public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
 
-        
+        public ICommand InsertSplitCommand { get; }
+        public int AfterInsertSelectionStart = -1;
 
 
         /// <summary>
