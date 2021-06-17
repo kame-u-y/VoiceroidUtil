@@ -226,30 +226,24 @@ namespace VoiceroidUtil.ViewModel
             void TalkTextHandle()
             {
                 // SelectionStartが発火されない時にプレビューを更新
-                Console.WriteLine("talktext");
                 if (this.PrevTalkTextLength == this.TalkText.Value.Length)
                 {
-                    Console.WriteLine("TalkText Update");
                     CallUpdatePreview.Invoke();
                 }
                 this.PrevTalkTextLength = this.TalkText.Value.Length;
             }
             void SelectionStartHandle()
             {
-                Console.WriteLine("selection:"+TalkTextSelectionStart.Value);
-                Console.WriteLine("text: " + this.TalkText.Value);
                 if (this.AfterInsertSelectionStart != -1 
                     && this.AfterInsertSelectionStart != this.TalkTextSelectionStart.Value)
                 {
                     var start = this.AfterInsertSelectionStart;
                     this.AfterInsertSelectionStart = -1;
                     this.TalkTextSelectionStart.Value = start;
-                    Console.WriteLine("selection onemore");
                     return;
                 }
                 this.AfterInsertSelectionStart = -1;
 
-                Console.WriteLine("SelectionStart Update");
                 CallUpdatePreview.Invoke();
             }
             this.TalkText.Subscribe(v => TalkTextHandle()).AddTo(this.CompositeDisposable);
@@ -285,56 +279,46 @@ namespace VoiceroidUtil.ViewModel
                 this.MakeCommand(
                     () =>
                     {
-                        Console.WriteLine("insert");
                         var currentCaret = this.TalkTextSelectionStart.Value;
                         var lfStr = this.PreviewStyle.Value.LineFeedString;
                         var fsStr = this.PreviewStyle.Value.FileSplitString;
 
-                        if (currentCaret >= lfStr.Length
-                            && this.TalkText.Value.Substring(currentCaret - lfStr.Length, lfStr.Length) == lfStr)
+                        // キャレット位置の「/-」を「/--」に変換
+                        for (int i = 0; i < fsStr.Length; i++)
                         {
-                            this.AfterInsertSelectionStart = currentCaret + (fsStr.Length - lfStr.Length);
-                            this.TalkText.Value =
-                                this.TalkText.Value
-                                    .Remove(currentCaret - lfStr.Length, lfStr.Length)
-                                    .Insert(currentCaret - lfStr.Length, fsStr);
-                        }
-                        else if (currentCaret >= fsStr.Length
-                            && this.TalkText.Value.Substring(currentCaret - fsStr.Length, fsStr.Length) == fsStr)
-                        {
-                            if (currentCaret == fsStr.Length)
+                            if (currentCaret <= this.TalkText.Value.Length - i
+                                && currentCaret >= fsStr.Length - i
+                                && this.TalkText.Value.Substring(currentCaret - (fsStr.Length - i), fsStr.Length) == fsStr)
                             {
-                                this.AfterInsertSelectionStart = currentCaret - fsStr.Length;
+                                this.AfterInsertSelectionStart = currentCaret - (fsStr.Length - i);
                                 this.TalkText.Value =
                                     this.TalkText.Value
-                                        .Remove(currentCaret - fsStr.Length, fsStr.Length);                            }
-                            else
+                                        .Remove(currentCaret - (fsStr.Length - i), fsStr.Length);
+                                return;
+                            }
+                        }
+                        // キャレット位置の「/--」を消去
+                        for (int i = 0; i < lfStr.Length; i++)
+                        {
+                            if (currentCaret <= this.TalkText.Value.Length-i 
+                                && currentCaret >= lfStr.Length-i
+                                && this.TalkText.Value.Substring(currentCaret - (lfStr.Length-i), lfStr.Length) == lfStr)
                             {
-                                this.AfterInsertSelectionStart = currentCaret - fsStr.Length;
+                                this.AfterInsertSelectionStart = currentCaret + (fsStr.Length - (lfStr.Length - i));
                                 this.TalkText.Value =
                                     this.TalkText.Value
-                                        .Remove(currentCaret - fsStr.Length, fsStr.Length);
+                                        .Remove(currentCaret - (lfStr.Length - i), lfStr.Length)
+                                        .Insert(currentCaret - (lfStr.Length - i), fsStr);
+                                return;
                             }
                         }
-                        else
+                        // キャレット位置に「/-」を挿入
+                        this.AfterInsertSelectionStart = currentCaret + lfStr.Length;
+                        this.TalkText.Value = this.TalkText.Value.Insert(currentCaret, lfStr);
+                        if (currentCaret == 0)
                         {
-                            if (currentCaret == 0)
-                            {
-                                this.AfterInsertSelectionStart = currentCaret + lfStr.Length;
-                                ////this.TalkTextSelectionStart.Value = currentCaret + lfStr.Length;
-                                //return;
-                            } else
-                            {
-                                this.AfterInsertSelectionStart = currentCaret + lfStr.Length;
-                            }
-                            this.TalkText.Value = this.TalkText.Value.Insert(currentCaret, lfStr);
-                            if (currentCaret == 0)
-                            {
-                                this.TalkTextSelectionStart.Value = currentCaret + lfStr.Length;
-                            }
+                            this.TalkTextSelectionStart.Value = currentCaret + lfStr.Length;
                         }
-                        Console.WriteLine("insert:" + this.TalkTextSelectionStart.Value);
-                        //CallUpdatePreview();
                     }
                 );
             

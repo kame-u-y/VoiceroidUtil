@@ -147,7 +147,7 @@
                 <v:ImeWatermarkTextBox.InputBindings>
                     <KeyBinding Gesture="Alt+Enter" Command="{Binding PlayStopCommand}" />
                     <KeyBinding Gesture="Ctrl+Enter" Command="{Binding SaveCommand}" />
-                    <KeyBinding Gesture="Ctrl+N" Command="{Binding InsertSplitCommand}" />
+                    <KeyBinding Gesture="Ctrl+OemQuestion" Command="{Binding InsertSplitCommand}" />
                 </v:ImeWatermarkTextBox.InputBindings>
                 <v:ImeWatermarkTextBox.Watermark>
                     <TextBlock>
