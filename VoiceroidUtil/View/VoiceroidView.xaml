@@ -237,7 +237,7 @@
                                                     <!-- 1行ごとのGlyphs字幕 -->
                                                     <Glyphs
                                                         UnicodeString="{Binding Text}"
-                                                    
+                                                        
                                                         HorizontalAlignment="{
                                                             Binding 
                                                                 Path=DataContext.PreviewStyle.Value.Text.Horizontal,

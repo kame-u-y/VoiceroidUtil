@@ -218,7 +218,14 @@ namespace VoiceroidUtil.ViewModel
             this.PrePreviewScene = "";
             this.PreviewTextList =
                 new ObservableCollection<PreviewTextStore>();
-            
+
+            this.PreviewLetterSpace =
+                this.MakeInnerPropertyOf(this.PreviewText, t => t.LetterSpace);
+            this.PreviewLetterSpace
+                .Subscribe(v => ReflectSettingToPreview())
+                .AddTo(this.CompositeDisposable);
+
+
             Action CallUpdatePreview = () =>
                 this.UpdatePreview(
                     this.GetPreviewSceneStart(this.TalkTextSelectionStart.Value),
@@ -780,8 +787,21 @@ namespace VoiceroidUtil.ViewModel
         /// </summary>
         public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
 
+
+        private void ReflectSettingToPreview()
+        {
+            for (int i = 0; i < PreviewTextList.Count; i++)
+            {
+                this.PreviewTextList[i] =
+                    new PreviewTextStore(this.PreviewTextList[i].Text, this.PreviewStyle.Value);
+            }
+        }
+
+
         public ICommand InsertSplitCommand { get; }
         public int AfterInsertSelectionStart = -1;
+
+        public IReactiveProperty<int> PreviewLetterSpace { get; }
 
 
         /// <summary>
