@@ -26,11 +26,10 @@ namespace VoiceroidUtil.TRToys
             // イベントハンドラ追加のためにプロパティ経由で設定
             this.Render = new PreviewRenderComponent(() => this.SetPreviewFontSize());
             this.Text = new PreviewTextComponent(() => this.SetPreviewFontSize());
-            Console.WriteLine("あげなす");
         }
 
         /// <summary>
-        /// TRT's拡張：字幕テキストに対して改行・分割処理を適用するか否かを取得または設定する。
+        /// 字幕テキストに対して改行・分割処理を適用するか否かを取得または設定する。
         /// </summary>
         [DataMember]
         public bool IsTextSplitting
@@ -38,13 +37,15 @@ namespace VoiceroidUtil.TRToys
             get => this.textSplitting;
             set
             {
-                Console.WriteLine("splitting is changed: " + value);
                 this.SetProperty(ref this.textSplitting, value);
                 this.SetPreviewFontSize();
             }
         }
         private bool textSplitting = false;
 
+        /// <summary>
+        /// テキストボックスの折り返しを行うか否かを取得または設定する。
+        /// </summary>
         [DataMember]
         public bool IsTextWrapping
         {
@@ -53,6 +54,10 @@ namespace VoiceroidUtil.TRToys
         }
         private bool isTextWrapping = true;
 
+        /// <summary>
+        /// 改行・分割文字列を含むテキストファイルを保存するか否かを取得または設定する。
+        /// 保存先下に「改行分割_再編集用」フォルダがなければ作成され、その中に保存される
+        /// </summary>
         [DataMember]
         public bool IsRawTextSaving
         {
@@ -225,18 +230,24 @@ namespace VoiceroidUtil.TRToys
             => this.PreviewRightMargin
                 = this.AviUtlRightMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
 
+        /// <summary>
+        /// プレビューテキストのフォントサイズを設定する
+        /// 依存するプロパティから呼び出される
+        /// </summary>
         private void SetPreviewFontSize()
         {
             if (this.Text != null && this.Render != null)
             {
-                Console.WriteLine("hoge");
                 this.PreviewFontSize = 
                     this.Text.FontSize.Begin
                     * ((decimal)this.PreviewWindowWidth / (decimal)this.AviUtlWindowWidth)
                     * Render.Scale.Begin / (decimal)100.0;
-
             }
         }
+
+        /// <summary>
+        /// プレビューテキストのフォントサイズを取得または設定する。
+        /// </summary>
         public decimal PreviewFontSize
         {
             get => this.previewFontSize;

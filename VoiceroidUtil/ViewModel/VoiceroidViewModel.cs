@@ -178,9 +178,11 @@ namespace VoiceroidUtil.ViewModel
                 this.MakeInnerPropertyOf(appConfig, c => c.IsTabAccepted);
 
             // TRT's拡張
+            // プレビュー用の設定値の取得
             this.PreviewStyle =
                 this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyle);
 
+            // TextWrapValueの設定。テキストボックスを折り返すかどうか
             this.IsTextSplitting =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.IsTextSplitting);
             this.IsTextWrapping =
@@ -191,6 +193,7 @@ namespace VoiceroidUtil.ViewModel
                     (s, w) => (s && w ? TextWrapping.Wrap : TextWrapping.NoWrap))
                 .ToReadOnlyReactiveProperty();
 
+            // PreviewTextMarginの設定
             this.PreviewLeftMargin =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.PreviewLeftMargin);
             this.PreviewRightMargin =
@@ -205,129 +208,47 @@ namespace VoiceroidUtil.ViewModel
                     (l, r, h) => GetPreviewTextMargin(l, r, h))
                 .ToReadOnlyReactiveProperty();
 
-            
-            this.IsMultiScenePreview =
-                new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
+            // プレビューの前後ボタンの表示or非表示用
             this.IsFirstScene =
                 new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
             this.IsLastScene =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
+
+            // テキストボックスのキャレット位置を取得・設定する
             this.TalkTextSelectionStart =
                 new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
-            this.PrevTalkTextLength = 0;
+            
+            // 値保持用の変数
+            this.AfterInsertSelectionStart = -1;
             this.PrePreviewScene = "";
+            this.PreTalkTextLength = 0;
+            
+            // 一行ごとのプレビューテキストのストアのリスト
             this.PreviewTextList =
                 new ObservableCollection<PreviewTextStore>();
 
+            // UpdatePreviewが呼び出されるタイミング
+            this.TalkText.Subscribe(v => TalkTextHandle()).AddTo(this.CompositeDisposable);
+            this.TalkTextSelectionStart.Subscribe(v => SelectionStartHandle()).AddTo(this.CompositeDisposable);
+
+            // UpdatePreviewの処理結果はそのままに直接PreviewTextListを更新
             this.PreviewLetterSpace =
                 this.MakeInnerPropertyOf(this.PreviewText, t => t.LetterSpace);
             this.PreviewLetterSpace
                 .Subscribe(v => ReflectSettingToPreview())
                 .AddTo(this.CompositeDisposable);
 
-
-            Action CallUpdatePreview = () =>
-                this.UpdatePreview(
-                    this.GetPreviewSceneStart(this.TalkTextSelectionStart.Value),
-                    this.GetPreviewSceneEnd(this.TalkTextSelectionStart.Value));
-            void TalkTextHandle()
-            {
-                // SelectionStartが発火されない時にプレビューを更新
-                if (this.PrevTalkTextLength == this.TalkText.Value.Length)
-                {
-                    CallUpdatePreview.Invoke();
-                }
-                this.PrevTalkTextLength = this.TalkText.Value.Length;
-            }
-            void SelectionStartHandle()
-            {
-                if (this.AfterInsertSelectionStart != -1 
-                    && this.AfterInsertSelectionStart != this.TalkTextSelectionStart.Value)
-                {
-                    var start = this.AfterInsertSelectionStart;
-                    this.AfterInsertSelectionStart = -1;
-                    this.TalkTextSelectionStart.Value = start;
-                    return;
-                }
-                this.AfterInsertSelectionStart = -1;
-
-                CallUpdatePreview.Invoke();
-            }
-            this.TalkText.Subscribe(v => TalkTextHandle()).AddTo(this.CompositeDisposable);
-            this.TalkTextSelectionStart.Subscribe(v => SelectionStartHandle()).AddTo(this.CompositeDisposable);
-
-            // TRT's拡張：一つ前のプレビューシーンに戻るコマンド
+            // 一つ前のプレビューシーンに戻るコマンド
             this.BackSceneCommand =
-                this.MakeCommand(
-                    () =>
-                    {
-                        if (!this.IsMultiScenePreview.Value) return;
-                        var currentStartId = this.GetPreviewSceneStart(this.TalkTextSelectionStart.Value);
+                this.MakeCommand(this.ExecuteBackSceneCommand);
 
-                        var backStartId = this.GetPreviewSceneStart(currentStartId - 1);
-                        var backEndId = this.GetPreviewSceneEnd(currentStartId - 1);
-                        this.TalkTextSelectionStart.Value = backStartId + 1;
-                    });
-
-            // TRT's拡張：一つ後のプレビューシーンに進むコマンド
+            // 一つ後のプレビューシーンに進むコマンド
             this.NextSceneCommand =
-                this.MakeCommand(
-                    () =>
-                    {
-                        if (!this.IsMultiScenePreview.Value) return;
-                        var currentEndId = this.GetPreviewSceneEnd(this.TalkTextSelectionStart.Value);
+                this.MakeCommand(this.ExecuteNextSceneCommand);
 
-                        var nextStartId = this.GetPreviewSceneStart(currentEndId + this.PreviewStyle.Value.FileSplitString.Length);
-                        var nextEndId = this.GetPreviewSceneEnd(currentEndId + this.PreviewStyle.Value.FileSplitString.Length);
-                        this.TalkTextSelectionStart.Value = nextEndId + this.PreviewStyle.Value.FileSplitString.Length + 1;
-                    });
-
+            // キャレット位置に改行・分割文字列を挿入するコマンド
             this.InsertSplitCommand =
-                this.MakeCommand(
-                    () =>
-                    {
-                        var currentCaret = this.TalkTextSelectionStart.Value;
-                        var lfStr = this.PreviewStyle.Value.LineFeedString;
-                        var fsStr = this.PreviewStyle.Value.FileSplitString;
-
-                        // キャレット位置の「/-」を「/--」に変換
-                        for (int i = 0; i < fsStr.Length; i++)
-                        {
-                            if (currentCaret <= this.TalkText.Value.Length - i
-                                && currentCaret >= fsStr.Length - i
-                                && this.TalkText.Value.Substring(currentCaret - (fsStr.Length - i), fsStr.Length) == fsStr)
-                            {
-                                this.AfterInsertSelectionStart = currentCaret - (fsStr.Length - i);
-                                this.TalkText.Value =
-                                    this.TalkText.Value
-                                        .Remove(currentCaret - (fsStr.Length - i), fsStr.Length);
-                                return;
-                            }
-                        }
-                        // キャレット位置の「/--」を消去
-                        for (int i = 0; i < lfStr.Length; i++)
-                        {
-                            if (currentCaret <= this.TalkText.Value.Length-i 
-                                && currentCaret >= lfStr.Length-i
-                                && this.TalkText.Value.Substring(currentCaret - (lfStr.Length-i), lfStr.Length) == lfStr)
-                            {
-                                this.AfterInsertSelectionStart = currentCaret + (fsStr.Length - (lfStr.Length - i));
-                                this.TalkText.Value =
-                                    this.TalkText.Value
-                                        .Remove(currentCaret - (lfStr.Length - i), lfStr.Length)
-                                        .Insert(currentCaret - (lfStr.Length - i), fsStr);
-                                return;
-                            }
-                        }
-                        // キャレット位置に「/-」を挿入
-                        this.AfterInsertSelectionStart = currentCaret + lfStr.Length;
-                        this.TalkText.Value = this.TalkText.Value.Insert(currentCaret, lfStr);
-                        if (currentCaret == 0)
-                        {
-                            this.TalkTextSelectionStart.Value = currentCaret + lfStr.Length;
-                        }
-                    }
-                );
+                this.MakeCommand(this.ExecuteInsertSplitCommand);
             
             // アイドル状態設定先
             var idle = new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
@@ -574,18 +495,10 @@ namespace VoiceroidUtil.ViewModel
         public IReactiveProperty<PreviewStyle> PreviewStyle { get; set; }
 
         /// <summary>
-        /// TRT's拡張：字幕テキストに対する改行・分割処理を適用するかの設定を取得する。
-        /// </summary>
-        public IReadOnlyReactiveProperty<bool> IsTextSplitting { get; }
-
-        /// <summary>
-        /// TRT's拡張：入力テキストの折り返しするかの設定を取得する。
-        /// </summary>
-        public IReadOnlyReactiveProperty<bool> IsTextWrapping { get; }
-
-        /// <summary>
         /// TRT's拡張：IsTextSplittingとIsTextWrappingから折り返しの設定値を取得する
         /// </summary>
+        public IReadOnlyReactiveProperty<bool> IsTextSplitting { get; }
+        public IReadOnlyReactiveProperty<bool> IsTextWrapping { get; }
         public IReadOnlyReactiveProperty<TextWrapping> TextWrapValue { get; }
 
         /// <summary>
@@ -593,8 +506,8 @@ namespace VoiceroidUtil.ViewModel
         /// </summary>
         public IReadOnlyReactiveProperty<double> PreviewLeftMargin { get; }
         public IReadOnlyReactiveProperty<double> PreviewRightMargin { get; }
-        public IReadOnlyReactiveProperty<HorizontalAlignment> PreviewHorizontal { get; }
         public IReadOnlyReactiveProperty<PreviewTextComponent> PreviewText { get; }
+        public IReadOnlyReactiveProperty<HorizontalAlignment> PreviewHorizontal { get; }
         Thickness GetPreviewTextMargin(double leftMargin, double rightMargin, HorizontalAlignment horizontal)
         {
             var verticalMargin = 5;
@@ -607,11 +520,6 @@ namespace VoiceroidUtil.ViewModel
                 return new Thickness(0, verticalMargin, rightMargin + horizontalMargin, verticalMargin);
         }
         public IReadOnlyReactiveProperty<Thickness> PreviewTextMargin { get; }
-
-        /// <summary>
-        /// TRT's拡張：プレビューが複数シーンであるかを取得・設定する。
-        /// </summary>
-        public IReactiveProperty<bool> IsMultiScenePreview { get; set; }
         
         /// <summary>
         /// TRT's拡張：現在表示プレビューが最初のシーンであるかを取得・設定する。
@@ -625,9 +533,31 @@ namespace VoiceroidUtil.ViewModel
         /// </summary>
         public IReactiveProperty<bool> IsLastScene { get; set; }
 
-        public int PrevTalkTextLength { get; set; }
+        /// <summary>
+        /// TRT's拡張：TalkTextのキャレット位置を取得・設定する。
+        /// ImeWatermarkTextBoxに実装したプロパティBindableSelectionStartにバインドする。
+        /// </summary>
+        public IReactiveProperty<int> TalkTextSelectionStart { get; }
 
-        public string PrePreviewScene { get; set; }
+        /// <summary>
+        /// TRT's拡張：InsertSplitCommand実行後のキャレット位置を保存する。
+        /// </summary>
+        private int AfterInsertSelectionStart { get; set; }
+
+        /// <summary>
+        /// TRT's拡張：不要な更新処理を切り上げるための前回のプレビューを保存する
+        /// </summary>
+        private string PrePreviewScene { get; set; }
+
+        /// <summary>
+        /// TRT's拡張：一つ前のTalkTextの文字数を保存する。
+        /// </summary>
+        private int PreTalkTextLength { get; set; }
+
+        /// <summary>
+        /// TRT's拡張：現在表示シーンの字幕テキストを構成する行ごとのデータリスト
+        /// </summary>
+        public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
 
         /// <summary>
         /// 入力テキスト中のキャレット位置を含むプレビューの開始位置を取得
@@ -706,7 +636,6 @@ namespace VoiceroidUtil.ViewModel
             // 拡張機能利用時のみ処理
             if (!this.PreviewStyle.Value.IsTextSplitting) return;
 
-            this.IsMultiScenePreview.Value = true;
             this.IsFirstScene.Value = startId == 0;
             this.IsLastScene.Value = endId == this.TalkText.Value.Length;
             if (TalkText.Value.Length <= 0)
@@ -720,13 +649,13 @@ namespace VoiceroidUtil.ViewModel
             if (previewScene == this.PrePreviewScene) return;
 
             this.PrePreviewScene = previewScene;
-            this.PreviewTextList.Clear();
 
-            // 設定された文字列により改行
             string[] lineSplitter = { this.PreviewStyle.Value.LineFeedString };
             string[] PreviewLines =
                 previewScene.Split(lineSplitter, System.StringSplitOptions.RemoveEmptyEntries);
 
+            // プレビューのItemsControl用のストアを生成
+            this.PreviewTextList.Clear();
             for (int i = 0; i < PreviewLines.Length; i++)
             {
                 this.PreviewTextList.Add(
@@ -734,60 +663,53 @@ namespace VoiceroidUtil.ViewModel
             }
         }
 
-        public class PreviewTextStore: BindableBase
+        /// <summary>
+        /// UpdatePreviewを呼び出す
+        /// </summary>
+        private void CallUpdatePreview()
         {
-            public string Text { 
-                get => this.text; 
-                set => SetProperty(ref text, value);
-            }
-            private string text;
-
-            public string Indices {
-                get => this.indices;
-                set => SetProperty(ref indices, value);
-            }
-            private string indices;
-
-            public Collection<char> UnregisterdLetters = new Collection<char>();
-            readonly char TempLetter = 'A';
-
-            private string GetIndices(string text, PreviewStyle style)
-            {
-                var typeface = new GlyphTypeface(style.Text.PreviewFontUri);
-                var indices = "";
-                for (int i = 0; i < text.Length-1; i++)
-                {
-                    ushort charaIndex = typeface.CharacterToGlyphMap.ContainsKey(text[i])
-                        ? typeface.CharacterToGlyphMap[text[i]]
-                        : typeface.CharacterToGlyphMap[TempLetter];
-
-                    var fontSize = (double)style.Text.FontSize.Begin;
-                    //var scale = 
-                    //    ((double)style.Render.Scale.Begin / 100.0) 
-                    //    * ((double)style.PreviewWindowWidth / (double)style.AviUtlWindowWidth);
-                    var charaWidth = typeface.AdvanceWidths[charaIndex];
-                    //var val = charaWidth * fontSize + style.Text.LetterSpace + (100-fontSize)*charaWidth;
-                    var val = 100 * charaWidth + style.Text.LetterSpace*100/fontSize;
-                    //Console.WriteLine(val);
-                    indices += $",{val};";
-                }
-                return indices;
-            }
-            
-            public PreviewTextStore(string text, PreviewStyle style)
-            {
-                text = text.Replace(Environment.NewLine, ";");
-                this.Text = text;
-                this.Indices = GetIndices(text, style);
-            }
+            UpdatePreview(
+                GetPreviewSceneStart(this.TalkTextSelectionStart.Value),
+                GetPreviewSceneEnd(this.TalkTextSelectionStart.Value));
         }
 
         /// <summary>
-        /// TRT's拡張：現在表示シーンの字幕テキストを構成する行ごとのデータリスト
+        /// TalkTextのSubscribeの処理
         /// </summary>
-        public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
+        private void TalkTextHandle()
+        {
+            // SelectionStartが発火されない時にプレビューを更新
+            // 日本語入力（k → か）など
+            if (this.PreTalkTextLength == this.TalkText.Value.Length)
+            {
+                CallUpdatePreview();
+            }
+            this.PreTalkTextLength = this.TalkText.Value.Length;
+        }
+        
+        /// <summary>
+        /// TalkTextSelectionStartのSubscribeの処理
+        /// </summary>
+        private void SelectionStartHandle()
+        {
+            // InsertSplitCommand後の処理
+            if (this.AfterInsertSelectionStart != -1
+                && this.AfterInsertSelectionStart != this.TalkTextSelectionStart.Value)
+            {
+                var start = this.AfterInsertSelectionStart;
+                this.AfterInsertSelectionStart = -1;
+                this.TalkTextSelectionStart.Value = start;
+                return;
+            }
+            this.AfterInsertSelectionStart = -1;
 
+            CallUpdatePreview();
+        }
 
+        /// <summary>
+        /// TRT's拡張：設定値の変更を即座にPreviewTextList内の情報へ反映するためのメソッド
+        /// UpdatePreviewの処理結果はそのままに直接PreviewTextListを更新
+        /// </summary>
         private void ReflectSettingToPreview()
         {
             for (int i = 0; i < PreviewTextList.Count; i++)
@@ -796,25 +718,81 @@ namespace VoiceroidUtil.ViewModel
                     new PreviewTextStore(this.PreviewTextList[i].Text, this.PreviewStyle.Value);
             }
         }
-
-
-        public ICommand InsertSplitCommand { get; }
-        public int AfterInsertSelectionStart = -1;
-
         public IReactiveProperty<int> PreviewLetterSpace { get; }
-
 
         /// <summary>
         /// TRT's拡張：一つ前のプレビューシーンに戻るコマンド
         /// </summary>
         public ICommand BackSceneCommand { get; }
-        
+        private void ExecuteBackSceneCommand()
+        {
+            var currentStartId = this.GetPreviewSceneStart(this.TalkTextSelectionStart.Value);
+
+            var backStartId = this.GetPreviewSceneStart(currentStartId - 1);
+            var backEndId = this.GetPreviewSceneEnd(currentStartId - 1);
+            this.TalkTextSelectionStart.Value = backStartId + 1;
+        }
+
         /// <summary>
         /// TRT's拡張：一つ後のプレビューシーンに進むコマンド
         /// </summary>
         public ICommand NextSceneCommand { get; }
+        private void ExecuteNextSceneCommand()
+        {
+            var currentEndId = this.GetPreviewSceneEnd(this.TalkTextSelectionStart.Value);
 
-        public IReactiveProperty<int> TalkTextSelectionStart { get; }
+            var nextStartId = this.GetPreviewSceneStart(currentEndId + this.PreviewStyle.Value.FileSplitString.Length);
+            var nextEndId = this.GetPreviewSceneEnd(currentEndId + this.PreviewStyle.Value.FileSplitString.Length);
+            this.TalkTextSelectionStart.Value = nextEndId + this.PreviewStyle.Value.FileSplitString.Length + 1;
+        }
+
+        /// <summary>
+        /// TRT's拡張：キャレット位置に改行分割文字列を挿入するコマンド
+        /// </summary>
+        public ICommand InsertSplitCommand { get; }
+        private void ExecuteInsertSplitCommand()
+        {
+            var currentCaret = this.TalkTextSelectionStart.Value;
+            var lfStr = this.PreviewStyle.Value.LineFeedString;
+            var fsStr = this.PreviewStyle.Value.FileSplitString;
+
+            // キャレット位置の「/-」を「/--」に変換
+            for (int i = 0; i < fsStr.Length; i++)
+            {
+                if (currentCaret <= this.TalkText.Value.Length - i
+                    && currentCaret >= fsStr.Length - i
+                    && this.TalkText.Value.Substring(currentCaret - (fsStr.Length - i), fsStr.Length) == fsStr)
+                {
+                    this.AfterInsertSelectionStart = currentCaret - (fsStr.Length - i);
+                    this.TalkText.Value =
+                        this.TalkText.Value
+                            .Remove(currentCaret - (fsStr.Length - i), fsStr.Length);
+                    return;
+                }
+            }
+            // キャレット位置の「/--」を消去
+            for (int i = 0; i < lfStr.Length; i++)
+            {
+                if (currentCaret <= this.TalkText.Value.Length - i
+                    && currentCaret >= lfStr.Length - i
+                    && this.TalkText.Value.Substring(currentCaret - (lfStr.Length - i), lfStr.Length) == lfStr)
+                {
+                    this.AfterInsertSelectionStart = currentCaret + (fsStr.Length - (lfStr.Length - i));
+                    this.TalkText.Value =
+                        this.TalkText.Value
+                            .Remove(currentCaret - (lfStr.Length - i), lfStr.Length)
+                            .Insert(currentCaret - (lfStr.Length - i), fsStr);
+                    return;
+                }
+            }
+            // キャレット位置に「/-」を挿入
+            this.AfterInsertSelectionStart = currentCaret + lfStr.Length;
+            this.TalkText.Value = this.TalkText.Value.Insert(currentCaret, lfStr);
+            if (currentCaret == 0)
+            {
+                this.TalkTextSelectionStart.Value = currentCaret + lfStr.Length;
+            }
+        }
 
 
         /// <summary>

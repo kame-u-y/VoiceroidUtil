@@ -6,6 +6,9 @@ using System.Runtime.Serialization;
 
 namespace VoiceroidUtil.TRToys
 {
+    /// <summary>
+    /// RenderComponentをもとに作成、プレビューの拡大率の設定値を管理する
+    /// </summary>
     [DataContract(Namespace = "")]
     public class PreviewRenderComponent : BindableConfigBase
     {

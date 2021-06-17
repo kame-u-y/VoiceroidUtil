@@ -166,6 +166,7 @@
     <Compile Include="TRToys\PreviewRenderComponent.cs" />
     <Compile Include="TRToys\PreviewTextAlignment.cs" />
     <Compile Include="TRToys\PreviewTextComponent.cs" />
+    <Compile Include="TRToys\PreviewTextStore.cs" />
     <Compile Include="UIConfig.cs" />
     <Compile Include="ViewModel\AppConfigViewModel.cs" />
     <Compile Include="ViewModel\AppStatusViewModel.cs" />

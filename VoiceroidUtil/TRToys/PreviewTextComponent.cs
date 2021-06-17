@@ -14,6 +14,9 @@ using WaterTrans.TypeLoader;
 
 namespace VoiceroidUtil.TRToys
 {
+    /// <summary>
+    /// TextComponentをもとに作成、プレビューのテキスト関連の設定値を管理する
+    /// </summary>
     [DataContract(Namespace = "")]
     public class PreviewTextComponent : BindableConfigBase
     {
@@ -115,15 +118,22 @@ namespace VoiceroidUtil.TRToys
         }
         static readonly IDictionary<string, Uri> fontPathDictionary =
             SearchFontNamePathPair();
+
+        /// <summary>
+        /// 辞書の作成
+        /// </summary>
+        /// <returns></returns>
         static IDictionary<string, Uri> SearchFontNamePathPair()
         {
             IDictionary<string, Uri> dic = new SortedDictionary<string, Uri>();
 
+            // ユーザ共通のフォントフォルダと、ユーザ個別のフォントフォルダのパスを取得
             string FontDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
             string UserFontDir = 
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
                 + @"\AppData\Local\Microsoft\Windows\Fonts\";
 
+            // .ttf, .otf, .ttcを取得し、Glyphsで読み込めるUriを生成
             var uris = 
                 Directory.GetFiles(FontDir, "*.ttf")
                     .Concat(Directory.GetFiles(FontDir, "*.otf"))
@@ -142,9 +152,10 @@ namespace VoiceroidUtil.TRToys
                         }
                     }));
 
-            // FaceNameについて、Boldは通常、Regular（もしくはフォント特有のFaceName）の太字モードとして扱われるが、
-            // RegularがなくBoldのみのフォント（例：Unispace、UD デジタル 教科書体 N-B）が存在するため、
-            // BoldのみであるかチェックするためにFaceNameを一覧する辞書を作成する
+            // 一時的な辞書を作成（FontName->FontFace->Uri）
+            //     FaceNameについて、Boldは通常、Regular（もしくはフォント特有のFaceName）の太字モードとして扱われるが、
+            //     RegularがなくBoldのみのフォント（例：Unispace、UD デジタル 教科書体 N-B）が存在するため、
+            //     BoldのみであるかチェックするためにFaceNameを一覧する辞書を作成する
             IDictionary<string, Dictionary<string, Uri>> nameFaceToPath = new Dictionary<string, Dictionary<string, Uri>>(); 
             foreach (Uri uri in uris)
             {
@@ -218,6 +229,9 @@ namespace VoiceroidUtil.TRToys
             return dic;
         }
 
+        /// <summary>
+        /// フォントファミリー名からフォントUriを取得
+        /// </summary>
         public Uri PreviewFontUri
         {
             get
@@ -268,7 +282,6 @@ namespace VoiceroidUtil.TRToys
                         deco : PreviewTextAlignment.TopLeft;
         }
 
-
         /// <summary>
         /// 字間幅を取得または設定する。
         /// </summary>
@@ -318,6 +331,11 @@ namespace VoiceroidUtil.TRToys
         }
         private string text = "";
 
+        /// <summary>
+        /// 縦方向について、TextAlignmentの位置を判定する
+        /// </summary>
+        /// <param name="alignment"></param>
+        /// <returns></returns>
         private bool IsTopAlignment(PreviewTextAlignment alignment)
             => alignment == PreviewTextAlignment.TopLeft
             || alignment == PreviewTextAlignment.TopCenter
@@ -331,6 +349,10 @@ namespace VoiceroidUtil.TRToys
             || alignment == PreviewTextAlignment.BottomCenter
             || alignment == PreviewTextAlignment.BottomRight;
         
+        /// <summary>
+        /// 上中下それぞれでの行間を取得
+        /// </summary>
+        /// <returns></returns>
         private Thickness GetPreviewLineSpace()
         {
             var val = 0;
@@ -344,11 +366,19 @@ namespace VoiceroidUtil.TRToys
                 return new Thickness(0);
         }
 
+        /// <summary>
+        /// プレビューの行間を取得する
+        /// 行間は設定項目には含まない
+        /// </summary>
         public Thickness PreviewLineSpace
         {
             get => GetPreviewLineSpace();
         }
         
+        /// <summary>
+        /// TextAlignmentの位置からVerticalAlignmentを取得する
+        /// </summary>
+        /// <returns></returns>
         private VerticalAlignment GetVertical()
         {
             if (IsTopAlignment(this.TextAlignment))
@@ -361,11 +391,19 @@ namespace VoiceroidUtil.TRToys
                 return VerticalAlignment.Center;
         }
 
+        /// <summary>
+        /// View用のVerticalAlignmentを取得する
+        /// </summary>
         public VerticalAlignment Vertical
         {
             get => GetVertical();
         }
 
+        /// <summary>
+        /// 横方向について、TextAlignmentの位置を判定する
+        /// </summary>
+        /// <param name="alignment"></param>
+        /// <returns></returns>
         private bool IsLeftAlignment(PreviewTextAlignment alignment)
                 => alignment == PreviewTextAlignment.TopLeft
                 || alignment == PreviewTextAlignment.MiddleLeft
@@ -379,6 +417,10 @@ namespace VoiceroidUtil.TRToys
             || alignment == PreviewTextAlignment.MiddleRight
             || alignment == PreviewTextAlignment.BottomRight;
 
+        /// <summary>
+        /// TextAlignmentの位置からHorizontalAlignmentを取得する
+        /// </summary>
+        /// <returns></returns>
         private HorizontalAlignment GetHorizontal()
         {
             if (IsLeftAlignment(this.TextAlignment))
@@ -391,6 +433,9 @@ namespace VoiceroidUtil.TRToys
                 return HorizontalAlignment.Center;
         }
 
+        /// <summary>
+        /// View用のHorizontalAlignmentを取得する
+        /// </summary>
         public HorizontalAlignment Horizontal
         {
             get => this.horizontal;

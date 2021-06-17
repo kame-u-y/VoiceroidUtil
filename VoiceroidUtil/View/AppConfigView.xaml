@@ -203,9 +203,10 @@
 
                         <!-- TRT's拡張：追加設定 -->
                         <CheckBox
-                            Content="TRT's拡張：指定文字列により、字幕の改行・ファイル分割処理を行う（.exo作成がオンの時）"
+                            Content="TRT's拡張：以下の文字列により字幕の改行・ファイル分割を行う"
                             IsChecked="{Binding PreviewStyle.Value.IsTextSplitting}"
                             Margin="0,4,0,0" />
+
                         <Grid Margin="20,4,0,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -249,12 +250,16 @@
                                 Mode=OneWay}"
                             Margin="20,4,0,0"/>
                         <CheckBox
-                            Content="再編集用テキストを保存する（保存先に「改行分割_再編集用」ディレクトリを生成）"
+                            Content="再編集用テキストを保存する"
                             IsChecked="{Binding PreviewStyle.Value.IsRawTextSaving}"
                             IsEnabled="{Binding 
                                 Path=PreviewStyle.Value.IsTextSplitting,
                                 Mode=OneWay}"
                             Margin="20,4,0,0"/>
+                        <Label
+                            Content="※保存先に「改行分割__再編集用」ディレクトリが生成されます。"
+                            FontSize="11"
+                            Margin="40,0,0,0" />
                         <StackPanel>
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
