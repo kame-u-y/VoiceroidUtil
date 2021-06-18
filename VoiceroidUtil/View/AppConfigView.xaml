@@ -277,7 +277,7 @@
                             <Border
                                 BorderBrush="Silver"
                                 BorderThickness="1"
-                                Margin="20,10,20,0"
+                                Margin="20,10,5,0"
                                 Padding="8">
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -361,7 +361,7 @@
                             <Border
                                 BorderBrush="Silver"
                                 BorderThickness="1"
-                                Margin="20,8,20,0"
+                                Margin="20,8,5,0"
                                 Padding="8">
                                 <StackPanel>
                                     <StackPanel>
@@ -382,81 +382,79 @@
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="5"/>
                                             <ColumnDefinition/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
                                         <Label
                                             Grid.Row="0" Grid.Column="0"
                                             Content="フォント："/>
-                                        <StackPanel
+                                        <ComboBox
                                             Grid.Row="0" Grid.Column="2"
-                                            Orientation="Horizontal">
-                                            <ComboBox
-                                                x:Name="Text_FontFamilyName"
-                                                ItemsSource="{Binding FontFamilyNames}"
-                                                SelectedItem="{Binding PreviewText.Value.FontFamilyName}"
-                                                Width="130"/>
-                                            <tk:DropDownButton
-                                                Padding="6,3"
-                                                Margin="4,0,0,0">
-                                                <tk:DropDownButton.DropDownContent>
-                                                    <tk:ColorCanvas
-                                                        SelectedColor="{Binding PreviewText.Value.FontColor}"
-                                                        UsingAlphaChannel="False" />
-                                                </tk:DropDownButton.DropDownContent>
-                                                <StackPanel Orientation="Horizontal" MinWidth="86">
-                                                    <Rectangle
-                                                            Stroke="Gray"
-                                                            Width="16"
-                                                            RadiusX="4" RadiusY="4">
-                                                        <Rectangle.Fill>
-                                                            <SolidColorBrush
-                                                                    Color="{Binding PreviewText.Value.FontColor}" />
-                                                        </Rectangle.Fill>
-                                                    </Rectangle>
-                                                    <AccessText Text="文字色(_C)" Margin="4,0,0,0" />
-                                                </StackPanel>
-                                            </tk:DropDownButton>
-                                        </StackPanel>
+                                            x:Name="Text_FontFamilyName"
+                                            ItemsSource="{Binding FontFamilyNames}"
+                                            SelectedItem="{Binding PreviewText.Value.FontFamilyName}"
+                                            MinWidth="130"/>
+                                        <tk:DropDownButton
+                                            Grid.Row="0" Grid.Column="3"
+                                            Padding="6,3"
+                                            Margin="4,0,0,0"
+                                            Width="100">
+                                            <tk:DropDownButton.DropDownContent>
+                                                <tk:ColorCanvas
+                                                    SelectedColor="{Binding PreviewText.Value.FontColor}"
+                                                    UsingAlphaChannel="False" />
+                                            </tk:DropDownButton.DropDownContent>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Rectangle
+                                                    Stroke="Gray"
+                                                    Width="16"
+                                                    RadiusX="4" RadiusY="4">
+                                                    <Rectangle.Fill>
+                                                        <SolidColorBrush
+                                                            Color="{Binding PreviewText.Value.FontColor}" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                                <AccessText Text="文字色(_C)" Margin="4,0,0,0" />
+                                            </StackPanel>
+                                        </tk:DropDownButton>
+
                                         <Label
                                             Grid.Row="2" Grid.Column="0"
                                             Content="配置："
                                             Target="{Binding ElementName=Text_TextAlignment}"/>
-                                        <StackPanel 
+                                        <ComboBox
                                             Grid.Row="2" Grid.Column="2"
-                                            Orientation="Horizontal">
-                                            <ComboBox
-                                                x:Name="Text_TextAlignment"
-                                                ItemsSource="{Binding Source={trt:PreviewEnumList {x:Type trt:PreviewTextAlignment}}}"
-                                                SelectedItem="{Binding PreviewText.Value.TextAlignment}"
-                                                Width="104">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock
-                                                            Text="{Binding
-                                                                Converter={StaticResource
-                                                                ResourceKey=enumDisplayConverter}}" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                        </StackPanel>
+                                            HorizontalAlignment="Left"
+                                            x:Name="Text_TextAlignment"
+                                            ItemsSource="{Binding Source={trt:PreviewEnumList {x:Type trt:PreviewTextAlignment}}}"
+                                            SelectedItem="{Binding PreviewText.Value.TextAlignment}"
+                                            Width="104">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock
+                                                        Text="{Binding
+                                                            Converter={StaticResource
+                                                            ResourceKey=enumDisplayConverter}}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+
                                         <Label
                                             Grid.Row="4" Grid.Column="0"
                                             Content="字間："
                                             Target="{Binding ElementName=Text_LetterSpace}"/>
-                                        <StackPanel 
-                                            Orientation="Horizontal"
-                                            Grid.Row="4" Grid.Column="2">
-                                            <tk:IntegerUpDown
-                                                x:Name="Text_LetterSpace"
-                                                Value="{Binding
-                                                    Path=PreviewText.Value.LetterSpace,
-                                                    UpdateSourceTrigger=PropertyChanged}"
-                                                Minimum="-100"
-                                                Maximum="100"
-                                                Width="56"/>
-                                        </StackPanel>
+                                        <tk:IntegerUpDown
+                                            Grid.Row="4" Grid.Column="2"
+                                            HorizontalAlignment="Left"
+                                            x:Name="Text_LetterSpace"
+                                            Value="{Binding
+                                                Path=PreviewText.Value.LetterSpace,
+                                                UpdateSourceTrigger=PropertyChanged}"
+                                            Minimum="-100"
+                                            Maximum="100"
+                                            Width="56"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
