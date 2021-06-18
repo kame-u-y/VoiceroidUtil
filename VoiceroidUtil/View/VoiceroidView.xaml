@@ -154,7 +154,8 @@
                         しゃべらせたい文章を入力してください。<LineBreak />
                         F5, Ctrl+Q または入力中に Alt+Enter で再生します。<LineBreak />
                         F6, Ctrl+S または入力中に Ctrl+Enter で音声保存します。<LineBreak />
-                        F9, Ctrl+E で保存先フォルダーを開きます。
+                        F9, Ctrl+E で保存先フォルダーを開きます。<LineBreak />
+                        Ctrl+/ で改行・分割文字列を挿入します。
                     </TextBlock>
                 </v:ImeWatermarkTextBox.Watermark>
 

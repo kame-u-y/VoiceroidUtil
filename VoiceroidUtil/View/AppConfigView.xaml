@@ -203,7 +203,7 @@
 
                         <!-- TRT's拡張：追加設定 -->
                         <CheckBox
-                            Content="TRT's拡張：以下の文字列により字幕の改行・ファイル分割を行う"
+                            Content="拡張機能：以下の文字列により字幕の改行・ファイル分割を行う"
                             IsChecked="{Binding PreviewStyle.Value.IsTextSplitting}"
                             Margin="0,4,0,0" />
 
