@@ -55,6 +55,18 @@ namespace VoiceroidUtil.TRToys
         private bool isTextWrapping = true;
 
         /// <summary>
+        /// 分割された複数のテキストファイルを保存するか否かを取得または設定する。
+        /// 保存先に "(保存名)_0.txt" "(保存名)_1.txt" "(保存名)_2.txt" ... のように保存される。
+        /// </summary>
+        [DataMember]
+        public bool IsSplitTextSaving
+        {
+            get => this.isSplitTextSaving;
+            set => this.SetProperty(ref this.isSplitTextSaving, value);
+        }
+        private bool isSplitTextSaving = false;
+
+        /// <summary>
         /// 改行・分割文字列を含むテキストファイルを保存するか否かを取得または設定する。
         /// 保存先下に「改行分割_再編集用」フォルダがなければ作成され、その中に保存される
         /// </summary>

@@ -250,7 +250,22 @@
                                 Mode=OneWay}"
                             Margin="20,4,0,0"/>
                         <CheckBox
-                            Content="再編集用テキストを保存する"
+                            Content="分割されたテキストファイルを作成"
+                            IsChecked="{Binding PreviewStyle.Value.IsSplitTextSaving}"
+                            IsEnabled="{Binding 
+                                Path=PreviewStyle.Value.IsTextSplitting,
+                                Mode=OneWay}"
+                            Margin="20,4,0,0"/>
+                        <Label
+                            Content="※「テキストファイルを必ず作成」へのチェックが必要"
+                            FontSize="11"
+                            Margin="40,0,0,0" />
+                        <Label
+                            Content="　保存先に「(保存名)__0.txt」のように作成されます。"
+                            FontSize="11"
+                            Margin="40,0,0,0" />
+                        <CheckBox
+                            Content="再編集用テキストファイルを作成"
                             IsChecked="{Binding PreviewStyle.Value.IsRawTextSaving}"
                             IsEnabled="{Binding 
                                 Path=PreviewStyle.Value.IsTextSplitting,
