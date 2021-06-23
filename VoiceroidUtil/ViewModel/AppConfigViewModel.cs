@@ -133,13 +133,61 @@ namespace VoiceroidUtil.ViewModel
             this.PreviewRender =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.Render);
 
-            // プレビュー設定「拡大率」のMovableValueViewModel
+            // プレビュー設定項目「拡大率」のMovableValueViewModel
             this.PreviewScale =
                 this.MakeMovableValueViewModel(this.PreviewRender, r => r.Scale);
             // プレビュー設定項目「サイズ」のMovableValueViewModel
             this.PreviewFontSize =
                 this.MakeMovableValueViewModel(this.PreviewText, t => t.FontSize);
 
+            // プレビュー設定項目「フォント」の値
+            this.PreviewFontFamilyName =
+                this.MakeInnerPropertyOf(this.PreviewText, t => t.FontFamilyName);
+            // 設定されたフォント名に対応するUri
+            void CheckExceptionFontFamilyName(string familyName)
+            {
+                this.PreviewText.Value.SetPreviewFontUri(familyName);
+                //if (!IsInitPreviewFont)
+                //{
+                //    this.IsInitPreviewFont = true;
+                //    return;
+                //}
+                var gtf = new GlyphTypeface(this.PreviewFontUri.Value);
+
+                var isFontUriSet = this.PreviewText.Value.IsExistFontNamePathPair(
+                    this.PreviewFontFamilyName.Value,
+                    this.PreviewFontUri.Value);
+                Console.WriteLine(this.PreviewFontFamilyName.Value + ", " + this.PreviewFontUri.Value);
+                if (isFontUriSet)
+                {
+                    var fontSuccessText = @"プレビュー用フォントは正常に読み込まれました。";
+                    if (this.LastStatus.Value.StatusText != fontSuccessText)
+                    {
+                        this.SetLastStatus(
+                            AppStatusType.Success,
+                            fontSuccessText);
+                    }
+                } 
+                else
+                {
+                    var fontFailText = @"プレビュー用フォントの読み込みに失敗しました。";
+                    if (this.LastStatus.Value.StatusText != fontFailText)
+                    {
+                        this.SetLastStatus(
+                            AppStatusType.Warning,
+                            fontFailText,
+                            subStatusText: @"デフォルトフォント(MS UI Gothic)で表示されます。");
+                    }
+                }
+            }
+            this.PreviewFontUri =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUri);
+            this.PreviewFontFamilyName
+                .Subscribe(v => CheckExceptionFontFamilyName(v))
+                .AddTo(this.CompositeDisposable);
+            //this.PreviewFontUri
+            //    .Subscribe(v => CheckExceptionFontFamilyName())
+            //    .AddTo(this.CompositeDisposable);
             // フォントファミリ名列挙
             this.FontFamilyNames = new FontFamilyNameEnumerable();
         }
@@ -386,7 +434,7 @@ namespace VoiceroidUtil.ViewModel
         public IReactiveProperty<PreviewStyle> PreviewStyle { get; }
 
         /// <summary>
-        /// TRT's拡張：プレビュー字幕テキストのフォント関連の設定を取得する。
+        /// TRT's拡張：プレビュー字幕テキストの幾何的な値の設定を取得する。
         /// </summary>
         public IReadOnlyReactiveProperty<PreviewRenderComponent> PreviewRender { get; }
 
@@ -406,10 +454,24 @@ namespace VoiceroidUtil.ViewModel
         public MovableValueViewModel PreviewFontSize { get; set; }
 
         /// <summary>
+        /// TRT's拡張：設定されたプレビューのフォント名を取得する。
+        /// </summary>
+        public IReactiveProperty<string> PreviewFontFamilyName { get; }
+
+        /// <summary>
+        /// TRT's拡張：設定されたプレビューのフォントUriを取得する。
+        /// </summary>
+        public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; }
+
+        /// <summary>
         /// TRT's拡張：フォントファミリ名列挙を取得する。
         /// </summary>
         public IEnumerable<string> FontFamilyNames { get; }
 
+        /// <summary>
+        /// TRT's拡張：起動時に初期値でのフォント指定時ステータス表示を回避
+        /// </summary>
+        //private bool IsInitPreviewFont = false;
 
         private MovableValueViewModel MakeMovableValueViewModel<T, TConstants>(
             IReadOnlyReactiveProperty<T> holder,

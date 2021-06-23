@@ -409,7 +409,7 @@
                                             Grid.Row="0" Grid.Column="2"
                                             x:Name="Text_FontFamilyName"
                                             ItemsSource="{Binding FontFamilyNames}"
-                                            SelectedItem="{Binding PreviewText.Value.FontFamilyName}"
+                                            SelectedItem="{Binding PreviewFontFamilyName.Value}"
                                             MinWidth="130"/>
                                         <tk:DropDownButton
                                             Grid.Row="0" Grid.Column="3"
