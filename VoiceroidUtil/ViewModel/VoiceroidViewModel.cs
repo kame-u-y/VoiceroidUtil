@@ -209,6 +209,8 @@ namespace VoiceroidUtil.ViewModel
                 .ToReadOnlyReactiveProperty();
 
             // プレビューの前後ボタンの表示or非表示用
+            this.IsMultiScenePreview =
+                new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
             this.IsFirstScene =
                 new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
             this.IsLastScene =
@@ -520,16 +522,22 @@ namespace VoiceroidUtil.ViewModel
                 return new Thickness(0, verticalMargin, rightMargin + horizontalMargin, verticalMargin);
         }
         public IReadOnlyReactiveProperty<Thickness> PreviewTextMargin { get; }
+
+        /// <summary>
+        /// TRT's拡張：プレビューが複数シーンであるかを取得・設定する。
+        /// Style.Triggerに利用。
+        /// </summary>
+        public IReactiveProperty<bool> IsMultiScenePreview { get; }
         
         /// <summary>
         /// TRT's拡張：現在表示プレビューが最初のシーンであるかを取得・設定する。
-        /// Style.Triggerに利用。Converterを検討する必要あり
+        /// Style.Triggerに利用。
         /// </summary>
         public IReactiveProperty<bool> IsFirstScene { get; set; }
 
         /// <summary>
         /// TRT's拡張：現在表示プレビューが最後のシーンであるかを取得・設定する。
-        /// Style.Triggerに利用。Converterを検討する必要あり
+        /// Style.Triggerに利用。
         /// </summary>
         public IReactiveProperty<bool> IsLastScene { get; set; }
 
@@ -636,6 +644,7 @@ namespace VoiceroidUtil.ViewModel
             // 拡張機能利用時のみ処理
             if (!this.PreviewStyle.Value.IsTextSplitting) return;
 
+            this.IsMultiScenePreview.Value = TalkText.Value.Length > 0;
             this.IsFirstScene.Value = startId == 0;
             this.IsLastScene.Value = endId == this.TalkText.Value.Length;
             if (TalkText.Value.Length <= 0)
@@ -726,6 +735,7 @@ namespace VoiceroidUtil.ViewModel
         public ICommand BackSceneCommand { get; }
         private void ExecuteBackSceneCommand()
         {
+            if (!this.IsMultiScenePreview.Value) return;
             var currentStartId = this.GetPreviewSceneStart(this.TalkTextSelectionStart.Value);
 
             var backStartId = this.GetPreviewSceneStart(currentStartId - 1);
@@ -739,6 +749,7 @@ namespace VoiceroidUtil.ViewModel
         public ICommand NextSceneCommand { get; }
         private void ExecuteNextSceneCommand()
         {
+            if (!this.IsMultiScenePreview.Value) return;
             var currentEndId = this.GetPreviewSceneEnd(this.TalkTextSelectionStart.Value);
 
             var nextStartId = this.GetPreviewSceneStart(currentEndId + this.PreviewStyle.Value.FileSplitString.Length);
