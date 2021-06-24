@@ -144,50 +144,14 @@ namespace VoiceroidUtil.ViewModel
             this.PreviewFontFamilyName =
                 this.MakeInnerPropertyOf(this.PreviewText, t => t.FontFamilyName);
             // 設定されたフォント名に対応するUri
-            void CheckExceptionFontFamilyName(string familyName)
-            {
-                this.PreviewText.Value.SetPreviewFontUri(familyName);
-                //if (!IsInitPreviewFont)
-                //{
-                //    this.IsInitPreviewFont = true;
-                //    return;
-                //}
-                var gtf = new GlyphTypeface(this.PreviewFontUri.Value);
-
-                var isFontUriSet = this.PreviewText.Value.IsExistFontNamePathPair(
-                    this.PreviewFontFamilyName.Value,
-                    this.PreviewFontUri.Value);
-                Console.WriteLine(this.PreviewFontFamilyName.Value + ", " + this.PreviewFontUri.Value);
-                if (isFontUriSet)
-                {
-                    var fontSuccessText = @"プレビュー用フォントは正常に読み込まれました。";
-                    if (this.LastStatus.Value.StatusText != fontSuccessText)
-                    {
-                        this.SetLastStatus(
-                            AppStatusType.Success,
-                            fontSuccessText);
-                    }
-                } 
-                else
-                {
-                    var fontFailText = @"プレビュー用フォントの読み込みに失敗しました。";
-                    if (this.LastStatus.Value.StatusText != fontFailText)
-                    {
-                        this.SetLastStatus(
-                            AppStatusType.Warning,
-                            fontFailText,
-                            subStatusText: @"デフォルトフォント(MS UI Gothic)で表示されます。");
-                    }
-                }
-            }
             this.PreviewFontUri =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUri);
+            
+            // プレビュー用フォント名が変更されたときの処理
             this.PreviewFontFamilyName
-                .Subscribe(v => CheckExceptionFontFamilyName(v))
+                .Subscribe(v => this.PreviewFontFamilyNameHandler(v))
                 .AddTo(this.CompositeDisposable);
-            //this.PreviewFontUri
-            //    .Subscribe(v => CheckExceptionFontFamilyName())
-            //    .AddTo(this.CompositeDisposable);
+            
             // フォントファミリ名列挙
             this.FontFamilyNames = new FontFamilyNameEnumerable();
         }
@@ -467,6 +431,57 @@ namespace VoiceroidUtil.ViewModel
         /// TRT's拡張：フォントファミリ名列挙を取得する。
         /// </summary>
         public IEnumerable<string> FontFamilyNames { get; }
+
+        /// <summary>
+        /// 初期化時はプレビュー用フォント名変更のステータス表示はしない
+        /// </summary>
+        public bool IsInitPreviewFont = false;
+
+        /// <summary>
+        /// プレビュー用フォントファミリ名の読み込み結果のステータスを表示
+        /// </summary>
+        /// <param name="familyName"></param>
+        private void CheckExceptionFontFamilyName(string familyName)
+        {
+            if (!IsInitPreviewFont)
+            {
+                this.IsInitPreviewFont = true;
+                return;
+            }
+            if (!this.PreviewStyle.Value.IsTextSplitting)
+            {
+                return;
+            }
+
+            if (this.PreviewText.Value.IsExistFontUri(familyName))
+            {
+                var fontSuccessText = @"プレビュー用フォントは正常に読み込まれました。";
+                if (this.LastStatus.Value.StatusText != fontSuccessText && this.LastStatus.Value.StatusText != "")
+                {
+                    this.SetLastStatus(
+                        AppStatusType.Success,
+                        fontSuccessText);
+                }
+            }
+            else
+            {
+                var fontFailText = $"プレビュー用フォントの読み込みに失敗しました。";
+                this.SetLastStatus(
+                    AppStatusType.Warning,
+                    fontFailText,
+                    subStatusText: $"フォント名：{familyName}");
+            }
+        }
+
+        /// <summary>
+        /// プレビュー用フォント名変更時のハンドラ
+        /// </summary>
+        /// <param name="familyName"></param>
+        private void PreviewFontFamilyNameHandler(string familyName)
+        {
+            this.PreviewText.Value.SetPreviewFontUri(familyName);
+            this.CheckExceptionFontFamilyName(familyName);
+        }
 
         /// <summary>
         /// TRT's拡張：起動時に初期値でのフォント指定時ステータス表示を回避

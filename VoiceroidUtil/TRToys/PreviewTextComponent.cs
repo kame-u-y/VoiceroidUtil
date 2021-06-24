@@ -288,11 +288,11 @@ namespace VoiceroidUtil.TRToys
             return dic;
         }
 
-        public bool IsExistFontNamePathPair(string familyName, Uri fontUri)
-            =>FontPathDictionary.Contains(new KeyValuePair<string, Uri>(familyName, fontUri));
+        public bool IsExistFontUri(string familyName)
+            => FontPathDictionary.ContainsKey(familyName);
 
         /// <summary>
-        /// フォントファミリー名からフォントUriを取得
+        /// プレビュー用フォントUriを取得または設定する。
         /// </summary>
         [DataMember]
         public Uri PreviewFontUri
@@ -305,6 +305,10 @@ namespace VoiceroidUtil.TRToys
         }
         private Uri previewFontUri = FontPathDictionary[DefaultFontFamilyName];
 
+        /// <summary>
+        /// フォントファミリー名変更時にフォントUriを変更
+        /// </summary>
+        /// <param name="familyName"></param>
         public void SetPreviewFontUri(string familyName)
         {
             if (FontPathDictionary.ContainsKey(familyName))
