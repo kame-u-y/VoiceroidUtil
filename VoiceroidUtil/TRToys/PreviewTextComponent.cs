@@ -119,6 +119,13 @@ namespace VoiceroidUtil.TRToys
         private static IDictionary<string, Uri> fontPathDictionary =
             SearchFontNamePathPair();
 
+        public class FontDataStore
+        {
+            public string FamilyName;
+            //public IDictionary<string, Uri> FaceNameToPath = new Dictionary<string, Uri>();
+            public string FaceName;
+            public Uri FaceNamePath;
+        }
         /// <summary>
         /// 辞書の作成
         /// </summary>
@@ -167,71 +174,53 @@ namespace VoiceroidUtil.TRToys
             //     FaceNameについて、Boldは通常、Regular（もしくはフォント特有のFaceName）の太字モードとして扱われるが、
             //     RegularがなくBoldのみのフォント（例：Unispace、UD デジタル 教科書体 N-B）が存在するため、
             //     BoldのみであるかチェックするためにFaceNameを一覧する辞書を作成する
-            IDictionary<string, Dictionary<string, Uri>> nameFaceToPath = new Dictionary<string, Dictionary<string, Uri>>();
-            var generalCultureName = "en-US";
-            var exceptionalCultureName = "ja-JP";
-            var exceptionalFaceName = "exceptionalFaceName";
+            IDictionary<string, FontDataStore> fontDataDictionary = 
+                new Dictionary<string, FontDataStore>();
+
+            var generalFaceCulture = new CultureInfo("en-US");
+            var exceptionalFaceCulture = new CultureInfo("ja-JP");
+            //var exceptionalFaceName = "exceptionalFaceName";
+
             foreach (Uri uri in uris)
             {
                 try
                 {
                     GlyphTypeface gtf = new GlyphTypeface(uri);
-                    foreach (string familyName in gtf.FamilyNames.Values)
+                    foreach (string familyName in gtf.Win32FamilyNames.Values)
                     {
-                        var cultureName =
-                            gtf.FaceNames.ContainsKey(new CultureInfo(generalCultureName))
-                                ? generalCultureName
-                                : exceptionalCultureName;
-                        var culture = new CultureInfo(cultureName);
-
-                        // "○○ Bold"と"○○ Italic"を"○○"に
-                        var faceName = gtf.FaceNames[culture]
-                                .Replace(" Bold", string.Empty)
-                                .Replace(" Italic", string.Empty);
-                        if (cultureName == exceptionalCultureName)
-                        {
-                            faceName = string.Empty;
-                        }
-                        else
-                        {
-                            if (faceName == "Regular")
-                            {
-                                faceName = faceName.Replace("Regular", string.Empty);
-                            }
-                            else if (faceName == "Bold")
-                            {
-                                faceName = faceName.Replace("Bold", string.Empty);
-                            }
-                            else if (faceName == "Italic")
-                            {
-                                faceName = faceName.Replace("Italic", string.Empty);
-                            }
-                        }
-
-                        var fontName = (faceName != "")
-                            ? $"{familyName} {faceName}"
-                            : $"{familyName}";
+                        var familyCulture =
+                           gtf.Win32FamilyNames.ContainsKey(CultureInfo.CurrentCulture)
+                               ? CultureInfo.CurrentCulture
+                               : new CultureInfo("en-US");
+                        var faceCulture =
+                            gtf.FaceNames.ContainsKey(generalFaceCulture)
+                                ? generalFaceCulture
+                                : exceptionalFaceCulture;
 
                         // 同一のfontNameが存在しなければAdd
-                        if (!nameFaceToPath.ContainsKey(fontName))
+                        if (!fontDataDictionary.ContainsKey(familyName))
                         {
-                            nameFaceToPath.Add(fontName, new Dictionary<string, Uri>());
+                            fontDataDictionary.Add(familyName, new FontDataStore { FamilyName = familyName, FaceName = string.Empty });
                         }
 
-                        // fontName内に同一のfontFaceが存在しなければAdd
-                        if (cultureName == generalCultureName)
+
+                        bool isSpecialFaceName()
+                            => gtf.Win32FaceNames[faceCulture] != "Bold"
+                                && gtf.Win32FaceNames[faceCulture] != "Italic"
+                                && gtf.Win32FaceNames[faceCulture] != "Bold Italic"
+                                && gtf.Win32FaceNames[faceCulture] != "Regular";
+
+                        if (fontDataDictionary[familyName].FaceName == string.Empty
+                            || gtf.Win32FaceNames[faceCulture] == "Regular"
+                            || (fontDataDictionary[familyName].FaceName != "Regular" && isSpecialFaceName())
+                            || (fontDataDictionary[familyName].FaceName == "Bold Italic"
+                                && (gtf.Win32FaceNames[faceCulture] == "Bold" || gtf.Win32FaceNames[faceCulture] == "Italic"))
+                            || (fontDataDictionary[familyName].FaceName == "Italic"
+                                && gtf.Win32FaceNames[faceCulture] == "Bold"))
                         {
-                            if (!nameFaceToPath[fontName].ContainsKey(gtf.FaceNames[culture]))
-                            {
-                                nameFaceToPath[fontName].Add(gtf.FaceNames[culture], uri);
-                            }
-                        }
-                        else
-                        {
-                            if (!nameFaceToPath[fontName].ContainsKey(exceptionalFaceName))
-                            {
-                                nameFaceToPath[fontName].Add(exceptionalFaceName, uri);
-                            }
+                            fontDataDictionary[familyName].FaceName = gtf.Win32FaceNames[faceCulture];
+                            fontDataDictionary[familyName].FaceNamePath = uri;
+                            //Console.WriteLine(fontDataDictionary[familyName].FaceName);
                         }
                     }
                 }
@@ -245,43 +234,19 @@ namespace VoiceroidUtil.TRToys
             }
 
             // 最終的な辞書の作成
-            foreach (string fontName in nameFaceToPath.Keys)
+            foreach (string familyName in fontDataDictionary.Keys)
             {
                 try
                 {
-                    var faceName = "";
-                    if (nameFaceToPath[fontName].Keys.Count == 1 && nameFaceToPath[fontName].ContainsKey("Bold"))
-                    {
-                        faceName = "Bold";
-                    }
-                    else if (nameFaceToPath[fontName].Keys.Count == 1 && nameFaceToPath[fontName].ContainsKey("Italic"))
-                    {
-                        faceName = "Italic";
-                    }
-                    else if (nameFaceToPath[fontName].Keys.Count == 1 && nameFaceToPath[fontName].ContainsKey("Bold Italic"))
-                    {
-                        faceName = "Bold Italic";
-                    }
-                    else if (nameFaceToPath[fontName].ContainsKey("Regular"))
-                    {
-                        faceName = "Regular";
-                    }
-                    else if (fontName.LastIndexOf(" ") != -1)
-                    {
-                        faceName = fontName.Substring(fontName.LastIndexOf(" ") + 1);
-                    }
-                    else
-                    {
-                        faceName = exceptionalFaceName;
-                    }
-                    dic.Add(fontName, nameFaceToPath[fontName][faceName]);
+                    Console.WriteLine(familyName + "," + fontDataDictionary[familyName].FaceName);
+                    dic.Add(familyName, fontDataDictionary[familyName].FaceNamePath);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(fontName);
+                    Console.WriteLine();
+                    Console.WriteLine(familyName);
                     Console.WriteLine(e);
                     Console.WriteLine();
-                    continue;
                 }
             }
 
