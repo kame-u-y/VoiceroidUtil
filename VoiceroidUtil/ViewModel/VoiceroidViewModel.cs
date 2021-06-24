@@ -235,8 +235,14 @@ namespace VoiceroidUtil.ViewModel
 
             // UpdatePreviewの処理結果はそのままに直接PreviewTextListを更新
             this.PreviewLetterSpace =
-                this.MakeInnerPropertyOf(this.PreviewText, t => t.LetterSpace);
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.LetterSpace);
             this.PreviewLetterSpace
+                .Subscribe(v => ReflectSettingToPreview())
+                .AddTo(this.CompositeDisposable);
+
+            this.PreviewFontUri =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUri);
+            this.PreviewFontUri
                 .Subscribe(v => ReflectSettingToPreview())
                 .AddTo(this.CompositeDisposable);
 
@@ -727,7 +733,8 @@ namespace VoiceroidUtil.ViewModel
                     new PreviewTextStore(this.PreviewTextList[i].Text, this.PreviewStyle.Value);
             }
         }
-        public IReactiveProperty<int> PreviewLetterSpace { get; }
+        public IReadOnlyReactiveProperty<int> PreviewLetterSpace { get; }
+        public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; }
 
         /// <summary>
         /// TRT's拡張：一つ前のプレビューシーンに戻るコマンド
