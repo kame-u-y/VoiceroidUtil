@@ -50,7 +50,7 @@ namespace VoiceroidUtil.TRToys
         /// フォントに入力文字の情報が存在しなかった場合の大体文字。
         /// ほぼ必ず存在し、かつ適度な幅の文字としてAを使用
         /// </summary>
-        readonly char TempLetter = 'A';
+        //readonly char TempLetter = 'A';
 
         /// <summary>
         /// テキストと設定値からIndicesを生成。
@@ -64,12 +64,17 @@ namespace VoiceroidUtil.TRToys
             var indices = "";
             for (int i = 0; i < text.Length - 1; i++)
             {
-                ushort charaIndex = typeface.CharacterToGlyphMap.ContainsKey(text[i])
-                    ? typeface.CharacterToGlyphMap[text[i]]
-                    : typeface.CharacterToGlyphMap[TempLetter];
-
+                double charaWidth;
+                if (typeface.CharacterToGlyphMap.ContainsKey(text[i]))
+                {
+                    ushort charaIndex = typeface.CharacterToGlyphMap[text[i]];
+                    charaWidth = typeface.AdvanceWidths[charaIndex];
+                }
+                else
+                {
+                    charaWidth = 0.65; // 代わりの字幅
+                }
                 var fontSize = (double)style.Text.FontSize.Begin;
-                var charaWidth = typeface.AdvanceWidths[charaIndex];
                 var val = (charaWidth + style.Text.LetterSpace / fontSize) * 100;
                 indices += $",{val};";
             }

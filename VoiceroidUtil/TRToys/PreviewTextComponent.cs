@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Media;
@@ -179,7 +180,6 @@ namespace VoiceroidUtil.TRToys
 
             var generalFaceCulture = new CultureInfo("en-US");
             var exceptionalFaceCulture = new CultureInfo("ja-JP");
-            //var exceptionalFaceName = "exceptionalFaceName";
 
             foreach (Uri uri in uris)
             {
@@ -197,39 +197,57 @@ namespace VoiceroidUtil.TRToys
                                 ? generalFaceCulture
                                 : exceptionalFaceCulture;
 
+                        if (!gtf.Win32FaceNames.ContainsKey(faceCulture))
+                        {
+                            continue;
+                        }
+                        
                         // 同一のfontNameが存在しなければAdd
                         if (!fontDataDictionary.ContainsKey(familyName))
                         {
                             fontDataDictionary.Add(familyName, new FontDataStore { FamilyName = familyName, FaceName = string.Empty });
                         }
 
-
-                        bool isSpecialFaceName()
-                            => gtf.Win32FaceNames[faceCulture] != "Bold"
+                        // FaceNameのパワーバランス
+                        // "Regular" > フォント固有のFaceName > "Bold" > "Italic" > "Bold Italic"
+                        bool canSetSpecialFace()
+                            => fontDataDictionary[familyName].FaceName != "Regular"
+                                && gtf.Win32FaceNames[faceCulture] != "Bold"
                                 && gtf.Win32FaceNames[faceCulture] != "Italic"
                                 && gtf.Win32FaceNames[faceCulture] != "Bold Italic"
                                 && gtf.Win32FaceNames[faceCulture] != "Regular";
-
+                        bool canSetBold()
+                            => gtf.Win32FaceNames[faceCulture] == "Bold"
+                                && (fontDataDictionary[familyName].FaceName == "Italic"
+                                    || fontDataDictionary[familyName].FaceName == "Bold Italic");
+                        bool canSetItalic()
+                            => gtf.Win32FaceNames[faceCulture] == "Italic"
+                                && fontDataDictionary[familyName].FaceName == "Bold Italic";
+                                
                         if (fontDataDictionary[familyName].FaceName == string.Empty
                             || gtf.Win32FaceNames[faceCulture] == "Regular"
-                            || (fontDataDictionary[familyName].FaceName != "Regular" && isSpecialFaceName())
-                            || (fontDataDictionary[familyName].FaceName == "Bold Italic"
-                                && (gtf.Win32FaceNames[faceCulture] == "Bold" || gtf.Win32FaceNames[faceCulture] == "Italic"))
-                            || (fontDataDictionary[familyName].FaceName == "Italic"
-                                && gtf.Win32FaceNames[faceCulture] == "Bold"))
+                            || canSetSpecialFace()
+                            || canSetBold() 
+                            || canSetItalic())
                         {
                             fontDataDictionary[familyName].FaceName = gtf.Win32FaceNames[faceCulture];
                             fontDataDictionary[familyName].FaceNamePath = uri;
-                            //Console.WriteLine(fontDataDictionary[familyName].FaceName);
                         }
                     }
                 }
                 catch (Exception e)
                 {
+                    string appDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                    Directory.CreateDirectory($"{appDir}\\log");
+                    StreamWriter sw = new StreamWriter(
+                        $"{appDir}\\error_log\\log_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt",
+                        true,
+                        System.Text.Encoding.GetEncoding("UTF-8"));
+                    Console.SetOut(sw);
                     Console.WriteLine(uri);
                     Console.WriteLine(e);
                     Console.WriteLine();
-                    continue;
+                    sw.Close();
                 }
             }
 
@@ -238,15 +256,25 @@ namespace VoiceroidUtil.TRToys
             {
                 try
                 {
-                    Console.WriteLine(familyName + "," + fontDataDictionary[familyName].FaceName);
+                    if (!fontDataDictionary.ContainsKey(familyName))
+                    {
+                        continue;
+                    }
                     dic.Add(familyName, fontDataDictionary[familyName].FaceNamePath);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine();
+                    string appDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                    Directory.CreateDirectory($"{appDir}\\log");
+                    StreamWriter sw = new StreamWriter(
+                        $"{appDir}\\error_log\\log_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt",
+                        true,
+                        System.Text.Encoding.GetEncoding("UTF-8"));
+                    Console.SetOut(sw);
                     Console.WriteLine(familyName);
                     Console.WriteLine(e);
                     Console.WriteLine();
+                    sw.Close();
                 }
             }
 
