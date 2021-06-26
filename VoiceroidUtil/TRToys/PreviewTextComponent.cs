@@ -186,6 +186,7 @@ namespace VoiceroidUtil.TRToys
                 try
                 {
                     GlyphTypeface gtf = new GlyphTypeface(uri);
+                    
                     foreach (string familyName in gtf.Win32FamilyNames.Values)
                     {
                         var familyCulture =
@@ -238,9 +239,9 @@ namespace VoiceroidUtil.TRToys
                 catch (Exception e)
                 {
                     string appDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                    Directory.CreateDirectory($"{appDir}\\log");
+                    Directory.CreateDirectory($"{appDir}\\error_log");
                     StreamWriter sw = new StreamWriter(
-                        $"{appDir}\\error_log\\log_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt",
+                        $"{appDir}\\error_log\\log_{DateTime.Now.ToString("yyyyMMddHHmmss")}_fontlist.txt",
                         true,
                         System.Text.Encoding.GetEncoding("UTF-8"));
                     Console.SetOut(sw);
@@ -265,9 +266,9 @@ namespace VoiceroidUtil.TRToys
                 catch (Exception e)
                 {
                     string appDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                    Directory.CreateDirectory($"{appDir}\\log");
+                    Directory.CreateDirectory($"{appDir}\\error_log");
                     StreamWriter sw = new StreamWriter(
-                        $"{appDir}\\error_log\\log_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt",
+                        $"{appDir}\\error_log\\log_{DateTime.Now.ToString("yyyyMMddHHmmss")}_fontdict.txt",
                         true,
                         System.Text.Encoding.GetEncoding("UTF-8"));
                     Console.SetOut(sw);
