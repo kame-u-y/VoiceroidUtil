@@ -186,7 +186,7 @@ namespace VoiceroidUtil.TRToys
                 try
                 {
                     GlyphTypeface gtf = new GlyphTypeface(uri);
-                    
+    
                     foreach (string familyName in gtf.Win32FamilyNames.Values)
                     {
                         var familyCulture =
@@ -238,6 +238,7 @@ namespace VoiceroidUtil.TRToys
                 }
                 catch (Exception e)
                 {
+                    var stdout = Console.Out;
                     string appDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
                     Directory.CreateDirectory($"{appDir}\\error_log");
                     StreamWriter sw = new StreamWriter(
@@ -249,6 +250,7 @@ namespace VoiceroidUtil.TRToys
                     Console.WriteLine(e);
                     Console.WriteLine();
                     sw.Close();
+                    Console.SetOut(stdout);
                 }
             }
 
@@ -265,6 +267,7 @@ namespace VoiceroidUtil.TRToys
                 }
                 catch (Exception e)
                 {
+                    var stdout = Console.Out;
                     string appDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
                     Directory.CreateDirectory($"{appDir}\\error_log");
                     StreamWriter sw = new StreamWriter(
@@ -276,6 +279,7 @@ namespace VoiceroidUtil.TRToys
                     Console.WriteLine(e);
                     Console.WriteLine();
                     sw.Close();
+                    Console.SetOut(stdout);
                 }
             }
 
