@@ -223,6 +223,7 @@ namespace VoiceroidUtil.ViewModel
             // 値保持用の変数
             this.AfterInsertSelectionStart = -1;
             this.PrePreviewScene = "";
+            this.PreTalkText = "";
             this.PreTalkTextLength = 0;
             
             // 一行ごとのプレビューテキストのストアのリスト
@@ -564,6 +565,11 @@ namespace VoiceroidUtil.ViewModel
         private string PrePreviewScene { get; set; }
 
         /// <summary>
+        /// TRT's拡張：一つ前のTalkTextを保存する。
+        /// </summary>
+        private string PreTalkText { get; set; }
+
+        /// <summary>
         /// TRT's拡張：一つ前のTalkTextの文字数を保存する。
         /// </summary>
         private int PreTalkTextLength { get; set; }
@@ -649,7 +655,7 @@ namespace VoiceroidUtil.ViewModel
         {
             // 拡張機能利用時のみ処理
             if (!this.PreviewStyle.Value.IsTextSplitting) return;
-
+            
             this.IsMultiScenePreview.Value = TalkText.Value.Length > 0;
             this.IsFirstScene.Value = startId == 0;
             this.IsLastScene.Value = endId == this.TalkText.Value.Length;
@@ -694,11 +700,16 @@ namespace VoiceroidUtil.ViewModel
         private void TalkTextHandle()
         {
             // SelectionStartが発火されない時にプレビューを更新
-            // 日本語入力（k → か）など
-            if (this.PreTalkTextLength == this.TalkText.Value.Length)
+            // ・日本語入力（k → か）
+            // ・Delete
+            if (this.PreTalkTextLength == this.TalkText.Value.Length
+                || (this.PreTalkTextLength != this.TalkText.Value.Length 
+                    && this.PreTalkText != this.TalkText.Value 
+                    && this.TalkTextSelectionStart.Value <= this.TalkText.Value.Length))
             {
                 CallUpdatePreview();
             }
+            this.PreTalkText = this.TalkText.Value;
             this.PreTalkTextLength = this.TalkText.Value.Length;
         }
         
