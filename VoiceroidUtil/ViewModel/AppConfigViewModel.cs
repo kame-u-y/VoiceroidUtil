@@ -134,10 +134,10 @@ namespace VoiceroidUtil.ViewModel
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.Render);
 
             // プレビュー設定項目「拡大率」のMovableValueViewModel
-            this.PreviewScale =
+            this.ScaleMovable =
                 this.MakeMovableValueViewModel(this.PreviewRender, r => r.Scale);
             // プレビュー設定項目「サイズ」のMovableValueViewModel
-            this.PreviewFontSize =
+            this.FontSizeMovable =
                 this.MakeMovableValueViewModel(this.PreviewText, t => t.FontSize);
 
             // プレビュー設定項目「フォント」の値
@@ -146,15 +146,42 @@ namespace VoiceroidUtil.ViewModel
             // 設定されたフォント名に対応するUri
             this.PreviewFontUri =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUri);
-            
+
             // プレビュー用フォント名が変更されたときの処理
             this.PreviewFontFamilyName
                 .Subscribe(v => this.PreviewFontFamilyNameHandler(v))
                 .AddTo(this.CompositeDisposable);
-            
+
             // フォントファミリ名列挙
             this.FontFamilyNames = new FontFamilyNameEnumerable();
+
+            this.ScaleMovable.Begin
+                .Subscribe(v => this.UpdatePreviewFontSize())
+                .AddTo(this.CompositeDisposable);
+            this.FontSizeMovable.Begin
+                .Subscribe(v => this.UpdatePreviewFontSize())
+                .AddTo(this.CompositeDisposable);
+            this.IsTextSplitting =
+                this.MakeInnerPropertyOf(this.PreviewStyle, c => c.IsTextSplitting);
+            this.IsTextSplitting
+                .Subscribe(v => this.UpdatePreviewFontSize())
+                .AddTo(this.CompositeDisposable);
+            this.AviUtlWindowWidth =
+                this.MakeInnerPropertyOf(this.PreviewStyle, c => c.AviUtlWindowWidth);
+            this.AviUtlWindowWidth
+                .Subscribe(v => this.UpdatePreviewFontSize())
+                .AddTo(this.CompositeDisposable);
+            this.PreviewWindowWidth =
+                this.MakeInnerPropertyOf(this.PreviewStyle, c => c.PreviewWindowWidth);
+            this.PreviewWindowWidth
+                .Subscribe(v => this.UpdatePreviewFontSize())
+                .AddTo(this.CompositeDisposable);
+
         }
+
+        public IReactiveProperty<bool> IsTextSplitting { get; }
+        public IReactiveProperty<int> AviUtlWindowWidth { get; }
+        public IReactiveProperty<int> PreviewWindowWidth { get; }
 
         /// <summary>
         /// 選択中タブインデックスを取得する。
@@ -410,12 +437,14 @@ namespace VoiceroidUtil.ViewModel
         /// <summary>
         /// TRT's拡張：プレビュー設定「拡大率」のMovableValueViewModelを取得・設定する。
         /// </summary>
-        public MovableValueViewModel PreviewScale { get; set; }
+        public MovableValueViewModel ScaleMovable { get; set; }
 
         /// <summary>
         /// TRT's拡張：プレビュー設定「サイズ」のMovableValueViewModelを取得・設定する。
         /// </summary>
-        public MovableValueViewModel PreviewFontSize { get; set; }
+        public MovableValueViewModel FontSizeMovable { get; set; }
+
+        public IReadOnlyReactiveProperty<decimal> MovableFontSize { get; set; }
 
         /// <summary>
         /// TRT's拡張：設定されたプレビューのフォント名を取得する。
@@ -487,6 +516,12 @@ namespace VoiceroidUtil.ViewModel
         /// TRT's拡張：起動時に初期値でのフォント指定時ステータス表示を回避
         /// </summary>
         //private bool IsInitPreviewFont = false;
+
+        private void UpdatePreviewFontSize()
+        {
+            this.PreviewStyle.Value.SetPreviewFontSize();
+        }
+
 
         private MovableValueViewModel MakeMovableValueViewModel<T, TConstants>(
             IReadOnlyReactiveProperty<T> holder,

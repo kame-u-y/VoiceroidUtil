@@ -383,10 +383,10 @@
                                 <StackPanel>
                                     <StackPanel>
                                         <v:PreviewMovableValueControl
-                                            DataContext="{Binding PreviewScale}"
+                                            DataContext="{Binding ScaleMovable}"
                                             Margin="0,0,0,0" />
                                         <v:PreviewMovableValueControl
-                                            DataContext="{Binding PreviewFontSize}"
+                                            DataContext="{Binding FontSizeMovable}"
                                             Margin="0,4,0,0" />
                                     </StackPanel>
                                     <Grid Margin="0,10,0,0">

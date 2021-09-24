@@ -24,8 +24,10 @@ namespace VoiceroidUtil.TRToys
         public PreviewStyle()
         {
             // イベントハンドラ追加のためにプロパティ経由で設定
-            this.Render = new PreviewRenderComponent(() => this.SetPreviewFontSize());
-            this.Text = new PreviewTextComponent(() => this.SetPreviewFontSize());
+            this.Render = new PreviewRenderComponent();
+            this.Text = new PreviewTextComponent();
+            //this.Render = new PreviewRenderComponent(() => this.SetPreviewFontSize());
+            //this.Text = new PreviewTextComponent(() => this.SetPreviewFontSize());
         }
 
         /// <summary>
@@ -38,7 +40,7 @@ namespace VoiceroidUtil.TRToys
             set
             {
                 this.SetProperty(ref this.textSplitting, value);
-                this.SetPreviewFontSize();
+                //this.SetPreviewFontSize(this.Text.FontSize.Begin);
             }
         }
         private bool textSplitting = false;
@@ -155,7 +157,7 @@ namespace VoiceroidUtil.TRToys
                 this.SetProperty(ref this.aviUtlWindowWidth, value);
                 this.SetPreviewLeftMargin();
                 this.SetPreviewRightMargin();
-                this.SetPreviewFontSize();
+                //this.SetPreviewFontSize(this.Text.FontSize.Begin);
             }
         }
         private int aviUtlWindowWidth = 1920;
@@ -172,7 +174,7 @@ namespace VoiceroidUtil.TRToys
                 this.SetProperty(ref this.previewWindowWidth, value);
                 this.SetPreviewLeftMargin();
                 this.SetPreviewRightMargin();
-                this.SetPreviewFontSize();
+                //this.SetPreviewFontSize(this.Text.FontSize.Begin);
             }
         }
         private int previewWindowWidth = 200;
@@ -246,10 +248,11 @@ namespace VoiceroidUtil.TRToys
         /// プレビューテキストのフォントサイズを設定する
         /// 依存するプロパティから呼び出される
         /// </summary>
-        private void SetPreviewFontSize()
+        public void SetPreviewFontSize()
         {
             if (this.Text != null && this.Render != null)
             {
+                Console.WriteLine("set PreviewFontSize");
                 this.PreviewFontSize = 
                     this.Text.FontSize.Begin
                     * ((decimal)this.PreviewWindowWidth / (decimal)this.AviUtlWindowWidth)
