@@ -31,12 +31,6 @@ namespace VoiceroidUtil.TRToys
             this.Scale = new PreviewMovableValue<ScaleConst>();
         }
 
-        public PreviewRenderComponent(Action action) : base()
-        {
-            // イベントハンドラ追加のためにプロパティ経由で設定
-            this.Scale = new PreviewMovableValue<ScaleConst>(action);
-        }
-
         /// <summary>
         /// 拡大率を取得または設定する。
         /// </summary>

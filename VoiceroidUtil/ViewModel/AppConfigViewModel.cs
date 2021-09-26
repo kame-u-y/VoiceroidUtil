@@ -121,67 +121,66 @@ namespace VoiceroidUtil.ViewModel
                     this.CanModify,
                     this.IsExoFileMakingCommandVisible);
 
-            // TRT's拡張
-            // プレビューの設定
+            // TRT's拡張：プレビューの設定
             this.PreviewStyle =
                 this.MakeInnerPropertyOf(config, c => c.PreviewStyle);
 
-            // プレビュー字幕テキストのフォント関連の設定
+            // TRT's拡張：プレビュー字幕テキストのフォント関連の設定
             this.PreviewText =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.Text);
-            // プレビュー字幕テキストの表示関連の設定
+            // TRT's拡張：プレビュー字幕テキストの表示関連の設定
             this.PreviewRender =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.Render);
 
-            // プレビュー設定項目「拡大率」のMovableValueViewModel
+            // TRT's拡張：プレビュー設定項目「拡大率」のMovableValueViewModel
             this.ScaleMovable =
                 this.MakeMovableValueViewModel(this.PreviewRender, r => r.Scale);
-            // プレビュー設定項目「サイズ」のMovableValueViewModel
+            // TRT's拡張：プレビュー設定項目「サイズ」のMovableValueViewModel
             this.FontSizeMovable =
                 this.MakeMovableValueViewModel(this.PreviewText, t => t.FontSize);
 
-            // プレビュー設定項目「フォント」の値
+            // TRT's拡張：プレビュー設定項目「フォント」の値
             this.PreviewFontFamilyName =
                 this.MakeInnerPropertyOf(this.PreviewText, t => t.FontFamilyName);
-            // 設定されたフォント名に対応するUri
+            // TRT's拡張：設定されたフォント名に対応するUri
             this.PreviewFontUri =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUri);
 
-            // プレビュー用フォント名が変更されたときの処理
+            // TRT's拡張：プレビュー用フォント名が変更されたときの処理
             this.PreviewFontFamilyName
                 .Subscribe(v => this.PreviewFontFamilyNameHandler(v))
                 .AddTo(this.CompositeDisposable);
 
-            // フォントファミリ名列挙
+            // TRT's拡張：フォントファミリ名列挙
             this.FontFamilyNames = new FontFamilyNameEnumerable();
 
+            // TRT's拡張：PreviewFontSizeの更新のための定義
             this.ScaleMovable.Begin
                 .Subscribe(v => this.UpdatePreviewFontSize())
                 .AddTo(this.CompositeDisposable);
             this.FontSizeMovable.Begin
                 .Subscribe(v => this.UpdatePreviewFontSize())
                 .AddTo(this.CompositeDisposable);
+
             this.IsTextSplitting =
-                this.MakeInnerPropertyOf(this.PreviewStyle, c => c.IsTextSplitting);
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.IsTextSplitting);
             this.IsTextSplitting
                 .Subscribe(v => this.UpdatePreviewFontSize())
                 .AddTo(this.CompositeDisposable);
+
             this.AviUtlWindowWidth =
-                this.MakeInnerPropertyOf(this.PreviewStyle, c => c.AviUtlWindowWidth);
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.AviUtlWindowWidth);
             this.AviUtlWindowWidth
                 .Subscribe(v => this.UpdatePreviewFontSize())
                 .AddTo(this.CompositeDisposable);
+
             this.PreviewWindowWidth =
-                this.MakeInnerPropertyOf(this.PreviewStyle, c => c.PreviewWindowWidth);
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, c => c.PreviewWindowWidth);
             this.PreviewWindowWidth
                 .Subscribe(v => this.UpdatePreviewFontSize())
                 .AddTo(this.CompositeDisposable);
 
         }
-
-        public IReactiveProperty<bool> IsTextSplitting { get; }
-        public IReactiveProperty<int> AviUtlWindowWidth { get; }
-        public IReactiveProperty<int> PreviewWindowWidth { get; }
 
         /// <summary>
         /// 選択中タブインデックスを取得する。
@@ -462,12 +461,12 @@ namespace VoiceroidUtil.ViewModel
         public IEnumerable<string> FontFamilyNames { get; }
 
         /// <summary>
-        /// 初期化時はプレビュー用フォント名変更のステータス表示はしない
+        /// TRT's拡張：起動時に初期値でのフォント指定時ステータス表示を回避
         /// </summary>
         public bool IsInitPreviewFont = false;
 
         /// <summary>
-        /// プレビュー用フォントファミリ名の読み込み結果のステータスを表示
+        /// TRT's拡張：プレビュー用フォントファミリ名の読み込み結果のステータスを表示
         /// </summary>
         /// <param name="familyName"></param>
         private void CheckExceptionFontFamilyName(string familyName)
@@ -503,7 +502,7 @@ namespace VoiceroidUtil.ViewModel
         }
 
         /// <summary>
-        /// プレビュー用フォント名変更時のハンドラ
+        /// TRT's拡張：プレビュー用フォント名変更時のハンドラ
         /// </summary>
         /// <param name="familyName"></param>
         private void PreviewFontFamilyNameHandler(string familyName)
@@ -513,10 +512,15 @@ namespace VoiceroidUtil.ViewModel
         }
 
         /// <summary>
-        /// TRT's拡張：起動時に初期値でのフォント指定時ステータス表示を回避
+        /// TRT's拡張：変更時にPreviewFontSize更新を伴うプロパティの定義        
         /// </summary>
-        //private bool IsInitPreviewFont = false;
+        private IReadOnlyReactiveProperty<bool> IsTextSplitting { get; }
+        private IReadOnlyReactiveProperty<int> AviUtlWindowWidth { get; }
+        private IReadOnlyReactiveProperty<int> PreviewWindowWidth { get; }
 
+        /// <summary>
+        /// TRT's拡張：PreviewFontSizeの更新
+        /// </summary>
         private void UpdatePreviewFontSize()
         {
             this.PreviewStyle.Value.SetPreviewFontSize();
