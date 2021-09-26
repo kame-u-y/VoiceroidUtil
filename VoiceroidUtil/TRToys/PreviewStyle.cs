@@ -1,12 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.Serialization;
-using System.Windows;
-using RucheHome.AviUtl.ExEdit;
 using RucheHome.Util;
-using RucheHome.Voiceroid;
-using VoiceroidUtil.TRToys;
 
 namespace VoiceroidUtil.TRToys
 {
@@ -16,16 +10,14 @@ namespace VoiceroidUtil.TRToys
     [DataContract(Namespace = "")]
     public class PreviewStyle : BindableConfigBase
     {
-
         /// <summary>
         /// コンストラクタ。
         /// </summary>
-        /// <param name="voiceroidId">VOICEROID識別ID。</param>
         public PreviewStyle()
         {
             // イベントハンドラ追加のためにプロパティ経由で設定
-            this.Render = new PreviewRenderComponent(() => this.SetPreviewFontSize());
-            this.Text = new PreviewTextComponent(() => this.SetPreviewFontSize());
+            this.Render = new PreviewRenderComponent();
+            this.Text = new PreviewTextComponent();
         }
 
         /// <summary>
@@ -38,7 +30,6 @@ namespace VoiceroidUtil.TRToys
             set
             {
                 this.SetProperty(ref this.textSplitting, value);
-                this.SetPreviewFontSize();
             }
         }
         private bool textSplitting = false;
@@ -80,6 +71,7 @@ namespace VoiceroidUtil.TRToys
 
         /// <summary>
         /// 改行用の文字列を取得または設定する。
+        /// 文字の設定は変更できないようにしている
         /// </summary>
         [DataMember]
         public string LineFeedString
@@ -89,9 +81,9 @@ namespace VoiceroidUtil.TRToys
         }
         private string lineFeedString = "/-";
 
-
         /// <summary>
         /// プレビューシーン・テキストファイル分割用の文字列を取得または設定する。
+        /// 文字の設定は変更できないようにしている
         /// </summary>
         [DataMember]
         public string FileSplitString
@@ -101,6 +93,11 @@ namespace VoiceroidUtil.TRToys
         }
         private string fileSplitString = "/--";
 
+        /// <summary>
+        /// 音声合成のために改行・分割用文字列を置換する
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public string RemovePreviewStrings(string text)
         {
             if (this.LineFeedString.Contains(this.FileSplitString))
@@ -138,10 +135,11 @@ namespace VoiceroidUtil.TRToys
             {
                 this.SetPropertyWithPropertyChangedChain(
                     ref this.text,
-                    value ?? new PreviewTextComponent(()=> Debug.WriteLine("はっか")));
+                    value ?? new PreviewTextComponent());
             }
         }
         private PreviewTextComponent text = null;
+
 
         /// <summary>
         /// 編集中のAviUtlプロジェクトの横幅を設定または取得する。
@@ -155,7 +153,6 @@ namespace VoiceroidUtil.TRToys
                 this.SetProperty(ref this.aviUtlWindowWidth, value);
                 this.SetPreviewLeftMargin();
                 this.SetPreviewRightMargin();
-                this.SetPreviewFontSize();
             }
         }
         private int aviUtlWindowWidth = 1920;
@@ -172,11 +169,18 @@ namespace VoiceroidUtil.TRToys
                 this.SetProperty(ref this.previewWindowWidth, value);
                 this.SetPreviewLeftMargin();
                 this.SetPreviewRightMargin();
-                this.SetPreviewFontSize();
             }
         }
         private int previewWindowWidth = 200;
-        
+
+
+        /// <summary>
+        /// AviUtlに対するプレビューの横幅倍率をもとに、プレビュー上の字幕の左余白幅を設定する。
+        /// </summary>
+        private void SetPreviewLeftMargin()
+            => this.PreviewLeftMargin =
+                this.AviUtlLeftMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
+
         /// <summary>
         /// AviUtl上の字幕の左余白幅を設定または取得する。
         /// </summary>
@@ -198,16 +202,17 @@ namespace VoiceroidUtil.TRToys
         public double PreviewLeftMargin
         {
             get => this.previewLeftMargin;
-            private set => this.SetProperty(ref this.previewLeftMargin, value);
+            set => this.SetProperty(ref this.previewLeftMargin, value);
         }
         private double previewLeftMargin = 300.0 * 200.0 / 1920.0;
-        
+
+
         /// <summary>
-        /// AviUtlに対するプレビューの横幅倍率をもとに、プレビュー上の字幕の左余白幅を設定する。
+        /// AviUtlに対するプレビューの横幅倍率をもとに、プレビュー上の字幕の右余白幅を設定する。
         /// </summary>
-        private void SetPreviewLeftMargin()
-            => this.PreviewLeftMargin = 
-                this.AviUtlLeftMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
+        private void SetPreviewRightMargin()
+            => this.PreviewRightMargin
+                = this.AviUtlRightMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
 
         /// <summary>
         /// AviUtl上の字幕の右余白幅を設定または取得する。
@@ -236,20 +241,14 @@ namespace VoiceroidUtil.TRToys
 
 
         /// <summary>
-        /// AviUtlに対するプレビューの横幅倍率をもとに、プレビュー上の字幕の右余白幅を設定する。
-        /// </summary>
-        private void SetPreviewRightMargin()
-            => this.PreviewRightMargin
-                = this.AviUtlRightMargin * ((double)this.PreviewWindowWidth / (double)this.AviUtlWindowWidth);
-
-        /// <summary>
         /// プレビューテキストのフォントサイズを設定する
         /// 依存するプロパティから呼び出される
         /// </summary>
-        private void SetPreviewFontSize()
+        public void SetPreviewFontSize()
         {
             if (this.Text != null && this.Render != null)
             {
+                Console.WriteLine("set PreviewFontSize");
                 this.PreviewFontSize = 
                     this.Text.FontSize.Begin
                     * ((decimal)this.PreviewWindowWidth / (decimal)this.AviUtlWindowWidth)

@@ -203,12 +203,6 @@ namespace VoiceroidUtil.TRToys
         {
         }
 
-        public PreviewMovableValue(Action action) : this(ThisConstants.DefaultValue)
-        {
-            SetPreviewFontSize = action;
-        }
-        Action SetPreviewFontSize;
-
         /// <summary>
         /// コンストラクタ。
         /// </summary>
@@ -291,10 +285,6 @@ namespace VoiceroidUtil.TRToys
                     if (this.IsCorrectingOnChanged && this.MoveMode == MoveMode.None)
                     {
                         this.End = v;
-                    }
-                    if (this.SetPreviewFontSize != null)
-                    {
-                        this.SetPreviewFontSize.Invoke();
                     }
                 }
             }

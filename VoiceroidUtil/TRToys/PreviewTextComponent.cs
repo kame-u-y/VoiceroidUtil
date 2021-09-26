@@ -48,12 +48,6 @@ namespace VoiceroidUtil.TRToys
             this.FontSize = new PreviewMovableValue<FontSizeConst>();
         }
 
-        public PreviewTextComponent(Action action) : base()
-        {
-            // イベントハンドラ追加のためにプロパティ経由で設定
-            this.FontSize = new PreviewMovableValue<FontSizeConst>(action);
-        }
-
         /// <summary>
         /// フォントサイズを取得または設定する。
         /// </summary>
