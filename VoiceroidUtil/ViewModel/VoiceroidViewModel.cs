@@ -235,6 +235,12 @@ namespace VoiceroidUtil.ViewModel
             this.TalkTextSelectionStart.Subscribe(v => SelectionStartHandle()).AddTo(this.CompositeDisposable);
 
             // UpdatePreviewの処理結果はそのままに直接PreviewTextListを更新
+            this.PreviewFontSize =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.PreviewFontSize);
+            this.PreviewFontSize
+                .Subscribe(v => ReflectSettingToPreview())
+                .AddTo(this.CompositeDisposable);
+
             this.PreviewLetterSpace =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.LetterSpace);
             this.PreviewLetterSpace
@@ -744,6 +750,7 @@ namespace VoiceroidUtil.ViewModel
                     new PreviewTextStore(this.PreviewTextList[i].Text, this.PreviewStyle.Value);
             }
         }
+        public IReadOnlyReactiveProperty<decimal> PreviewFontSize { get; }
         public IReadOnlyReactiveProperty<int> PreviewLetterSpace { get; }
         public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; }
 

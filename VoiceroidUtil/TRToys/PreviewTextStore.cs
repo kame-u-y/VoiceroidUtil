@@ -64,18 +64,21 @@ namespace VoiceroidUtil.TRToys
             var indices = "";
             for (int i = 0; i < text.Length - 1; i++)
             {
-                double charaWidth;
+                double advanceWidth;
                 if (typeface.CharacterToGlyphMap.ContainsKey(text[i]))
                 {
                     ushort charaIndex = typeface.CharacterToGlyphMap[text[i]];
-                    charaWidth = typeface.AdvanceWidths[charaIndex];
+                    advanceWidth = typeface.AdvanceWidths[charaIndex];
                 }
                 else
                 {
-                    charaWidth = 0.65; // 代わりの字幅
+                    advanceWidth = 0.65; // 代わりの字幅
                 }
                 var fontSize = (double)style.Text.FontSize.Begin;
-                var val = (charaWidth + style.Text.LetterSpace / fontSize) * 100;
+                var letterSpace = (double)style.Text.LetterSpace;
+                var EmMultiplier = 100.0;
+                var val = (advanceWidth + letterSpace / fontSize) * EmMultiplier;
+
                 indices += $",{val};";
             }
             return indices;
