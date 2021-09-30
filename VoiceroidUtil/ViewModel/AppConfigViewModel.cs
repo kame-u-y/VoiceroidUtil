@@ -143,8 +143,13 @@ namespace VoiceroidUtil.ViewModel
             this.PreviewFontFamilyName =
                 this.MakeInnerPropertyOf(this.PreviewText, t => t.FontFamilyName);
             // TRT's拡張：設定されたフォント名に対応するUri
+            this.PreviewFontUriString =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUriString);
             this.PreviewFontUri =
-                this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUri);
+                this.PreviewFontUriString
+                .Select((v) => new Uri(v))
+                .ToReadOnlyReactiveProperty()
+                .AddTo(this.CompositeDisposable);
 
             // TRT's拡張：プレビュー用フォント名が変更されたときの処理
             this.PreviewFontFamilyName
@@ -453,6 +458,7 @@ namespace VoiceroidUtil.ViewModel
         /// <summary>
         /// TRT's拡張：設定されたプレビューのフォントUriを取得する。
         /// </summary>
+        public IReadOnlyReactiveProperty<String> PreviewFontUriString { get; }
         public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; }
 
         /// <summary>

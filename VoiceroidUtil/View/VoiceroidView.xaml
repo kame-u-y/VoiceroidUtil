@@ -245,7 +245,7 @@
                                                                     AncestorType={x:Type UserControl}}}"
                                                         FontUri="{
                                                             Binding 
-                                                                Path=DataContext.PreviewStyle.Value.Text.PreviewFontUri,
+                                                                Path=DataContext.PreviewFontUri.Value,
                                                                 RelativeSource={
                                                                     RelativeSource FindAncestor, 
                                                                     AncestorType={x:Type UserControl}}}"

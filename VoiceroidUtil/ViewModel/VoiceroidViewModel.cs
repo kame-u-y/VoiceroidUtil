@@ -208,6 +208,15 @@ namespace VoiceroidUtil.ViewModel
                     (l, r, h) => GetPreviewTextMargin(l, r, h))
                 .ToReadOnlyReactiveProperty();
 
+            // PreviewFontUriの設定
+            this.PreviewFontUriString =
+                this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUriString);
+            this.PreviewFontUri =
+                this.PreviewFontUriString
+                .Select((v) => new Uri(v))
+                .ToReadOnlyReactiveProperty()
+                .AddTo(this.CompositeDisposable);
+
             // プレビューの前後ボタンの表示or非表示用
             this.IsMultiScenePreview =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
@@ -247,11 +256,10 @@ namespace VoiceroidUtil.ViewModel
                 .Subscribe(v => ReflectSettingToPreview())
                 .AddTo(this.CompositeDisposable);
 
-            this.PreviewFontUri =
-                this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUri);
-            this.PreviewFontUri
+            this.PreviewFontUriString
                 .Subscribe(v => ReflectSettingToPreview())
                 .AddTo(this.CompositeDisposable);
+
 
             // 一つ前のプレビューシーンに戻るコマンド
             this.BackSceneCommand =
@@ -537,6 +545,12 @@ namespace VoiceroidUtil.ViewModel
         public IReadOnlyReactiveProperty<Thickness> PreviewTextMargin { get; }
 
         /// <summary>
+        /// TRT's拡張：プレビューのフォントUri文字列を取得し、それをもとにUriを生成
+        /// </summary>
+        public IReadOnlyReactiveProperty<string> PreviewFontUriString { get; }
+        public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; }
+
+        /// <summary>
         /// TRT's拡張：プレビューが複数シーンであるかを取得・設定する。
         /// Style.Triggerに利用。
         /// </summary>
@@ -752,7 +766,7 @@ namespace VoiceroidUtil.ViewModel
         }
         public IReadOnlyReactiveProperty<decimal> PreviewFontSize { get; }
         public IReadOnlyReactiveProperty<int> PreviewLetterSpace { get; }
-        public IReadOnlyReactiveProperty<Uri> PreviewFontUri { get; }
+
 
         /// <summary>
         /// TRT's拡張：一つ前のプレビューシーンに戻るコマンド

@@ -248,7 +248,6 @@ namespace VoiceroidUtil.TRToys
         {
             if (this.Text != null && this.Render != null)
             {
-                Console.WriteLine("set PreviewFontSize");
                 this.PreviewFontSize = 
                     this.Text.FontSize.Begin
                     * ((decimal)this.PreviewWindowWidth / (decimal)this.AviUtlWindowWidth)

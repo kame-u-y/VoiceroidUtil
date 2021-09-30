@@ -60,7 +60,7 @@ namespace VoiceroidUtil.TRToys
         /// <returns></returns>
         private string GetIndices(string text, PreviewStyle style)
         {
-            var typeface = new GlyphTypeface(style.Text.PreviewFontUri);
+            var typeface = new GlyphTypeface(new Uri(style.Text.PreviewFontUriString));
             var indices = "";
             for (int i = 0; i < text.Length - 1; i++)
             {

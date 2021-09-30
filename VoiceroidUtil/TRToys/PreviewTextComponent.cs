@@ -284,18 +284,16 @@ namespace VoiceroidUtil.TRToys
             => FontPathDictionary.ContainsKey(familyName);
 
         /// <summary>
-        /// プレビュー用フォントUriを取得または設定する。
+        /// プレビュー用フォントUriをstringで取得または設定する。
+        /// Uriで扱うと、"MS UI Gothic"から"MS P ゴシック"への変更などが更新できない
         /// </summary>
         [DataMember]
-        public Uri PreviewFontUri
+        public string PreviewFontUriString
         {
-            get => this.previewFontUri;
-            set
-            {
-                this.SetProperty(ref this.previewFontUri, value);
-            }
+            get => this.previewFontUriString;
+            set => this.SetProperty(ref this.previewFontUriString, value);
         }
-        private Uri previewFontUri = FontPathDictionary[DefaultFontFamilyName];
+        private string previewFontUriString = FontPathDictionary[DefaultFontFamilyName].ToString();
 
         /// <summary>
         /// フォントファミリー名変更時にフォントUriを変更
@@ -305,11 +303,11 @@ namespace VoiceroidUtil.TRToys
         {
             if (FontPathDictionary.ContainsKey(familyName))
             {
-                this.PreviewFontUri = FontPathDictionary[familyName];
+                this.PreviewFontUriString = FontPathDictionary[familyName].ToString();
             }
             else
             {
-                this.PreviewFontUri = FontPathDictionary[DefaultFontFamilyName];
+                this.PreviewFontUriString = FontPathDictionary[DefaultFontFamilyName].ToString();
             }
         }
 
