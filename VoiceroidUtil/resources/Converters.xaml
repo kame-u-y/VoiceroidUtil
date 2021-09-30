@@ -6,4 +6,5 @@
     <ru:EnumValueDisplayConverter x:Key="enumDisplayConverter" />
     <ru:BooleanVisibilityConverter x:Key="boolVisibilityConverter" />
     <ru:MultiCommandConverter x:Key="multiCommandConverter" />
+    <ru:BooleanAndConverter x:Key="booleanAndConverter"/>
 </ResourceDictionary>

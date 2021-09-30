@@ -166,7 +166,6 @@
                 </i:Interaction.Behaviors>
             </v:ImeWatermarkTextBox>
             <!-- TRT's拡張：プレビューウィンドウ -->
-                <!--Background="#fafafa"-->
             <Border
                 BorderBrush="Silver"
                 BorderThickness="1"
@@ -206,8 +205,7 @@
                         <Grid 
                             Grid.Row="1"
                             Width="{Binding PreviewStyle.Value.PreviewWindowWidth}">
-                                <!--Background="#f5f5f5"-->
-                                <Grid.ColumnDefinitions>
+                            <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="{Binding PreviewStyle.Value.PreviewLeftMargin}"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="{Binding PreviewStyle.Value.PreviewRightMargin}"/>

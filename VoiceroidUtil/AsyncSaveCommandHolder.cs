@@ -1285,7 +1285,7 @@ namespace VoiceroidUtil
             if (appConfig.PreviewStyle.IsTextSplitting && appConfig.PreviewStyle.IsRawTextSaving)
             {
                 // TRT's拡張：再編集用の生テキストファイルを保存
-                var dirName = "改行分割_再編集用";
+                var dirName = "TextSplit_再編集用";
 
                 try
                 {

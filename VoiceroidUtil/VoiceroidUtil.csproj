@@ -431,8 +431,6 @@
   <ItemGroup>
     <Resource Include="resources\voiceroid\tsuina.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="dic\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -176,6 +176,7 @@
                             </ComboBox>
                         </DockPanel>
                         <CheckBox
+                            x:Name="IsTextFileForceMaking"
                             Content="テキストファイルを必ず作成(_T)"
                             IsChecked="{Binding Config.Value.IsTextFileForceMaking}"
                             Margin="0,4,0,0" />
@@ -205,6 +206,7 @@
 
                         <!-- TRT's拡張：追加設定 -->
                         <CheckBox
+                            x:Name="IsTextSplitting"
                             Content="拡張機能：以下の文字列により字幕の改行・ファイル分割を行う"
                             IsChecked="{Binding PreviewStyle.Value.IsTextSplitting}"
                             Margin="0,4,0,0" />
@@ -229,9 +231,6 @@
                                 Text="{Binding PreviewStyle.Value.LineFeedString}"
                                 IsEnabled="False"
                                 Width="20"/>
-                                <!--IsEnabled="{Binding 
-                                    Path=PreviewStyle.Value.IsTextSplitting, 
-                                    Mode=OneWay}"-->
                             <Label 
                                 Grid.Row="2" Grid.Column="0"
                                 Content="ファイル分割用文字列："/>
@@ -240,9 +239,6 @@
                                 Text="{Binding PreviewStyle.Value.FileSplitString}"
                                 IsEnabled="False"
                                 Width="20"/>
-                                <!--IsEnabled="{Binding 
-                                    Path=PreviewStyle.Value.IsTextSplitting, 
-                                    Mode=OneWay}"-->
                         </Grid>
                         <CheckBox
                             Content="入力テキストの行を右端で折り返す"
@@ -254,10 +250,14 @@
                         <CheckBox
                             Content="分割されたテキストファイルを作成"
                             IsChecked="{Binding PreviewStyle.Value.IsSplitTextSaving}"
-                            IsEnabled="{Binding 
-                                Path=PreviewStyle.Value.IsTextSplitting,
-                                Mode=OneWay}"
-                            Margin="20,4,0,0"/>
+                            Margin="20,4,0,0">
+                            <CheckBox.IsEnabled>
+                                <MultiBinding Converter="{StaticResource booleanAndConverter}">
+                                    <Binding ElementName="IsTextFileForceMaking" Path="IsChecked" />
+                                    <Binding ElementName="IsTextSplitting" Path="IsChecked" />
+                                </MultiBinding>
+                            </CheckBox.IsEnabled>
+                        </CheckBox>
                         <Label
                             Content="※「テキストファイルを必ず作成」へのチェックが必要"
                             FontSize="11"
@@ -274,7 +274,7 @@
                                 Mode=OneWay}"
                             Margin="20,4,0,0"/>
                         <Label
-                            Content="※保存先に「改行分割__再編集用」ディレクトリが生成されます。"
+                            Content="※保存先に「TextSplit__再編集用」ディレクトリが生成されます。"
                             FontSize="11"
                             Margin="40,0,0,0" />
                         <StackPanel>

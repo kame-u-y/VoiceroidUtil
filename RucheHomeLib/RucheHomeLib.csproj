@@ -76,6 +76,7 @@
     <Compile Include="Windows\Mvvm\Behaviors\ListBoxAutoScrollBehavior.cs" />
     <Compile Include="Windows\Mvvm\Commands\ProcessStartCommand.cs" />
     <Compile Include="Windows\Mvvm\Commands\RelayCommand.cs" />
+    <Compile Include="Windows\Mvvm\Converters\BooleanAndConverter.cs" />
     <Compile Include="Windows\Mvvm\Converters\BooleanInverter.cs" />
     <Compile Include="Windows\Mvvm\Converters\BooleanVisibilityConverter.cs" />
     <Compile Include="Windows\Mvvm\Converters\EnumValueDisplayConverter.cs" />

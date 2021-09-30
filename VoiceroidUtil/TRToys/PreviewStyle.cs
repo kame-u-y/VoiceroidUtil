@@ -59,7 +59,7 @@ namespace VoiceroidUtil.TRToys
 
         /// <summary>
         /// 改行・分割文字列を含むテキストファイルを保存するか否かを取得または設定する。
-        /// 保存先下に「改行分割_再編集用」フォルダがなければ作成され、その中に保存される
+        /// 保存先下に「TextSplit_再編集用」フォルダがなければ作成され、その中に保存される
         /// </summary>
         [DataMember]
         public bool IsRawTextSaving
