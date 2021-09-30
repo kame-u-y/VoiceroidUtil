@@ -1187,7 +1187,6 @@ namespace VoiceroidUtil
                         voiceroid2Like ? @"一度再生を行ってみてください。" : null);
             }
 
-            Console.WriteLine("揚げなす");
             // WAVEファイル保存
             var result = await process.Save(filePath);
             if (!result.IsSucceeded)
@@ -1240,7 +1239,6 @@ namespace VoiceroidUtil
                 appConfig.PreviewStyle.FileSplitString, 
                 appConfig.PreviewStyle.FileSplitString + appConfig.PreviewStyle.LineFeedString };
             string[] splitFileTexts = fileText.Split(fileSplitStrings, System.StringSplitOptions.RemoveEmptyEntries);
-            Console.WriteLine(splitFileTexts.Length);
             if (appConfig.IsTextFileForceMaking)
             {
                 if (appConfig.PreviewStyle.IsTextSplitting && splitFileTexts.Length > 1)
