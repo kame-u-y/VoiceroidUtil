@@ -658,15 +658,15 @@ namespace VoiceroidUtil
             exo.FpsScale = (int)Math.Pow(10, scale);
             exo.FpsBase = decimal.Floor(common.Fps * exo.FpsScale);
 
-            foreach (string text in textList)
+            foreach (var text in textList.Select((value, index) => new { value, index }))
             {
                 // テキストレイヤー追加
                 {
                     var item =
                         new LayerItem
                         {
-                            BeginFrame = 1,
-                            EndFrame = frameCount / 2,
+                            BeginFrame = 1 + text.index * exo.Length / textList.Length,
+                            EndFrame = (text.index + 1) * exo.Length / textList.Length,
                             LayerId = 1,
                             GroupId = common.IsGrouping ? 1 : 0,
                             IsClipping = charaStyle.IsTextClipping
@@ -674,7 +674,7 @@ namespace VoiceroidUtil
 
                     var c = charaStyle.Text.Clone();
                     ExoTextStyleTemplate.ClearUnused(c);
-                    c.Text = text;
+                    c.Text = text.value;
                     item.Components.Add(c);
                     item.Components.Add(charaStyle.Render.Clone());
 
