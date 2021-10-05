@@ -1,10 +1,8 @@
--- VoiceroidUtil ?¿½?¿½?¿½s?¿½E?¿½?¿½?¿½?¿½?¿½g?¿½?¿½
--- ?¿½?¿½?¿½?¿½?¿½Æ•ï¿½?¿½?¿½?¿½e?¿½L?¿½X?¿½g?¿½?¿½?¿½Ü‚ï¿½.exo?¿½?¿½?¿½h?¿½?¿½?¿½b?¿½v?¿½?¿½?¿½?¿½?¿½ê??¿½É”ï¿½?¿½?¿½
--- oov?¿½?¿½?¿½?¿½psdtoolkit_wav.lua?¿½?¿½?¿½g?¿½?¿½?¿½?¿½?¿½?¿½?¿½?¿½?¿½?¿½
-
+-- TRT'sŠg’£
+-- VoiceroidUtil TextSplit
 local P = {}
 
-P.name = "SPLITTEXT_HANDLER"
+P.name = "MULTITEXT_EXO_HANDLER"
 
 P.priority = 1
 
@@ -39,8 +37,8 @@ local function fileread(filepath)
 end
 
 local function postprocesssubtitle(subtitle, encoding, setting)
-    -- BOM ãŒã‚ã‚‹ï¿½???¿½?¿½åˆï¿½???¿½?¿½ãã‚Œã‚’åŸºæº–ã«ã‚¨ãƒ³ã‚³ãƒ¼??¿½?¿½?ã‚£ãƒ³ã‚°è¨­å®šã‚’ä¸Šæ›¸ãã—??¿½?¿½?
-    -- ã¤??¿½?¿½?ã§ã« BOM ã‚‚ã‚«??¿½?¿½?ãƒˆã™??¿½?¿½?
+    -- BOM ‚ª‚ ‚éê‡‚Í‚»‚ê‚ðŠî€‚ÉƒGƒ“ƒR[ƒfƒBƒ“ƒOÝ’è‚ðã‘‚«‚µA
+    -- ‚Â‚¢‚Å‚É BOM ‚àƒJƒbƒg‚·‚é
     if subtitle:sub(1, 3) == "\239\187\191" then
       encoding = "utf8"
       subtitle = subtitle:sub(4)
@@ -52,11 +50,11 @@ local function postprocesssubtitle(subtitle, encoding, setting)
       subtitle = subtitle:sub(3)
     end
     if encoding ~= "utf8" then
-      -- ??¿½?¿½?éƒ¨ã®ä¿æŒçŠ¶æ…‹ã‚’ UTF-8 ã«çµ±ä¸€ã™ã‚‹
+      -- “à•”‚Ì•ÛŽó‘Ô‚ð UTF-8 ‚É“ˆê‚·‚é
       subtitle = GCMZDrops.convertencoding(subtitle, encoding, "utf8")
     end
 
-    -- ç½®æ›ç”¨å‡¦??¿½?¿½?ã‚’å‘¼ã³å‡º??¿½?¿½?
+    -- ’uŠ·—pˆ—‚ðŒÄ‚Ño‚·
     subtitle = setting:wav_subtitle_replacer(subtitle)
 
     return subtitle
@@ -139,6 +137,7 @@ function P.ondragenter(files, state)
     for i, v in ipairs(files) do 
         local ext = getextension(v.filepath)
         if ext == ".exo" then
+            -- ƒtƒ@ƒCƒ‹‚ÌŠg’£Žq‚ª .wav ‚© .txt ‚© .exo ‚Ìƒtƒ@ƒCƒ‹‚ª‚ ‚Á‚½‚çˆ—‚Å‚«‚é‚©‚à‚µ‚ê‚È‚¢‚Ì‚Å true
             return true
         end
     end
@@ -146,6 +145,7 @@ function P.ondragenter(files, state)
 end
 
 function P.ondragover(files, state)
+    -- ondragenter ‚Åˆ—‚Å‚«‚»‚¤‚È‚à‚Ì‚Í ondragover ‚Å‚àˆ—‚Å‚«‚»‚¤‚È‚Ì‚Å’²‚×‚¸ true
     return true
 end
 
@@ -159,7 +159,7 @@ function P.exaread(filepath, postfix)
         filepath = basepath .. filepath .. "_" .. postfix .. ".exa"
         inistr = fileread(filepath)
         if inistr == nil then
-            debug_print("??¿½?¿½Ç‚Ýï¿½??¿½?¿½ÝŽï¿½??¿½?¿½s: " .. filepath)
+            debug_print("“Ç‚Ýž‚ÝŽ¸”s: " .. filepath)
         end
     end
     if inistr == nil then
@@ -167,7 +167,7 @@ function P.exaread(filepath, postfix)
         inistr = fileread(filepath)
     end
     if inistr ~= nil then
-        debug_print("??¿½?¿½g??¿½?¿½p??¿½?¿½??¿½?¿½??¿½?¿½??¿½?¿½G??¿½?¿½C??¿½?¿½??¿½?¿½??¿½?¿½A??¿½?¿½X??¿½?¿½t??¿½?¿½@??¿½?¿½C??¿½?¿½??¿½?¿½: " .. filepath)
+        debug_print("Žg—p‚·‚éƒGƒCƒŠƒAƒXƒtƒ@ƒCƒ‹: " .. filepath)
     else
         error("cannot read: " .. filepath)
     end
@@ -225,8 +225,8 @@ function P.parseexo(filepath)
     local txtindex = 1
     local i = 0
     while 1 do
-        -- 260:VoiceroidUtil‚Å1•¶Žš‚¸‚Â•ªŠ„‚µ‚½ê‡‚ÌÅ‘å•ªŠ„”
         if i == 260 then
+            -- 260:VoiceroidUtil‚Å1•¶Žš‚¸‚Â•ªŠ„‚µ‚½ê‡‚ÌÅ‘å•ªŠ„”
             return nil
         end
         local name = ini:get(i .. ".0", "_name", "")
@@ -234,12 +234,12 @@ function P.parseexo(filepath)
             break
         end
 
-        if wav == nil and name == "‰¹ºƒtƒ@ƒCƒ‹" then
+        if wav == nil and ((name == "‰¹ºƒtƒ@ƒCƒ‹")or(name == "Audio file")) then
             wav = ini:get(i .. ".0", "file", nil)
             if j == nil or j == '' then
                 j = ini:get(i .. ".0", "__json", nil)
             end
-        elseif name == "ƒeƒLƒXƒg" then
+        elseif (name == "ƒeƒLƒXƒg")or(name == "Text") then
             txtlist[txtindex] = ini:get(i .. ".0", "text", nil)
             if j == nil or j == '' then
                 j = ini:get(i .. ".0", "__json", nil)
@@ -265,6 +265,7 @@ end
 
 function P.fire(files, state)
     local setting = P.loadsetting()
+    -- setting.wav_firemode_exo ‚É“K‡‚·‚é‚©ƒ`ƒFƒbƒN
     if setting.wav_firemode_exo == 1 then 
         for i, v in ipairs(files) do
             if getextension(v.filepath) == ".exo" then
@@ -336,15 +337,17 @@ end
 function P.ondrop(files, state)
     local wavfilepath, subtitlelist, exabase, j = P.fire(files, state)
     if wavfilepath ~= nil and subtitlelist ~= nil then
+        -- ƒvƒƒWƒFƒNƒg‚Æƒtƒ@ƒCƒ‹‚Ìî•ñ‚ðŽæ“¾‚·‚é
         local proj = GCMZDrops.getexeditfileinfo()
         local fi = GCMZDrops.getfileinfo(wavfilepath)
+        -- ‰¹º‚ªŒ»Ý‚ÌƒvƒƒWƒFƒNƒg‚Å‰½ƒtƒŒ[ƒ€•ª‚ ‚é‚Ì‚©‚ðŒvŽZ‚·‚é
         local wavlen = math.ceil((fi.audio_samples * proj.rate) / (proj.audio_rate * proj.scale))
 
         return P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
     end
 
     subtitlelist, exabase, j = P.firetext(files, state)
-    if subtitlelist ~= nil then 
+    if subtitlelist ~= nil then
         local issetsubtitle = true
         for i=1,#subtitlelist do
             if subtitlelist[i] == nil then
@@ -352,7 +355,7 @@ function P.ondrop(files, state)
                 break
             end
         end
-        if issetsubtitle == true then -- wavãŒãª??¿½?¿½?ç·Šæ€¥æ™‚ç”¨???¿½?¿½?
+        if issetsubtitle == true then
             return P.generateexo(nil, 64, subtitlelist, exabase, state, j)
         end
     end
@@ -361,6 +364,7 @@ end
 
 function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
     local setting = P.loadsetting()
+    -- ƒeƒ“ƒvƒŒ[ƒg—p•Ï”‚ð€”õ
     local values = {
         WAV_START = 1,
         WAV_END = 0,
@@ -387,6 +391,7 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
         end,
     }
 
+    -- ’·‚³‚ð”½‰f
     values.WAV_END = values.WAV_END + wavlen
     values.LIPSYNC_END = values.LIPSYNC_END + wavlen
     values.MPSLIDER_END = values.MPSLIDER_END + wavlen
@@ -394,7 +399,7 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
         values.SUBTITLE_END_LIST[i] = wavlen * i / #subtitlelist
     end
 
-    -- ã‚ªãƒ•ã‚»??¿½?¿½?ãƒˆã¨ãƒžï¿½???¿½?¿½ã‚¸ãƒ³ã‚’å??¿½?¿½?
+    -- ƒIƒtƒZƒbƒg‚Æƒ}[ƒWƒ“‚ð”½‰f
     values.LIPSYNC_START = values.LIPSYNC_START + setting.wav_lipsync_offset
     values.LIPSYNC_END = values.LIPSYNC_END + setting.wav_lipsync_offset
     values.MPSLIDER_START = values.MPSLIDER_START - setting.wav_mpslider_margin_left
@@ -408,7 +413,7 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
         = values.SUBTITLE_END_LIST[#subtitlelist-1] + setting.wav_subtitle_margin_right
     end
 
-    -- ãƒžã‚¤ãƒŠã‚¹æ–¹å‘ã«é€²ã‚“ã§ã—ã¾ã£ãŸï¿½??ã‚’æˆ»??¿½?¿½?
+    -- ƒ}ƒCƒiƒX•ûŒü‚Éi‚ñ‚Å‚µ‚Ü‚Á‚½•ª‚ð–ß‚·
     local ofs = math.min(values.LIPSYNC_START, values.MPSLIDER_START, values.SUBTITLE_START_LIST[1]) - 1
     values.WAV_START = values.WAV_START - ofs
     values.WAV_END = values.WAV_END - ofs
@@ -421,7 +426,7 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
         values.SUBTITLE_END_LIST[i] = values.SUBTITLE_END_LIST[i] - ofs
     end
 
-    -- exo ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ˜ãƒƒãƒ€éƒ¨??¿½?¿½?ã‚’ï¿½?ã¿ç«‹ã¦
+    -- exo ƒtƒ@ƒCƒ‹‚Ìƒwƒbƒ_•”•ª‚ð‘g‚Ý—§‚Ä
     local proj = GCMZDrops.getexeditfileinfo()
     local oini = GCMZDrops.inistring("")
     local totallen = math.max(values.WAV_END, values.LIPSYNC_END, values.MPSLIDER_END, values.SUBTITLE_END_LIST[#subtitlelist])
@@ -433,9 +438,10 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
     oini:set("exedit", "audio_rate", proj.audio_rate)
     oini:set("exedit", "audio_ch", proj.audio_ch)
 
+    -- ƒIƒuƒWƒFƒNƒg‚Ì‘}“ü
     local index = 0
 
-    -- éŸ³å£°
+    -- ‰¹º‚ð‘g‚Ý—§‚Ä
     if wavfilepath ~= nil then
         local aini = P.exaread(exabase, "wav")
         setting:wav_examodifler_wav(aini, values, modifiers)
@@ -444,13 +450,13 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
     end
 
     if setting.wav_mergedprep > 0 then
-        -- ??¿½?¿½??¿½?¿½??¿½?¿½??¿½?¿½??¿½?¿½I??¿½?¿½u??¿½?¿½W??¿½?¿½F??¿½?¿½N??¿½?¿½g??¿½?¿½??¿½?¿½g??¿½?¿½Ý—ï¿½??¿½?¿½??¿½?¿½
+        -- €”õƒIƒuƒWƒFƒNƒg‚ð‘g‚Ý—§‚Ä
         local aini = GCMZDrops.inistring("")
         setting:wav_examodifler_mergedprep(aini, values, modifiers)
         P.insertexa(oini, aini, index, index + 1)
         index = index + 1
     else
-        -- å£ãƒ‘ã‚¯æº–å‚™
+        -- ŒûƒpƒN€”õ‚ð‘g‚Ý—§‚Ä
         if wavfilepath ~= nil and setting.wav_lipsync == 1 then
             local aini = P.exaread(exabase, "lipsync")
             setting:wav_examodifler_lipsync(aini, values, modifiers)
@@ -458,7 +464,7 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
             index = index + 1
         end
 
-        -- å¤šç›®??¿½?¿½?ã‚¹ãƒ©ã‚¤ãƒ€ãƒ¼
+        -- ‘½–Ú“IƒXƒ‰ƒCƒ_[‚ð‘g‚Ý—§‚Ä
         if setting.wav_mpslider > 0 then
             local aini = GCMZDrops.inistring("")
             setting:wav_examodifler_mpslider(aini, values, modifiers)
@@ -466,6 +472,7 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
             index = index + 1
         end
 
+        -- Žš–‹€”õ‚ð‘g‚Ý—§‚Ä
         for i=1,#subtitlelist do
             if setting.wav_subtitle > 0 and values.SUBTITLE_TEXT_LIST[i] ~= "" then
                 local aini = P.exaread(exabase, "subtitle")
@@ -484,7 +491,7 @@ function P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
 
     f:write(tostring(oini))
     f:close()
-    debug_print("["..P.name.."] ??¿½?¿½??¿½?¿½??¿½?¿½h??¿½?¿½??¿½?¿½??¿½?¿½b??¿½?¿½v??¿½?¿½??¿½?¿½??¿½?¿½ê‚½??¿½?¿½t??¿½?¿½@??¿½?¿½C??¿½?¿½??¿½?¿½??¿½?¿½??¿½?¿½ exo ??¿½?¿½t??¿½?¿½@??¿½?¿½C??¿½?¿½??¿½?¿½??¿½?¿½Éï¿½??¿½?¿½??¿½?¿½??¿½?¿½Ö‚ï¿½??¿½?¿½Ü‚ï¿½??¿½?¿½??¿½?¿½??¿½?¿½B")
+    debug_print("["..P.name.."] ‚ªƒhƒƒbƒv‚³‚ê‚½ƒtƒ@ƒCƒ‹‚ð exo ƒtƒ@ƒCƒ‹‚É·‚µ‘Ö‚¦‚Ü‚µ‚½B")
 
     if state.frameadvance ~= nil and state.frameadvance > 0 then
         state.frameadvance = totallen
