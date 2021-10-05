@@ -1241,7 +1241,7 @@ namespace VoiceroidUtil
             string[] splitFileTexts = fileText.Split(fileSplitStrings, System.StringSplitOptions.RemoveEmptyEntries);
             if (appConfig.IsTextFileForceMaking)
             {
-                if (appConfig.PreviewStyle.IsTextSplitting && splitFileTexts.Length > 1)
+                if (appConfig.PreviewStyle.IsTextSplitting && appConfig.PreviewStyle.IsSplitTextSaving && splitFileTexts.Length > 1)
                 {
                     // TRT's拡張：ファイルを分割してそれぞれ保存
                     var noExtFilePath = string.Format(
