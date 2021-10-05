@@ -1,8 +1,9 @@
 -- TRT'sŠg’£
--- VoiceroidUtil TextSplit
+-- VoiceroidUtil_TextSplit‚É‘Î‰‚·‚éˆ—‚ğÀs‚·‚é
+
 local P = {}
 
-P.name = "MULTITEXT_EXO_HANDLER"
+P.name = "TEXTSPLIT_EXO_HANDLER"
 
 P.priority = 1
 
