@@ -61,14 +61,6 @@ local function postprocesssubtitle(subtitle, encoding, setting)
     return subtitle
 end
 
-local function readsubtitle(filepath, encoding, setting)
-    local subtitle = fileread(fileread)
-    if subtitle == nil then
-        return nil
-    end
-    return postprocesssubtitle(subtitle, encoding, setting)
-end
-
 local function requireLocal(pkg)
     local origpath = package.path
     local origcpath = package.cpath
@@ -138,7 +130,7 @@ function P.ondragenter(files, state)
     for i, v in ipairs(files) do 
         local ext = getextension(v.filepath)
         if ext == ".exo" then
-            -- ファイルの拡張子が .wav か .txt か .exo のファイルがあったら処理できるかもしれないので true
+            -- ファイルの拡張子が .exo のファイルがあったら処理できるかもしれないので true
             return true
         end
     end
@@ -297,44 +289,6 @@ function P.fire(files, state)
     return nil
 end
 
-function P.firetext(files, state)
-    local setting = P.loadsetting()
-    local subtitlelist, index, exabase = {}, 1, nil
-    local lasttxtindex = 0;
-    for i, v in ipairs(files) do
-        if getextension(v.filepath) == ".txt" then
-            lasttxtindex = i
-        end
-    end
-    for i, v in ipairs(files) do
-        if getextension(v.filepath) == ".txt" then
-            local encoding = setting.wav_subtitle_encoding
-            if v.mediatype == "text/plain; charset=Sift_JIS" then
-                encoding = "sjis"
-            elseif v.mediatype == "text/plain; charset=UTF-8" then
-                encoding = "utf8"
-            end
-            
-            subtitlelist[index] = readsubtitle(
-                v.filepath,
-                v.overridesubtitleencoding or encoding,
-                setting)
-            
-
-            local exabase = P.resolvepath(
-                v.orgfilepath or v.filepath,
-                setting.wav_exafinder,
-                setting
-            )
-            if i == lasttxtindex and state.shift then 
-                local j = loadjson(trimextension(v.orgfilepath or v.filepath) .. ".json")
-                return subtitlelist, exabase, j
-            end
-        end
-    end
-    return nil
-end
-
 function P.ondrop(files, state)
     local wavfilepath, subtitlelist, exabase, j = P.fire(files, state)
     if wavfilepath ~= nil and subtitlelist ~= nil then
@@ -345,20 +299,6 @@ function P.ondrop(files, state)
         local wavlen = math.ceil((fi.audio_samples * proj.rate) / (proj.audio_rate * proj.scale))
 
         return P.generateexo(wavfilepath, wavlen, subtitlelist, exabase, state, j)
-    end
-
-    subtitlelist, exabase, j = P.firetext(files, state)
-    if subtitlelist ~= nil then
-        local issetsubtitle = true
-        for i=1,#subtitlelist do
-            if subtitlelist[i] == nil then
-                issetsubtitle = false
-                break
-            end
-        end
-        if issetsubtitle == true then
-            return P.generateexo(nil, 64, subtitlelist, exabase, state, j)
-        end
     end
     return false
 end
