@@ -224,6 +224,9 @@ function P.parseexo(filepath)
         end
         local name = ini:get(i .. ".0", "_name", "")
         if name == "" then
+            if i == 2 then
+                return nil
+            end
             break
         end
 
