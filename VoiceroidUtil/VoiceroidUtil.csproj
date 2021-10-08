@@ -205,6 +205,7 @@
     <Compile Include="View\MovableValueMoveModeControl.xaml.cs">
       <DependentUpon>MovableValueMoveModeControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\ActualWidthObserver.cs" />
     <Compile Include="View\PreviewMovableValueControl.xaml.cs">
       <DependentUpon>PreviewMovableValueControl.xaml</DependentUpon>
     </Compile>

@@ -177,12 +177,11 @@ namespace VoiceroidUtil.ViewModel
             this.IsTalkTextTabAccepted =
                 this.MakeInnerPropertyOf(appConfig, c => c.IsTabAccepted);
 
-            // TRT's拡張
-            // プレビュー用の設定値の取得
+            // TRT's拡張：プレビュー用の設定値の取得
             this.PreviewStyle =
                 this.MakeInnerPropertyOf(appConfig, c => c.PreviewStyle);
 
-            // TextWrapValueの設定。テキストボックスを折り返すかどうか
+            // TRT's拡張：TextWrapValueの設定。テキストボックスを折り返すかどうか
             this.IsTextSplitting =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.IsTextSplitting);
             this.IsTextWrapping =
@@ -193,7 +192,7 @@ namespace VoiceroidUtil.ViewModel
                     (s, w) => (s && w ? TextWrapping.Wrap : TextWrapping.NoWrap))
                 .ToReadOnlyReactiveProperty();
 
-            // PreviewTextMarginの設定
+            // TRT's拡張：PreviewTextMarginの設定
             this.PreviewLeftMargin =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.PreviewLeftMargin);
             this.PreviewRightMargin =
@@ -208,7 +207,7 @@ namespace VoiceroidUtil.ViewModel
                     (l, r, h) => GetPreviewTextMargin(l, r, h))
                 .ToReadOnlyReactiveProperty();
 
-            // PreviewFontUriの設定
+            // TRT's拡張：PreviewFontUriの設定
             this.PreviewFontUriString =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewText, t => t.PreviewFontUriString);
             this.PreviewFontUri =
@@ -217,7 +216,7 @@ namespace VoiceroidUtil.ViewModel
                 .ToReadOnlyReactiveProperty()
                 .AddTo(this.CompositeDisposable);
 
-            // プレビューの前後ボタンの表示or非表示用
+            // TRT's拡張：プレビューの前後ボタンの表示or非表示用
             this.IsMultiScenePreview =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
             this.IsFirstScene =
@@ -225,25 +224,25 @@ namespace VoiceroidUtil.ViewModel
             this.IsLastScene =
                 new ReactiveProperty<bool>(false).AddTo(this.CompositeDisposable);
 
-            // テキストボックスのキャレット位置を取得・設定する
+            // TRT's拡張：テキストボックスのキャレット位置を取得・設定する
             this.TalkTextSelectionStart =
                 new ReactiveProperty<int>(0).AddTo(this.CompositeDisposable);
-            
-            // 値保持用の変数
+
+            // TRT's拡張：値保持用の変数
             this.AfterInsertSelectionStart = -1;
             this.PrePreviewScene = "";
             this.PreTalkText = "";
             this.PreTalkTextLength = 0;
-            
-            // 一行ごとのプレビューテキストのストアのリスト
+
+            // TRT's拡張：一行ごとのプレビューテキストのストアのリスト
             this.PreviewTextList =
                 new ObservableCollection<PreviewTextStore>();
 
-            // UpdatePreviewが呼び出されるタイミング
+            // TRT's拡張：UpdatePreviewが呼び出されるタイミング
             this.TalkText.Subscribe(v => TalkTextHandle()).AddTo(this.CompositeDisposable);
             this.TalkTextSelectionStart.Subscribe(v => SelectionStartHandle()).AddTo(this.CompositeDisposable);
 
-            // UpdatePreviewの処理結果はそのままに直接PreviewTextListを更新
+            // TRT's拡張：UpdatePreviewの処理結果はそのままに直接PreviewTextListを更新
             this.PreviewFontSize =
                 this.MakeInnerReadOnlyPropertyOf(this.PreviewStyle, s => s.PreviewFontSize);
             this.PreviewFontSize
@@ -261,17 +260,28 @@ namespace VoiceroidUtil.ViewModel
                 .AddTo(this.CompositeDisposable);
 
 
-            // 一つ前のプレビューシーンに戻るコマンド
+            // TRT's拡張：一つ前のプレビューシーンに戻るコマンド
             this.BackSceneCommand =
                 this.MakeCommand(this.ExecuteBackSceneCommand);
 
-            // 一つ後のプレビューシーンに進むコマンド
+            // TRT's拡張：一つ後のプレビューシーンに進むコマンド
             this.NextSceneCommand =
                 this.MakeCommand(this.ExecuteNextSceneCommand);
 
-            // キャレット位置に改行・分割文字列を挿入するコマンド
+            // TRT's拡張：キャレット位置に改行・分割文字列を挿入するコマンド
             this.InsertSplitCommand =
                 this.MakeCommand(this.ExecuteInsertSplitCommand);
+
+            // TRT's拡張：プレビューのテキスト幅チェックのための設定
+            this.PreviewMarginColor =
+                new ReactiveProperty<Brush>(new SolidColorBrush(Color.FromRgb(0xdd, 0xdd, 0xdd)));
+            this.PreviewTextActualWidth =
+                new ReactiveProperty<double>(0).AddTo(this.CompositeDisposable)
+                .AddTo(this.CompositeDisposable);
+            this.PreviewTextActualWidth
+                .Subscribe(v => CheckFitPreviewTextWidth(v))
+                .AddTo(this.CompositeDisposable);
+
             
             // アイドル状態設定先
             var idle = new ReactiveProperty<bool>(true).AddTo(this.CompositeDisposable);
@@ -600,7 +610,7 @@ namespace VoiceroidUtil.ViewModel
         public ObservableCollection<PreviewTextStore> PreviewTextList { get; set; }
 
         /// <summary>
-        /// 入力テキスト中のキャレット位置を含むプレビューの開始位置を取得
+        /// TRT's拡張：入力テキスト中のキャレット位置を含むプレビューの開始位置を取得
         /// </summary>
         /// <param name="caretId">入力テキスト中のキャレット位置</param>
         /// <returns></returns>
@@ -634,7 +644,7 @@ namespace VoiceroidUtil.ViewModel
         }
 
         /// <summary>
-        /// 入力テキスト中のキャレット位置を含むプレビューの終了位置を取得
+        /// TRT's拡張：入力テキスト中のキャレット位置を含むプレビューの終了位置を取得
         /// </summary>
         /// <param name="caretId">入力テキスト中のキャレット位置</param>
         /// <returns></returns>
@@ -667,7 +677,7 @@ namespace VoiceroidUtil.ViewModel
         }
 
         /// <summary>
-        /// プレビューの更新
+        /// TRT's拡張：プレビューの更新
         /// </summary>
         /// <param name="startId">入力テキスト中の現在表示プレビュー開始位置</param>
         /// <param name="endId">入力テキスト中の現在表示プレビュー終了位置</param>
@@ -679,15 +689,18 @@ namespace VoiceroidUtil.ViewModel
             this.IsMultiScenePreview.Value = TalkText.Value.Length > 0;
             this.IsFirstScene.Value = startId == 0;
             this.IsLastScene.Value = endId == this.TalkText.Value.Length;
-            if (TalkText.Value.Length <= 0)
+            if (TalkText.Value.Length <= 0 && this.PreviewTextList.Count > 0)
             {
                 this.PreviewTextList.Clear();
                 return;
             }
 
             string previewScene = this.TalkText.Value.Substring(startId, endId - startId);
-
-            if (previewScene == this.PrePreviewScene) return;
+            // 「a」→「」→「a」のようにしたときreturnされないようにしている
+            if (previewScene == this.PrePreviewScene && (TalkText.Value.Length != 1 && PreviewTextList.Count != 0))
+            {
+                return;
+            }
 
             this.PrePreviewScene = previewScene;
 
@@ -695,17 +708,29 @@ namespace VoiceroidUtil.ViewModel
             string[] PreviewLines =
                 previewScene.Split(lineSplitter, System.StringSplitOptions.RemoveEmptyEntries);
 
-            // プレビューのItemsControl用のストアを生成
-            this.PreviewTextList.Clear();
+            var deleteNum = PreviewTextList.Count - PreviewLines.Length;
+            for (int i = 0; i < deleteNum; i++) 
+            {
+                PreviewTextList.Remove(PreviewTextList.Last());
+            }
+
             for (int i = 0; i < PreviewLines.Length; i++)
             {
-                this.PreviewTextList.Add(
-                    new PreviewTextStore(PreviewLines[i], this.PreviewStyle.Value));
+                if (i < this.PreviewTextList.Count)
+                {
+                    this.PreviewTextList[i] = 
+                        new PreviewTextStore(PreviewLines[i], this.PreviewStyle.Value);
+                }
+                else
+                {
+                    this.PreviewTextList.Add(
+                        new PreviewTextStore(PreviewLines[i], this.PreviewStyle.Value));
+                }
             }
         }
 
         /// <summary>
-        /// UpdatePreviewを呼び出す
+        /// TRT's拡張：UpdatePreviewを呼び出す
         /// </summary>
         private void CallUpdatePreview()
         {
@@ -715,7 +740,7 @@ namespace VoiceroidUtil.ViewModel
         }
 
         /// <summary>
-        /// TalkTextのSubscribeの処理
+        /// TRT's拡張：TalkTextのSubscribeの処理
         /// </summary>
         private void TalkTextHandle()
         {
@@ -723,8 +748,8 @@ namespace VoiceroidUtil.ViewModel
             // ・日本語入力（k → か）
             // ・Delete
             if (this.PreTalkTextLength == this.TalkText.Value.Length
-                || (this.PreTalkTextLength != this.TalkText.Value.Length 
-                    && this.PreTalkText != this.TalkText.Value 
+                || (this.PreTalkTextLength != this.TalkText.Value.Length
+                    && this.PreTalkText != this.TalkText.Value
                     && this.TalkTextSelectionStart.Value <= this.TalkText.Value.Length))
             {
                 CallUpdatePreview();
@@ -732,9 +757,9 @@ namespace VoiceroidUtil.ViewModel
             this.PreTalkText = this.TalkText.Value;
             this.PreTalkTextLength = this.TalkText.Value.Length;
         }
-        
+
         /// <summary>
-        /// TalkTextSelectionStartのSubscribeの処理
+        /// TRT's拡張：TalkTextSelectionStartのSubscribeの処理
         /// </summary>
         private void SelectionStartHandle()
         {
@@ -841,6 +866,34 @@ namespace VoiceroidUtil.ViewModel
             if (currentCaret == 0)
             {
                 this.TalkTextSelectionStart.Value = currentCaret + lfStr.Length;
+            }
+        }
+
+        /// <summary>
+        /// TRT's拡張：プレビューのテキスト幅を取得・設定する。
+        /// </summary>
+        public IReactiveProperty<double> PreviewTextActualWidth { get; set; }
+        
+        /// <summary>
+        /// TRT's拡張：プレビューの左右余白の色を取得・設定する。
+        /// </summary>
+        public IReactiveProperty<Brush> PreviewMarginColor { get; set; }
+
+        /// <summary>
+        /// プレビューのテキスト幅が字幕表示領域を超えた場合、左右の余白を黄色に変化させる。
+        /// </summary>
+        /// <param name="previewTextWidth"></param>
+        private void CheckFitPreviewTextWidth(double previewTextWidth)
+        {
+            var maxPreviewTextWidth = 
+                PreviewStyle.Value.PreviewWindowWidth - PreviewRightMargin.Value - PreviewLeftMargin.Value;
+            if (previewTextWidth < maxPreviewTextWidth)
+            {
+                PreviewMarginColor.Value = new SolidColorBrush(Color.FromRgb(0xdd, 0xdd, 0xdd));
+            }
+            else
+            {
+                PreviewMarginColor.Value = new SolidColorBrush(Color.FromRgb(0xdd, 0xdd, 0x66));
             }
         }
 
